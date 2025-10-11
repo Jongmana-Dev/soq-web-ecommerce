@@ -18,12 +18,20 @@ export default function Header(){
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
-    const onChange = (e: Event) => setActive((e as CustomEvent<string>).detail)
-    onScroll(); window.addEventListener('scroll', onScroll)
-    window.addEventListener('sectionchange', onChange as any)
+
+    // ฟังอีเวนต์ sectionchange แบบ type-safe
+    const onChange = (e: Event) => {
+      const ce = e as CustomEvent<string>
+      if (typeof ce.detail === 'string') setActive(ce.detail)
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    window.addEventListener('sectionchange', onChange)
+
     return () => {
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('sectionchange', onChange as any)
+      window.removeEventListener('sectionchange', onChange)
     }
   }, [])
 
@@ -34,16 +42,19 @@ export default function Header(){
         <nav className="hidden items-center gap-6 md:flex">
           {NAV.map(i => (
             <a key={i.id} href={`#${i.id}`} data-nav data-target={i.id} data-active={active===i.id}
-               className="text-sm text-muted-foreground hover:text-foreground">{i.label}</a>
+               className="text-sm text-muted-foreground hover:text-foreground">
+              {i.label}
+            </a>
           ))}
           <div className="mx-1 h-4 w-px bg-border/70" />
           <LocaleSwitcher />
-          <a href="/login" title="เข้าสู่ระบบ" data-hover="cursor" className="text-muted-foreground hover:text-foreground">
+          {/* ใช้ Link สำหรับ internal routes เพื่อไม่โดน no-html-link-for-pages */}
+          <Link href="/login" title="เข้าสู่ระบบ" className="text-muted-foreground hover:text-foreground" data-hover="cursor">
             <User2 size={18}/>
-          </a>
-          <a href="/cart" title="ตะกร้า" data-hover="cursor" className="text-muted-foreground hover:text-foreground">
+          </Link>
+          <Link href="/cart" title="ตะกร้า" className="text-muted-foreground hover:text-foreground" data-hover="cursor">
             <ShoppingCart size={18}/>
-          </a>
+          </Link>
         </nav>
       </div>
     </header>
