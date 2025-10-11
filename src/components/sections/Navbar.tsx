@@ -1,0 +1,1 @@
+import { Link } from '@/i18n/navigation'; export default function Navbar({ locale }:{locale:string}){ return (<nav className='border-b border-border/60'><div className='container flex h-12 items-center justify-between'><Link href={`/${locale}`} className='font-semibold'>SOQ</Link><div className='text-sm text-muted-foreground'>/products</div></div></nav>) }

@@ -1,0 +1,45 @@
+{
+  "name": "soq-frontend",
+  "private": true,
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@studio-freight/lenis": "^1.0.42",
+    "add": "^2.0.6",
+    "class-variance-authority": "0.7.0",
+    "clsx": "2.1.1",
+    "dialog": "^0.3.1",
+    "dlx": "^0.2.1",
+    "framer-motion": "11.3.31",
+    "lucide-react": "0.471.0",
+    "next": "15.5.4",
+    "next-intl": "3.25.3",
+    "next-themes": "0.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "shadcn": "^3.4.0",
+    "tailwind-merge": "2.5.2",
+    "zod": "3.23.8",
+    "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.14",
+    "@types/node": "22.9.1",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "eslint": "9.12.0",
+    "eslint-config-next": "15.5.4",
+    "postcss": "8.4.47",
+    "typescript": "5.6.3"
+  }
+}

@@ -1,0 +1,59 @@
+# --- Node / Next.js ---
+node_modules/
+.next/
+.next-static/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Turbo / SWC / Caches
+.turbo/
+.swc/
+.cache/
+
+# ESLint / TypeScript cache
+.eslintcache
+
+# --- Env files (เก็บตัวอย่างไว้ได้) ---
+.env
+.env.*
+!.env.example
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Tests / Coverage / E2E ---
+coverage/
+.nyc_output/
+cypress/videos/
+cypress/screenshots/
+playwright-report/
+test-results/
+
+# --- Editors / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- Package managers ---
+.pnpm-store/
+
+# --- Vercel / Deploy ---
+.vercel/
+
+# --- Storybook / Reports (ถ้ามี) ---
+storybook-static/
+.storybook-out/
+
+# --- Temp / Artifacts ---
+tmp/
+temp/
+*.local
