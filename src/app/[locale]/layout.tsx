@@ -6,8 +6,8 @@ import Navbar from '@/components/sections/Navbar'
 import { LenisProvider } from '@/providers/SmoothScrollProvider'
 import '@/app/globals.css'
 
-const prompt = Prompt({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700'] })
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'] })
+const prompt = Prompt({ subsets: ['latin', 'thai'], weight: ['400', '500', '600', '700'], display: 'swap' })
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap' })
 
 export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
   const { locale } = await props.params
@@ -15,8 +15,10 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${prompt.className} ${poppins.className} bg-[var(--background)] text-[var(--foreground)]`}>
-        <ThemeProvider attribute="class">
+      {/* รวมฟอนต์ไว้ที่ body เดียว กัน class mismatch ตอน hydrate */}
+      <body className={`${prompt.className} ${poppins.className}`}>
+        {/* ล็อคเป็น light กันธีมค้าง + กันพื้นดำ */}
+        <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
           <NextIntlClientProvider locale={locale}>
             <LenisProvider>
               <Navbar />
