@@ -2,17 +2,18 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
+      "dom",
+      "dom.iterable",
+      "es2022"
     ],
     "strict": true,
-    "skipLibCheck": true,
     "noEmit": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "preserve",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
@@ -23,15 +24,22 @@
         "name": "next"
       }
     ],
+    "types": [
+      "vitest",
+      "@testing-library/jest-dom",
+      "node"
+    ],
+    "ignoreDeprecations": "5.0" // ✅ ค่าที่ TS 5.x ยอมรับ (อย่าใส่ "6.0")
+    ,
     "allowJs": true,
+    "skipLibCheck": true,
     "incremental": true,
-    "esModuleInterop": true,
-    "isolatedModules": true
+    "esModuleInterop": true
   },
   "include": [
     "next-env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [

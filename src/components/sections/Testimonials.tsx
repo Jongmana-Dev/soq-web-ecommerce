@@ -1,27 +1,44 @@
 'use client'
-import React from 'react' // ให้ไฟล์เป็นโมดูลแน่ ๆ สำหรับ TS/isolatedModules
 
-const data = [
-  { name: 'คุณพิม', role: 'แบรนด์เครื่องประดับ', quote: 'หน้าเดียว แต่ขายได้จริง สวยแบบมีรสนิยม!' },
-  { name: 'คุณปาล์ม', role: 'D2C skincare', quote: 'เร็วมาก SEO ดี และเพิ่มยอดโดยไม่ต้องยิง ads หนัก' },
-  { name: 'คุณเจ', role: 'แฟชั่นไลฟ์สไตล์', quote: 'ทีม dev บอกดูแลง่าย ขยาย section ได้เอง' }
+import { motion } from 'framer-motion'
+import { useLocale } from 'next-intl'
+
+type Testimonial = {
+  name: string
+  role: string
+  text: { th: string; en: string }
+}
+
+const items: Testimonial[] = [
+  { name: 'Nicha', role: 'Cafe owner', text: { th: 'กลิ่นไม่ฉุน ทำความสะอาดง่าย', en: 'Low odor, easy to clean' } },
+  { name: 'Beam', role: 'Brewer', text: { th: 'คราบหินปูนหายไวมาก', en: 'Scale build-up disappears fast' } },
+  { name: 'Rit', role: 'Bar manager', text: { th: 'แพ็กเกจดูพรีเมียม ลูกค้าชอบ', en: 'Premium look customers like' } },
 ]
 
 export default function Testimonials() {
+  const locale = useLocale()
+
   return (
-    <section className="py-24">
-      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-6 px-6 md:grid-cols-3">
-        {data.map((t) => (
-          <figure
-            key={t.name}
-            className="rounded-xl border border-border bg-card p-6 text-card-foreground shadow"
-          >
-            <blockquote className="text-lg italic">“{t.quote}”</blockquote>
-            <figcaption className="mt-3 text-sm text-muted-foreground">
-              — {t.name}, {t.role}
-            </figcaption>
-          </figure>
-        ))}
+    <section id="testimonials" className="section">
+      <div className="container">
+        <h2 className="text-2xl md:text-4xl font-semibold mb-10">
+          {locale === 'th' ? 'เสียงจากผู้ใช้จริง' : 'What customers say'}
+        </h2>
+        <div className="grid md:grid-cols-3 gap-5">
+          {items.map((item) => (
+            <motion.div
+              key={item.name}
+              className="card glow"
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35 }}
+            >
+              <p className="text-white/85">{item.text[locale as 'th' | 'en']}</p>
+              <div className="mt-5 text-sm text-white/70">— {item.name}, {item.role}</div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )

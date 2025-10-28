@@ -1,62 +1,110 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
-import { ShoppingCart, User2 } from 'lucide-react'
-import LocaleSwitcher from '@/components/sections/LocaleSwitcher'
+import { useLocale, useTranslations } from 'next-intl'
+import LocaleSwitcher from '@/components/site/LocaleSwitcher'
+import ThemeToggle from '@/components/ui/ThemeToggle'
+import { ShoppingCart, Languages, UserRound } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useCart } from '@/providers/CartProvider'
+import CartSheet from '@/components/site/cart/CartSheet'
+import clsx from 'clsx'
 
 const NAV = [
-  { label: 'สินค้า', id: 'products' },
-  { label: 'รีวิว', id: 'reviews' },
-  { label: 'มาตรฐานในโรงงาน', id: 'standards' },
-  { label: 'คำถามที่พบบ่อย', id: 'faq' },
-  { label: 'ติดต่อ', id: 'contact' }
-] as const
+  { id: 'products', key: 'products' },
+  { id: 'reviews', key: 'reviews' },
+  { id: 'standards', key: 'standards' },
+  { id: 'faq', key: 'faq' },
+  { id: 'contact', key: 'contact' },
+]
 
-export default function Header(){
-  const [scrolled, setScrolled] = useState(false)
-  const [active, setActive] = useState('')
+export default function Header() {
+  const [active, setActive] = useState<string>('products')
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const locale = useLocale()
+  const tNav = useTranslations('nav')
+  const { count } = useCart()
+
+  const [isSticky, setSticky] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-
-    // ฟังอีเวนต์ sectionchange แบบ type-safe
-    const onChange = (e: Event) => {
-      const ce = e as CustomEvent<string>
-      if (typeof ce.detail === 'string') setActive(ce.detail)
-    }
-
-    onScroll()
+    const onScroll = () => setSticky(window.scrollY > 80)
     window.addEventListener('scroll', onScroll)
-    window.addEventListener('sectionchange', onChange)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('sectionchange', onChange)
+  useEffect(() => {
+    const onSection = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string }>).detail
+      setActive(detail?.id ?? 'products')
     }
+    window.addEventListener('sectionchange', onSection as EventListener)
+    return () => window.removeEventListener('sectionchange', onSection as EventListener)
   }, [])
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-border/60 ${scrolled ? 'bg-background/65 backdrop-blur' : 'bg-transparent'}`}>
-      <div className="container flex h-14 items-center">
-        <Link href="/" className="mr-auto font-semibold tracking-tight">SOQ</Link>
-        <nav className="hidden items-center gap-6 md:flex">
-          {NAV.map(i => (
-            <a key={i.id} href={`#${i.id}`} data-nav data-target={i.id} data-active={active===i.id}
-               className="text-sm text-muted-foreground hover:text-foreground">
-              {i.label}
+    <header
+      className={clsx(
+        "sticky z-50 transition-all duration-500 ease-in-out",
+        isSticky
+          ? "top-3 mx-auto py-1.5 w-[calc(100%-4rem)] rounded-full shadow-xl bg-neutral-900/90 backdrop-blur-lg border border-neutral-700 scale-95"
+          : "top-0 bg-neutral-950 py-3 shadow-none border-b border-neutral-800 scale-100 rounded-none"
+      )}
+    >
+      <div
+        className={clsx(
+          "container mx-auto flex items-center justify-between px-6 transition-height duration-500 ease-in-out",
+          isSticky ? "h-[56px]" : "h-[76px]"
+        )}
+      >
+        <Link href="/" locale={locale} className="font-bold text-xl text-neutral-200">
+          SOQ
+        </Link>
+
+        <nav className="hidden md:flex gap-8">
+          {NAV.map(item => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              data-active={active === item.id}
+              className="text-sm font-medium opacity-80 hover:text-[--color-gold] data-[active=true]:text-[--color-gold] transition duration-300 text-neutral-300"
+            >
+              {tNav(item.key)}
             </a>
           ))}
-          <div className="mx-1 h-4 w-px bg-border/70" />
-          <LocaleSwitcher />
-          {/* ใช้ Link สำหรับ internal routes เพื่อไม่โดน no-html-link-for-pages */}
-          <Link href="/login" title="เข้าสู่ระบบ" className="text-muted-foreground hover:text-foreground" data-hover="cursor">
-            <User2 size={18}/>
-          </Link>
-          <Link href="/cart" title="ตะกร้า" className="text-muted-foreground hover:text-foreground" data-hover="cursor">
-            <ShoppingCart size={18}/>
-          </Link>
         </nav>
+
+        <div className="flex gap-3 items-center">
+          <ThemeToggle className="text-neutral-300 hover:text-[--color-gold] transition duration-300" />
+
+          <Button variant="ghost" size="icon" className="text-neutral-300 hover:text-[--color-gold] transition duration-300">
+            <UserRound className="w-5 h-5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Cart"
+            onClick={() => setSheetOpen(true)}
+            className="relative text-neutral-300 hover:text-[--color-gold] transition duration-300"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {count > 0 && (
+              <span className="absolute -top-1 -right-1 rounded-full bg-[--color-gold] text-white w-4 h-4 text-xs flex justify-center items-center animate-pulse shadow-md">
+                {count}
+              </span>
+            )}
+          </Button>
+
+          <LocaleSwitcher
+            icon={<Languages className="w-4 h-4" />}
+            className="text-neutral-300 hover:text-[--color-gold] transition duration-300"
+          />
+        </div>
       </div>
+
+      {/* <CartSheet open={sheetOpen} onOpenChange={setSheetOpen} /> */}
     </header>
   )
 }

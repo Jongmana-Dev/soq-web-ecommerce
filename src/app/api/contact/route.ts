@@ -1,7 +1,8 @@
+//# API ฟอร์มติดต่อ (Edge, zod validate + rate limit in-memory)
 import {NextRequest, NextResponse} from 'next/server';
 import {z} from 'zod';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 export const preferredRegion = ['sin1']; // <- เอา `as const` ออก
 
 const schema = z.object({

@@ -1,4 +1,5 @@
 // src/components/motion/Reveal.tsx
+//# ฮุค+ตัวช่วยแอนิเมชัน (Motion)
 'use client'
 
 import {motion, useInView} from 'framer-motion'

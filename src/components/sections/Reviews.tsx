@@ -1,44 +1,39 @@
-import Image from 'next/image'
-import { Reveal, Stagger, Item } from '@/components/motion/Reveal'
+'use client'
 
-const DATA = [
-  {
-    quote: 'โคตรสะอาด ใช้งานรวดเร็ว มั่นใจได้',
-    by: 'MARTHA',
-    img: 'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1200&auto=format&fit=crop'
-  },
-  {
-    quote: 'กลิ่นไม่ติด คราฟท์ได้เต็มรส',
-    by: 'Psycho',
-    img: 'https://images.unsplash.com/photo-1532635241-17e820acc59f?q=80&w=1200&auto=format&fit=crop'
-  },
-  {
-    quote: 'ประหยัดเวลา ทำความสะอาดง่าย',
-    by: 'Andechs',
-    img: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop'
-  }
+import { motion } from 'framer-motion'
+import { useLocale } from 'next-intl'
+
+const data = [
+  { name: 'Nicha', role: 'Cafe owner', text: { th: 'กลิ่นไม่ฉุน ทำความสะอาดง่าย', en: 'Low odor, easy to clean' } },
+  { name: 'Beam', role: 'Brewer', text: { th: 'คราบหินปูนหายไวมาก', en: 'Scale build-up disappears fast' } },
+  { name: 'Rit', role: 'Bar manager', text: { th: 'แพ็กเกจดูพรีเมียม ลูกค้าชอบ', en: 'Premium look that customers like' } },
 ]
 
-export default function Reviews(){
+export default function Reviews() {
+  const locale = useLocale()
+
   return (
-    <section id="reviews" data-section="true" className="relative py-24">
-      {/* แผ่นทองบาง ๆ ซ้อนพื้น */}
-      <div aria-hidden className="pointer-events-none absolute -left-10 top-0 hidden h-72 w-80 rotate-3 rounded-2xl bg-[--color-gold]/12 blur-xl md:block" />
+    <section id="reviews" className="section">
       <div className="container">
-        <Reveal><h2 className="text-2xl font-semibold">ความประทับใจจากลูกค้า</h2></Reveal>
-        <Stagger className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {DATA.map((it, idx) => (
-            <Item key={idx}>
-              <figure className="card overflow-hidden">
-                <div className="relative h-44 w-full">
-                  <Image src={it.img} alt="" fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover opacity-85" priority={idx===0}/>
-                </div>
-                <blockquote className="p-6 text-lg">“{it.quote}”</blockquote>
-                <figcaption className="px-6 pb-6 text-sm text-muted-foreground">— {it.by}</figcaption>
-              </figure>
-            </Item>
+        <h2 className="text-2xl md:text-4xl font-semibold mb-10">
+          {locale === 'th' ? 'เสียงจากผู้ใช้จริง' : 'What customers say'}
+        </h2>
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {data.map((r, i) => (
+            <motion.div
+              key={r.name}
+              className="card glow"
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <p className="text-white/85">{r.text[locale as 'th' | 'en']}</p>
+              <div className="mt-5 text-sm text-white/70">— {r.name}, {r.role}</div>
+            </motion.div>
           ))}
-        </Stagger>
+        </div>
       </div>
     </section>
   )

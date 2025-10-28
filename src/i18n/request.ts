@@ -1,17 +1,16 @@
 // src/i18n/request.ts
 import {getRequestConfig} from 'next-intl/server'
-import {routing} from './routing'
+import {routing, Locale} from './routing'
 
-type Locale = (typeof routing.locales)[number]
+function isLocale(input: string | undefined): input is Locale {
+  return !!input && (routing.locales as readonly string[]).includes(input)
+}
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const requested = await requestLocale
-  const locale: Locale =
-    routing.locales.includes((requested ?? '') as Locale)
-      ? (requested as Locale)
-      : routing.defaultLocale
+export default getRequestConfig(async ({requestLocale}) => {
+  // ✅ ต้องรอผลก่อน
+  const resolved = await requestLocale
 
-  // เปลี่ยน path เป็น ../messages/
+  const locale: Locale = isLocale(resolved) ? resolved : routing.defaultLocale
   const messages = (await import(`../messages/${locale}.json`)).default
 
   return { locale, messages }

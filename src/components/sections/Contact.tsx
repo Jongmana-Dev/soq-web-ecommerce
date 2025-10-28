@@ -1,89 +1,56 @@
 'use client'
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Reveal } from '@/components/motion/Reveal'
+import { useLocale } from 'next-intl'
 
-type ContactPayload = {
-  name: string
-  email: string
-  phone?: string
-  subject: string
-  message: string
-}
-
-export default function ContactSection() {
-  const [status, setStatus] = useState<string>('')
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const form = e.currentTarget
-    const fd = new FormData(form)
-
-    // แข็งแรง ชัดเจน ไม่ใช้ any
-    const payload: ContactPayload = {
-      name: String(fd.get('name') || ''),
-      email: String(fd.get('email') || ''),
-      phone: fd.get('phone') ? String(fd.get('phone')) : undefined,
-      subject: String(fd.get('subject') || ''),
-      message: String(fd.get('message') || '')
-    }
-
-    setStatus('')
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    const j = await res.json()
-    setStatus(j.ok ? 'ส่งสำเร็จ' : 'ผิดพลาด')
-    if (j.ok) form.reset()
-  }
+export default function Contact() {
+  const locale = useLocale()
 
   return (
-    <section id="standards" data-section="true" className="container py-24">
-      <div className="container">
-        <Reveal>
-          <h2 className="text-2xl font-semibold">ติดต่อเรา</h2>
-        </Reveal>
-        <Reveal y={20} delay={0.1}>
-          <form
-            onSubmit={onSubmit}
-            className="mt-8 grid grid-cols-1 gap-4 rounded-2xl border border-border bg-background/60 p-6 backdrop-blur md:grid-cols-2"
-          >
-            <div>
-              <Label htmlFor="name">ชื่อ</Label>
-              <Input name="name" id="name" required />
-            </div>
-            <div>
-              <Label htmlFor="email">อีเมล</Label>
-              <Input name="email" id="email" type="email" required />
-            </div>
-            <div>
-              <Label htmlFor="phone">โทร</Label>
-              <Input name="phone" id="phone" />
-            </div>
-            <div>
-              <Label htmlFor="subject">เรื่อง</Label>
-              <Input name="subject" id="subject" required />
-            </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="message">ข้อความ</Label>
-              <textarea
-                id="message"
-                name="message"
-                className="mt-2 h-28 w-full rounded-md border border-border bg-transparent p-3 text-sm outline-none"
-                required
-              />
-            </div>
-            <div className="md:col-span-2">
-              <button className="btn-glint rounded-full bg-[--color-gold] px-6 py-2 text-black">
-                ส่งข้อความ
-              </button>
-              <span className="ml-3 text-sm text-muted-foreground">{status}</span>
-            </div>
+    <section id="contact" className="section">
+      <div className="container grid md:grid-cols-2 gap-8 items-center">
+        <div className="card glow">
+          <h3 className="text-xl md:text-2xl font-semibold">
+            {locale === 'th' ? 'ติดต่อทีม SOQ' : 'Contact SOQ Team'}
+          </h3>
+          <p className="text-white/80 mt-3 text-sm">
+            {locale === 'th'
+              ? 'ขอใบเสนอราคา สอบถามสเปก หรือปรึกษาการใช้งานสำหรับร้าน/โรงงาน'
+              : 'Request a quote, specs, or usage advice for your venue/facility.'}
+          </p>
+          <form action="/api/contact" method="post" className="mt-6 grid gap-3">
+            <input
+              name="name"
+              required
+              placeholder={locale === 'th' ? 'ชื่อ' : 'Name'}
+              className="rounded-lg bg-black/20 border border-white/10 px-4 py-3 outline-none"
+            />
+            <input
+              name="email"
+              required
+              type="email"
+              placeholder="Email"
+              className="rounded-lg bg-black/20 border border-white/10 px-4 py-3 outline-none"
+            />
+            <textarea
+              name="message"
+              rows={4}
+              placeholder={locale === 'th' ? 'รายละเอียด' : 'Message'}
+              className="rounded-lg bg-black/20 border border-white/10 px-4 py-3 outline-none"
+            />
+            <button className="btn btn-primary glow">{locale === 'th' ? 'ส่งข้อความ' : 'Send message'}</button>
           </form>
-        </Reveal>
+        </div>
+
+        <div className="card">
+          <div className="text-sm text-white/70">
+            <div>LINE: @soq-clean</div>
+            <div>Facebook: SOQ Cleaners</div>
+            <div>Email: hello@soq.example</div>
+          </div>
+          <a href="#hero" className="mt-6 inline-block underline">
+            {locale === 'th' ? 'กลับขึ้นด้านบน' : 'Back to top'}
+          </a>
+        </div>
       </div>
     </section>
   )

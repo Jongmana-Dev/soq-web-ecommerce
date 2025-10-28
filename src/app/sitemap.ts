@@ -1,11 +1,14 @@
+// src/app/sitemap.ts
 import type {MetadataRoute} from 'next'
 import {routing} from '@/i18n/routing'
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'
-  const urls: MetadataRoute.Sitemap = []
+  const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const out: MetadataRoute.Sitemap = []
+
   for (const l of routing.locales) {
-    urls.push({ url: `${base}/${l}`, changeFrequency: 'weekly', priority: 1 })
-    urls.push({ url: `${base}/${l}/products/star-san-sanitizer`, changeFrequency: 'monthly', priority: 0.8 })
+    const root = l === routing.defaultLocale && routing.localePrefix === 'as-needed' ? '' : `/${l}`
+    out.push({ url: `${base}${root}`, changeFrequency: 'weekly', priority: 1 })
   }
-  return urls
+  return out
 }

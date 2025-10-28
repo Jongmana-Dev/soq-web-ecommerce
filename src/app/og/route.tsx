@@ -1,8 +1,9 @@
 // src/app/og/route.tsx
+// สร้างรูป Open Graph แบบ dynamic (Edge runtime)
 import React from 'react'
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge' // OK
+//export const runtime = 'edge' // OK
 
 export async function GET() {
   // สร้าง element แบบ non-JSX เพื่อลดปัญหา TS/JSX

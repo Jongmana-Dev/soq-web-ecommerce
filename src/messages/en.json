@@ -1,15 +1,77 @@
 {
-  "nav.features": "Features",
-  "nav.products": "Products",
-  "nav.pricing": "Pricing",
-  "nav.faq": "FAQ",
-  "hero.kicker": "SOQ \u2022 Premium Brewing Care",
-  "hero.h1_1": "A shopping experience that's",
-  "hero.h1_2_lux": "luxurious",
-  "hero.h1_3_smooth": "smooth",
-  "hero.p": "From brand story to checkout \u2014 performance, SEO and i18n included.",
-  "hero.cta.viewProducts": "View products",
-  "hero.cta.getQuote": "Get a quote",
-  "product.addToCart": "Add to cart",
-  "product.buyNow": "Buy now"
+  "nav": {
+    "products": "Products",
+    "reviews": "Reviews",
+    "standards": "Standards",
+    "faq": "FAQ",
+    "contact": "Contact"
+  },
+  "reviews": {
+    "title": "What users say",
+    "items": [
+      { "quote": "Truly clean with no lingering smell.", "author": "BeerToh" },
+      { "quote": "Easy to mix – prep time dropped a lot.", "author": "CraftBangkok" },
+      { "quote": "Tried many, I came back to this one.", "author": "BrewLab" }
+    ]
+  },
+  "standards": {
+    "title": "Factory-grade standards",
+    "items": [
+      { "title": "Industrial grade", "desc": "Consistent results with selected ingredients" },
+      { "title": "QC per lot", "desc": "Every batch verified before shipping" },
+      { "title": "Docs included", "desc": "Safety & usage information included" },
+      { "title": "Equipment-friendly", "desc": "Non-corrosive when diluted properly" },
+      { "title": "Cost-efficient", "desc": "Low ratio, lasts long" },
+      { "title": "Scalable", "desc": "From homebrew to plant" }
+    ]
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": [
+      { "q": "Is it SEO-friendly?", "a": "Supports i18n, sitemap, metadata, and valid HTML structure." },
+      { "q": "Safe for stainless?", "a": "Yes, when used at the recommended ratio." },
+      { "q": "Rinse required?", "a": "Not necessary if diluted properly as per docs." },
+      { "q": "Available sizes?", "a": "250ml, 500ml and 1000ml." }
+    ]
+  },
+  "contact": {
+    "title": "Contact us",
+    "name": "Name",
+    "namePh": "Your name",
+    "email": "Email",
+    "subject": "Subject",
+    "subjectPh": "I'd like to ask about…",
+    "message": "Message",
+    "messagePh": "Details",
+    "submit": "Send message"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout"
+  },
+  "footer": {
+    "rights": "© 2024 — Copyright"
+  },
+   "Header": {
+    "products": "Products",
+    "reviews": "Reviews",
+    "standards": "Standards",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "account": "Account",
+    "cart": "Cart"
+  },
+  "Hero": {
+    "title": "Star San Sanitizer",
+    "desc": "No-rinse sanitizer for brewing equipment. Easy to use, safe and highly effective.",
+    "cta": "Shop now"
+  },
+  "product": {
+    "addToCart": "Add to Cart",
+    "size": "Size",
+    "quantity": "Quantity"
+  }
+
 }
