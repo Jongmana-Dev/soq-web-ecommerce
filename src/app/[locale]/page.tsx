@@ -5,18 +5,14 @@ import Standards from '@/components/sections/Standards'
 import FAQs from '@/components/sections/FAQs'
 import Contact from '@/components/sections/Contact'
 import Footer from '@/components/sections/Footer'
-import BackToTop from '@/components/ui/backtotop'
 
-export const revalidate = 3600
-
-export default function HomePage() {
+export default function IndexPage() {
   return (
     <>
-      <BackToTop />
       <Hero />
       <Product />
-      <Standards />
       <Reviews />
+      <Standards />
       <FAQs />
       <Contact />
       <Footer />

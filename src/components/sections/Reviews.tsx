@@ -1,39 +1,40 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { useLocale } from 'next-intl'
-
-const data = [
-  { name: 'Nicha', role: 'Cafe owner', text: { th: 'กลิ่นไม่ฉุน ทำความสะอาดง่าย', en: 'Low odor, easy to clean' } },
-  { name: 'Beam', role: 'Brewer', text: { th: 'คราบหินปูนหายไวมาก', en: 'Scale build-up disappears fast' } },
-  { name: 'Rit', role: 'Bar manager', text: { th: 'แพ็กเกจดูพรีเมียม ลูกค้าชอบ', en: 'Premium look that customers like' } },
-]
+import Image from 'next/image'
 
 export default function Reviews() {
   const locale = useLocale()
 
   return (
     <section id="reviews" className="section">
-      <div className="container">
-        <h2 className="text-2xl md:text-4xl font-semibold mb-10">
-          {locale === 'th' ? 'เสียงจากผู้ใช้จริง' : 'What customers say'}
-        </h2>
-
-        <div className="grid md:grid-cols-3 gap-5">
-          {data.map((r, i) => (
-            <motion.div
-              key={r.name}
-              className="card glow"
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <p className="text-white/85">{r.text[locale as 'th' | 'en']}</p>
-              <div className="mt-5 text-sm text-white/70">— {r.name}, {r.role}</div>
-            </motion.div>
-          ))}
+      <div className="container text-center max-w-3xl mx-auto">
+        <div className="relative h-20 w-20 rounded-full overflow-hidden mx-auto border-2" style={{ borderColor: 'var(--line)'}}>
+          {/* รูปโปรไฟล์ลูกค้า (จำลอง) */}
+          <Image
+            src="https://images.unsplash.com/photo-1557053910-d9eadeed1c58?q=80&w=800&auto=format&fit=crop"
+            alt="Customer review"
+            fill
+            className="object-cover"
+          />
         </div>
+        
+        <blockquote className="text-xl md:text-2xl font-medium leading-relaxed mt-6" style={{ color: 'var(--brand-600)' }}>
+          <p>
+            {locale === 'th'
+              ? '“ประทับใจมากค่ะ สินค้าใช้ดีมาก บ้านสะอาดขึ้นทันที แถมยังปลอดภัยกับลูกเล็กและสัตว์เลี้ยงด้วย”'
+              : '“Very impressed! The product works wonders, my home feels instantly cleaner, and it\'s safe for my kids and pets.”'}
+          </p>
+        </blockquote>
+        
+        <footer className="mt-4">
+          <cite className="font-semibold not-italic">
+            {locale === 'th' ? 'คุณสิรินยา' : 'Sirinya K.'}
+          </cite>
+          <p className="text-sm" style={{ color: 'var(--muted)' }}>
+            {locale === 'th' ? 'ลูกค้าจริง, กรุงเทพฯ' : 'Verified Customer, Bangkok'}
+          </p>
+        </footer>
       </div>
     </section>
   )

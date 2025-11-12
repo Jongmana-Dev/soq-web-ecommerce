@@ -9,33 +9,64 @@
 :root{
   --surface:#f6f4ef; --surface-2:#ffffff; --text:#1f2328; --muted:#6f7780;
   --brand:#16453b; --brand-600:#0f3d33; --brand-500:#1a5a4d;
-  --accent:#c8a46a; --accent-2:#e2c892;
-  --line:#e6e1d7; --line-strong:#dad3c4;
+  --accent:#F3C85B; /* สีเหลืองตามสเปก */
+  --accent-2:color-mix(in oklch, var(--accent) 80%, #fff);
+  --line:#e6e6e6; /* ปรับสี line ให้อ่อนลงเล็กน้อย */
+  --line-strong:#dadada;
   --chrome:#0f1215; --chrome-2:#15181d; --chrome-text:#e9eaec;
   --background:var(--surface); --foreground:var(--text);
   --border:var(--line); --card:var(--surface-2); --card-foreground:var(--text);
   --gold:var(--accent); --ring:#d5d0c3;
 }
+
+/* ================================= */
+/* ========= DARK MODE VARS ======== */
+/* ================================= */
+.dark{
+  --surface:var(--chrome);
+  --surface-2:var(--chrome-2);
+  --text:var(--chrome-text);
+  --muted:#8a9199;
+  /* ... (colors) ... */
+  --line:color-mix(in oklch, var(--chrome-2) 80%, #fff);
+  --line-strong:var(--chrome-2);
+  --background:var(--surface);
+  --foreground:var(--text);
+  --border:var(--line);
+  --card:var(--surface-2);
+  --card-foreground:var(--text);
+  --gold:var(--accent);
+  --ring:var(--chrome-2);
+}
+
+
 html{scroll-behavior:auto}
 body{
   color:var(--foreground);
-  background:
-    radial-gradient(1000px 700px at 70% -200px, rgba(200,164,106,.08), transparent 60%),
-    radial-gradient(800px 600px at -200px 60%, rgba(200,164,106,.06), transparent 55%),
-    var(--background);
+  background:var(--background);
 }
-.container{ @apply mx-auto px-4; max-width:1200px; }
+.container{ @apply mx-auto px-4; max-width:1440px; } /* ปรับ max-width เป็น 1440px */
 .section{ @apply py-20 md:py-28; }
 .card{
   @apply rounded-2xl p-6 md:p-8;
-  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.95));
+  background:var(--card);
   border:1px solid var(--line);
   box-shadow:0 1px 1px rgba(0,0,0,.03), 0 8px 24px rgba(26,52,47,.06);
 }
+
+.dark .card{
+  box-shadow:0 1px 1px rgba(0,0,0,.1), 0 8px 24px rgba(233, 234, 236, 0.03);
+}
+
 .display{ @apply text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight; }
+
+/* ... (btn styles) ... */
 .btn{
   @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-medium transition-all;
   background:linear-gradient(120deg,#fff,#f6f4ef); border:1px solid var(--line); color:var(--text);
+}
+.dark .btn{
+  background:linear-gradient(120deg, var(--surface-2), color-mix(in oklch, var(--surface-2) 90%, #fff));
 }
 .btn:hover{ transform:translateY(-1px); box-shadow:0 12px 28px rgba(22,69,59,.08); }
 .btn-primary{
@@ -50,47 +81,12 @@ body{
 }
 
 /* ================= NAV ================= */
-/* Top state: no frame, transparent */
-.nav-plain{
-  display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
-  height:84px; padding-inline:8px; background:transparent; border:0; color:var(--text);
-}
-/* Scrolled state: BIG white pill (like reference) */
-.nav-framed-light{
-  display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
-  height:84px; padding-inline:18px; border-radius:999px; margin-top:12px;
-  background:#ffffff;
-  border:2px solid #efece6;
-  box-shadow:
-    0 2px 6px rgba(0,0,0,.05),
-    0 18px 50px rgba(16,26,23,.12);
-  color:#1a1d1c;
-}
-.nav-plain nav,.nav-framed-light nav{ justify-self:center; }
+/* ลบ .nav-plain, .nav-framed-light, .nav-link, .nav-icon ออกทั้งหมด */
+/* สไตล์ Navbar ใหม่จะถูกกำหนดโดยตรงใน Component โดยใช้ Tailwind */
 
-.nav-link{
-  position:relative; padding:12px 18px; border-radius:14px; transition:opacity .15s ease;
-  color:#1a1d1c;
-  font-weight:600;
-  letter-spacing:.1px;
-}
-.nav-link::after{
-  content:""; position:absolute; left:18px; right:18px; bottom:8px; height:2px; border-radius:2px;
-  background:#1a1d1c; transform:scaleX(0); transform-origin:center; transition:transform .18s ease;
-}
-.nav-link:hover::after{ transform:scaleX(1); }
-.nav-link--active::after{ transform:scaleX(1); }
-
-/* Right-side icons: beige circular buttons to match reference */
-.nav-icon,.nav-action{
-  height:42px; min-width:42px; padding:0 14px; border-radius:999px;
-  display:inline-flex; align-items:center; justify-content:center;
-  background:#b5ab9f; color:#1a1d1c; border:2px solid #efece6;
-  font-weight:700;
-}
-.nav-action{ min-width:auto; }
-.nav-icon:hover,.nav-action:hover{ filter:brightness(0.97); }
 
 /* generic links */
 a{ @apply transition-opacity; }
 a:hover{ @apply opacity-90; }
+
+/* ลบ .h-screen-minus-nav ออก */

@@ -1,46 +1,53 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { useLocale } from 'next-intl'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 export default function Standards() {
   const locale = useLocale()
 
   return (
-    <section id="standards" className="section">
-      <div className="container grid md:grid-cols-2 gap-8 items-center">
+    <section id="standards" className="section" style={{ background: 'var(--surface-2)'}}>
+      <div className="container grid md:grid-cols-2 gap-10 items-center">
         <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="card glow"
+          className="relative h-80 md:h-96 w-full rounded-2xl overflow-hidden card"
         >
-          <h3 className="text-xl md:text-2xl font-semibold">
-            {locale === 'th' ? 'มาตรฐานการผลิตและความปลอดภัย' : 'Production Standards & Safety'}
-          </h3>
-          <ul className="mt-6 space-y-3 text-white/80 text-sm">
-            <li>• {locale === 'th' ? 'วัตถุดิบพรีเมียม ผ่านการรับรอง' : 'Premium ingredients, certified sources'}</li>
-            <li>• {locale === 'th' ? 'ควบคุมคุณภาพทุกล็อต' : 'Quality control per batch'}</li>
-            <li>• {locale === 'th' ? 'ฉลากชัดเจน วิธีใช้ปลอดภัย' : 'Clear labels with safe instructions'}</li>
-            <li>• {locale === 'th' ? 'รองรับการใช้งานเชิงพาณิชย์' : 'Ready for commercial use'}</li>
-          </ul>
+          {/* รูปโรงงาน/แล็บสะอาดๆ */}
+          <Image
+            src="https://images.unsplash.com/photo-1567942712618-9c5b4d350854?q=80&w=1200&auto=format&fit=crop"
+            alt="Clean modern factory"
+            fill
+            className="object-cover"
+          />
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="card glow"
-        >
-          <h3 className="text-xl md:text-2xl font-semibold">
-            {locale === 'th' ? 'ประสิทธิภาพตามจริง' : 'Proven Efficacy'}
-          </h3>
-          <p className="mt-4 text-white/80 text-sm">
+        
+        <div>
+          <span className="badge-gold">Quality</span>
+          <h2 className="display mt-4">
+            {locale === 'th' ? 'มาตรฐานระดับโลก' : 'World-Class Standards'}
+          </h2>
+          <p className="mt-4 text-base/7" style={{ color: 'var(--muted)' }}>
             {locale === 'th'
-              ? 'ทดสอบกับงานจริง ทั้งอุปกรณ์สแตนเลส แก้ว และระบบทำความสะอาดในอุตสาหกรรมคราฟท์เบียร์'
-              : 'Field-tested across stainless equipment, glassware, and cleaning systems in craft brewing.'}
+              ? 'โรงงานของเราผ่านการรับรองมาตรฐานสากล ISO 9001 และ GMP มั่นใจได้ในคุณภาพและความปลอดภัย'
+              : 'Our factory is certified with ISO 9001 and GMP international standards, ensuring quality and safety.'}
           </p>
-        </motion.div>
+          <ul className="mt-6 space-y-3 font-medium">
+            <li className="flex items-center gap-3">
+              <span style={{ color: 'var(--brand)' }}>✓</span> ISO 9001 Certified
+            </li>
+            <li className="flex items-center gap-3">
+              <span style={{ color: 'var(--brand)' }}>✓</span> GMP Certified Facility
+            </li>
+            <li className="flex items-center gap-3">
+              <span style={{ color: 'var(--brand)' }}>✓</span> Eco-Friendly Production
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
   )

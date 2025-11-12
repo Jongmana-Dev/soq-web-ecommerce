@@ -1,57 +1,66 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { useLocale } from 'next-intl'
+
+// Path ไปยังรูปภาพ Mockup ที่เรา gen ไว้
+const HERO_BACKGROUND_IMAGE = '/images/hero-mockup-bottles.jpg'
 
 export default function Hero() {
   const locale = useLocale()
-
+  
   return (
-    <section id="hero" className="section pt-28">
-      <div className="container grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <span className="badge-gold">SOQ</span>
-          <h1 className="display mt-5 leading-tight" style={{ color: 'var(--brand-600)' }}>
-            {locale === 'th' ? 'ทำความสะอาดระดับโปรเฟสชันนัล' : 'Professional-grade Cleaning'}
-          </h1>
-          <p className="mt-5 text-base/7" style={{ color: 'var(--muted)' }}>
-            {locale === 'th'
-              ? 'โทนสว่าง อบอุ่น พรีเมียมเหมือนตัวอย่าง พร้อม header/footer แบบ dark ให้สมดุล'
-              : 'Warm, premium look like the reference, balanced with dark header and footer.'}
-          </p>
-          <div className="mt-8 flex items-center gap-3">
-            <a href="#contact" className="btn btn-primary">
-              {locale === 'th' ? 'ขอใบเสนอราคา' : 'Get a Quote'}
-            </a>
-            <a href="#features" className="btn btn-outline">{locale === 'th' ? 'ดูรายละเอียด' : 'Learn more'}</a>
-          </div>
-        </div>
+    <section 
+      id="hero" 
+      className="relative flex items-center bg-cover bg-center px-4"
+      // 1. ใช้รูปภาพเป็นพื้นหลัง
+      // 2. กำหนด min-height ให้เท่ากับความสูงจอ ลบด้วย Navbar (76px)
+      style={{
+        backgroundImage: `url(${HERO_BACKGROUND_IMAGE})`,
+        minHeight: 'calc(100vh - 76px)'
+      }}
+    >
+      {/* Optional: เพิ่ม Overlay สีจางๆ ถ้าข้อความอ่านยาก (ปรับ opacity ได้) */}
+      {/* <div className="absolute inset-0 bg-white/30 dark:bg-black/30"></div> */}
 
+      {/* 2. จัด Container ของเนื้อหา */}
+      <div className="container relative z-10 mx-auto max-w-[1429px]">
+        {/* 3. จัดข้อความและปุ่ม (วางชิดซ้าย) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97, y: 10 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: 'easeOut' }}
-          viewport={{ once: true }}
-          className="relative h-[360px] md:h-[440px] rounded-2xl overflow-hidden card"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="flex w-full max-w-xl flex-col items-start gap-10"
         >
-          <Image
-            src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop"
-            alt="SOQ premium"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div
-            className="absolute bottom-4 left-4 rounded-full px-3 py-1 text-xs font-semibold"
-            style={{
-              color: '#0f1a14',
-              background: 'linear-gradient(90deg, var(--accent-2), var(--accent))',
-              border: '1px solid color-mix(in oklch, var(--accent) 75%, #000)'
-            }}
+          {/* Headline (Star San Sanitizer) */}
+          <h1 
+            // ใช้ font-light, text-8xl (80px), leading-[100px] ตามสเปก
+            // ปรับขนาด Responsive สำหรับมือถือ
+            className="font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px]"
+            style={{ color: '#F3C85B' }}
           >
-            Premium • Safe • Effective
-          </div>
+            Star San Sanitizer
+          </h1>
+
+          {/* Description (น้ำยาฆ่าเชื้อ...) */}
+          <p 
+            // ใช้ font-light, text-lg (18px) ตามสเปก
+            className="font-light text-lg leading-7 text-black dark:text-white"
+          >
+            {locale === 'th'
+              ? 'น้ำยาฆ่าเชื้อและทำความสะอาดอุปกรณ์ต้ม เบียร์และถังเบียร์แบบไม่ต้องล้างออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูง'
+              : 'Sanitizer and cleaner for brewing equipment and kegs. No-rinse formula, easy to use, safe, and highly effective.'}
+          </p>
+
+          {/* Button (ซื้อเลย) */}
+          <a 
+            href="#contact" 
+            // ใช้ bg-[#F3C85B], font-semibold, text-lg, text-center ตามสเปก
+            className="flex h-[50px] w-full max-w-[227px] items-center justify-center bg-[#F3C85B] text-center font-semibold text-lg text-black transition-transform hover:scale-105"
+          >
+            {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
+          </a>
+
         </motion.div>
       </div>
     </section>
