@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import LocaleSwitcher from '@/components/site/LocaleSwitcher'
-import ThemeToggle from '@/components/ui/ThemeToggle'
+// import LocaleSwitcher from '@/components/site/LocaleSwitcher'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { ShoppingCart, Languages, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/providers/CartProvider'
@@ -76,7 +76,7 @@ export default function Header() {
         </nav>
 
         <div className="flex gap-3 items-center">
-          <ThemeToggle className="text-neutral-300 hover:text-[--color-gold] transition duration-300" />
+          {/* <ThemeToggle className="text-neutral-300 hover:text-[--color-gold] transition duration-300" /> */}
 
           <Button variant="ghost" size="icon" className="text-neutral-300 hover:text-[--color-gold] transition duration-300">
             <UserRound className="w-5 h-5" />
@@ -97,10 +97,10 @@ export default function Header() {
             )}
           </Button>
 
-          <LocaleSwitcher
+          {/* <LocaleSwitcher
             icon={<Languages className="w-4 h-4" />}
             className="text-neutral-300 hover:text-[--color-gold] transition duration-300"
-          />
+          /> */}
         </div>
       </div>
 

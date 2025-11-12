@@ -4,11 +4,19 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // 1. เพิ่ม CSS Variables ของฟอนต์ที่นี่
         prompt: ['var(--font-prompt)', 'sans-serif'],
         poppins: ['var(--font-poppins)', 'sans-serif'],
       },
-      // ... (colors, keyframes, etc.) ...
+      colors: {
+        brand: {
+          DEFAULT: 'var(--brand)',
+          500: 'var(--brand-500)',
+          600: 'var(--brand-600)',
+        },
+        // เพิ่ม chrome-text สำหรับ dark mode
+        'chrome-text': 'var(--chrome-text)',
+      }
+      // ... (keyframes, etc.) ...
     },
   },
   plugins: [],

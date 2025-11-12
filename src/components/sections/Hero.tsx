@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { useLocale } from 'next-intl'
+import Image from 'next/image' 
 
-// Path ไปยังรูปภาพ Mockup ที่เรา gen ไว้
+// Path ไปยังรูปภาพ Mockup 3 ขวด
 const HERO_BACKGROUND_IMAGE = '/images/hero-mockup-bottles.jpg'
 
 export default function Hero() {
@@ -12,56 +13,61 @@ export default function Hero() {
   return (
     <section 
       id="hero" 
-      className="relative flex items-center bg-cover bg-center px-4"
-      // 1. ใช้รูปภาพเป็นพื้นหลัง
-      // 2. กำหนด min-height ให้เท่ากับความสูงจอ ลบด้วย Navbar (76px)
+      className="relative flex min-h-[calc(100vh-76px)] items-start overflow-hidden bg-cover bg-center"
       style={{
-        backgroundImage: `url(${HERO_BACKGROUND_IMAGE})`,
-        minHeight: 'calc(100vh - 76px)'
+        backgroundImage: `url(${HERO_BACKGROUND_IMAGE})`
       }}
     >
-      {/* Optional: เพิ่ม Overlay สีจางๆ ถ้าข้อความอ่านยาก (ปรับ opacity ได้) */}
-      {/* <div className="absolute inset-0 bg-white/30 dark:bg-black/30"></div> */}
-
-      {/* 2. จัด Container ของเนื้อหา */}
-      <div className="container relative z-10 mx-auto max-w-[1429px]">
-        {/* 3. จัดข้อความและปุ่ม (วางชิดซ้าย) */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex w-full max-w-xl flex-col items-start gap-10"
-        >
-          {/* Headline (Star San Sanitizer) */}
-          <h1 
-            // ใช้ font-light, text-8xl (80px), leading-[100px] ตามสเปก
-            // ปรับขนาด Responsive สำหรับมือถือ
-            className="font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px]"
-            style={{ color: '#F3C85B' }}
+      <div className="container relative z-10 mx-auto">
+        <div className="grid md:grid-cols-2 gap-10">
+          
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="flex w-full flex-col items-start gap-5 pt-16 md:pt-24 pb-10 md:pb-0" 
           >
-            Star San Sanitizer
-          </h1>
+            {/* 1. Headline (Star San) - สีเหลือง (Accent) */}
+            <h1 
+              className="font-prompt font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px]"
+              style={{ color: 'var(--accent)' }} // <-- สีเหลือง (ถูกต้องตามภาพ)
+            >
+              Star San
+            </h1>
 
-          {/* Description (น้ำยาฆ่าเชื้อ...) */}
-          <p 
-            // ใช้ font-light, text-lg (18px) ตามสเปก
-            className="font-light text-lg leading-7 text-black dark:text-white"
-          >
-            {locale === 'th'
-              ? 'น้ำยาฆ่าเชื้อและทำความสะอาดอุปกรณ์ต้ม เบียร์และถังเบียร์แบบไม่ต้องล้างออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูง'
-              : 'Sanitizer and cleaner for brewing equipment and kegs. No-rinse formula, easy to use, safe, and highly effective.'}
-          </p>
+            {/* ================ FIX HERE (TEXT COLOR) ================ */}
+            {/* 2. Headline (Sanitizer) - สีขาว (ตามภาพ) */}
+            <h1 
+              className="font-prompt font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px] text-white -mt-8" // <-- เปลี่ยนเป็น text-white
+            >
+              Sanitizer
+            </h1>
 
-          {/* Button (ซื้อเลย) */}
-          <a 
-            href="#contact" 
-            // ใช้ bg-[#F3C85B], font-semibold, text-lg, text-center ตามสเปก
-            className="flex h-[50px] w-full max-w-[227px] items-center justify-center bg-[#F3C85B] text-center font-semibold text-lg text-black transition-transform hover:scale-105"
-          >
-            {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
-          </a>
+            {/* 3. Description (น้ำยาทำความสะอาด...) - สีขาว (ตามภาพ) */}
+            <p 
+              className="font-prompt font-light text-lg leading-7 text-white max-w-md" // <-- เปลี่ยนเป็น text-white
+            >
+              {locale === 'th'
+                ? 'น้ำยาทำความสะอาดและทำลายจุลินทรีย์ชั้นสูงแบบไม่ใช้ออกซิเจน ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูง'
+                : 'Superior cleaner and high-foaming sanitizer that is effective and safe to use. No-rinse formula.'}
+            </p>
+            {/* ========================================== */}
 
-        </motion.div>
+            {/* 4. Button (ซื้อเลย) - สีทอง (ถูกต้อง) */}
+            <a 
+              href="#contact" 
+              className="btn btn-primary flex h-[50px] w-full max-w-[227px] items-center justify-center text-center font-semibold text-lg" 
+            >
+              {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
+            </a>
+
+          </motion.div>
+
+          <div className="hidden md:block">
+            {/* ... (ส่วนนี้ว่างไว้) ... */}
+          </div>
+
+        </div>
       </div>
     </section>
   )

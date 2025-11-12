@@ -5,18 +5,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Base palette (คงเหมือนรอบก่อน) ===== */
+/* ===== Base palette (อัปเดตสีตามภาพตัวอย่าง) ===== */
 :root{
-  --surface:#f6f4ef; --surface-2:#ffffff; --text:#1f2328; --muted:#6f7780;
-  --brand:#16453b; --brand-600:#0f3d33; --brand-500:#1a5a4d;
-  --accent:#F3C85B; /* สีเหลืองตามสเปก */
+  --surface:#ffffff; 
+  --surface-2:#f6f7f8; /* <--- สีเทาอ่อนสำหรับพื้นหลัง Card */
+  --text:#1f2328; /* <--- สีดำสำหรับข้อความใน Light Mode */
+  --muted:#6f7780; /* <--- สีเทาสำหรับข้อความรอง */
+  
+  /* --- สีแบรนด์หลัก (สีดำสำหรับ Light Mode) --- */
+  --brand:#1f2328; 
+  --brand-600:#0f1215; 
+  --brand-500:#2d333a; 
+  
+  /* --- สี Accent (สีทอง - ไม่เปลี่ยนตามธีม) --- */
+  --accent:#F3C85B; /* <--- สีทองตามภาพตัวอย่าง */
   --accent-2:color-mix(in oklch, var(--accent) 80%, #fff);
-  --line:#e6e6e6; /* ปรับสี line ให้อ่อนลงเล็กน้อย */
+  
+  --line:#e6e6e6;
   --line-strong:#dadada;
-  --chrome:#0f1215; --chrome-2:#15181d; --chrome-text:#e9eaec;
-  --background:var(--surface); --foreground:var(--text);
+  
+  /* --- สี Dark Mode (สำหรับ Navbar) --- */
+  --chrome:#0f1215; 
+  --chrome-2:#15181d; 
+  --chrome-text:#e9eaec; /* สีขาวสำหรับ text ใน Dark Mode */
+  
+  --background:#f6f4ef; /* <--- เปลี่ยนพื้นหลัง body เป็นสีเทาอ่อน */
+  --foreground:var(--text);
   --border:var(--line); --card:var(--surface-2); --card-foreground:var(--text);
-  --gold:var(--accent); --ring:#d5d0c3;
+  --gold:var(--accent); --ring:var(--brand);
 }
 
 /* ================================= */
@@ -25,9 +41,16 @@
 .dark{
   --surface:var(--chrome);
   --surface-2:var(--chrome-2);
-  --text:var(--chrome-text);
+  --text:var(--chrome-text); /* สีขาวใน Dark Mode */
   --muted:#8a9199;
-  /* ... (colors) ... */
+  
+  --brand:var(--chrome-text); /* <--- สีขาวสำหรับ brand text ใน Dark Mode */
+  --brand-600:var(--chrome-text); 
+  --brand-500:var(--chrome-text); 
+  
+  --accent:#F3C85B; /* <--- สีทองคงเดิม */
+  --accent-2:color-mix(in oklch, var(--accent) 80%, #fff);
+  
   --line:color-mix(in oklch, var(--chrome-2) 80%, #fff);
   --line-strong:var(--chrome-2);
   --background:var(--surface);
@@ -36,16 +59,15 @@
   --card:var(--surface-2);
   --card-foreground:var(--text);
   --gold:var(--accent);
-  --ring:var(--chrome-2);
+  --ring:var(--brand);
 }
-
 
 html{scroll-behavior:auto}
 body{
   color:var(--foreground);
   background:var(--background);
 }
-.container{ @apply mx-auto px-4; max-width:1440px; } /* ปรับ max-width เป็น 1440px */
+.container{ @apply mx-auto px-4; max-width:1440px; } /* <-- max-width 1440px */
 .section{ @apply py-20 md:py-28; }
 .card{
   @apply rounded-2xl p-6 md:p-8;
@@ -59,34 +81,41 @@ body{
 }
 
 .display{ @apply text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight; }
-
-/* ... (btn styles) ... */
 .btn{
   @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-medium transition-all;
-  background:linear-gradient(120deg,#fff,#f6f4ef); border:1px solid var(--line); color:var(--text);
+  /* ปุ่มทั่วไป */
+  background:#fff; border:1px solid var(--line); color:var(--text);
 }
 .dark .btn{
-  background:linear-gradient(120deg, var(--surface-2), color-mix(in oklch, var(--surface-2) 90%, #fff));
+  background:var(--chrome-2);
 }
-.btn:hover{ transform:translateY(-1px); box-shadow:0 12px 28px rgba(22,69,59,.08); }
+.btn:hover{ transform:translateY(-1px); box-shadow:0 12px 28px rgba(0,0,0,.08); }
+
+/* --- อัปเดต .btn-primary ให้ใช้สีทอง --- */
 .btn-primary{
-  color:#fff; background:linear-gradient(135deg,var(--brand-500),var(--brand-600));
-  border:1px solid color-mix(in oklch, var(--brand) 65%, #0b0e12);
+  color:#1f2328; /* <--- สีดำสำหรับข้อความบนปุ่มทอง */
+  background:var(--accent);
+  border:1px solid var(--accent);
 }
+.btn-primary:hover {
+  background: color-mix(in oklch, var(--accent) 90%, #000); /* <--- สีทองเข้มขึ้นเล็กน้อยเมื่อ hover */
+  border-color: color-mix(in oklch, var(--accent) 90%, #000);
+}
+
 .btn-outline{ background:transparent; border:1px solid var(--line-strong); }
 .badge-gold{
   @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
-  color:#1a1d21; background:linear-gradient(90deg,var(--accent-2),var(--accent));
-  border:1px solid color-mix(in oklch,var(--accent) 75%, #b38f57);
+  color:#1a1d21; background:var(--accent);
+  border:1px solid color-mix(in oklch,var(--accent) 75%, #000);
 }
 
 /* ================= NAV ================= */
-/* ลบ .nav-plain, .nav-framed-light, .nav-link, .nav-icon ออกทั้งหมด */
-/* สไตล์ Navbar ใหม่จะถูกกำหนดโดยตรงใน Component โดยใช้ Tailwind */
-
+/* ลบ class ที่ไม่ใช้แล้วออก เพื่อให้ Tailwind จัดการทั้งหมด */
 
 /* generic links */
 a{ @apply transition-opacity; }
+a{ @apply transition-opacity; }
 a:hover{ @apply opacity-90; }
-
-/* ลบ .h-screen-minus-nav ออก */
+/* body {
+  cursor: none;
+} */
