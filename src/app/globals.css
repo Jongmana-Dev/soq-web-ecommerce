@@ -119,3 +119,58 @@ a:hover{ @apply opacity-90; }
 /* body {
   cursor: none;
 } */
+
+/* generic links */
+a{ @apply transition-opacity; }
+a:hover{ @apply opacity-90; }
+
+/* ===== Custom Cursor Hide ===== */
+/* body {
+  cursor: none;
+} */
+
+/* ================ FIX HERE ================ */
+/* ===== Infinite Marquee Animation for Logos ===== */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* เลื่อน 50% ของความกว้างทั้งหมด */
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite; /* 40s คือความเร็ว */
+}
+
+/* Optional: Hide scrollbar for the logo div */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+/* ========================================== */
+
+/* ===== Infinite Marquee Animation for Logos ===== */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } 
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite; 
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ================ FIX HERE ================ */
+/* ปรับ line-height สำหรับ h2 และ h1 ที่ใช้ font-prompt */
+h1.font-prompt, h2.font-prompt {
+  line-height: 1.25em; /* ปรับค่านี้เพื่อให้ระยะห่างบรรทัดแคบลง */
+  text-wrap: balance; /* ช่วยจัดข้อความให้สมดุล */
+}

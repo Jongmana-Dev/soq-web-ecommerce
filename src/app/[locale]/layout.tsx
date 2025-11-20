@@ -27,10 +27,20 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      {/* ================ FIX HERE ================ */}
-      {/* เพิ่ม padding-top: 76px (h-[76px]) ให้กับ body เพื่อดันเนื้อหาลงมา */}
+      <head>
+        {/* ================ FIX HERE ================ */}
+        {/* เพิ่ม CDN link สำหรับ Font Awesome Icons */}
+        <link 
+          rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossOrigin="anonymous" 
+          referrerPolicy="no-referrer" 
+        />
+        {/* ========================================== */}
+      </head>
+      {/* แก้ไข: ยืนยันว่า body มี pt-[76px] */}
       <body className={`${prompt.variable} ${poppins.variable} font-prompt pt-[76px]`}>
-      {/* ========================================== */}
         
         <LuxuryCursor /> 
 

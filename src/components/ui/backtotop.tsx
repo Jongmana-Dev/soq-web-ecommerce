@@ -1,62 +1,114 @@
 'use client'
 
-import { ArrowUp, MessageSquare } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 
 export default function BackToTop() {
-  const [scrolled, setScrolled] = useState(false)
+  const [showButton, setShowButton] = useState(false)
+  const [openChat, setOpenChat] = useState(false) // สถานะสำหรับเปิด/ปิดช่องแชท
 
   useEffect(() => {
     const handleScroll = () => {
-      // แสดงปุ่ม BackToTop เมื่อเลื่อนลงมาเกิน 200px
-      setScrolled(window.scrollY > 200) 
+      if (window.scrollY > 300) { // แสดงปุ่มเมื่อเลื่อนลงมาเกิน 300px
+        setShowButton(true)
+      } else {
+        setShowButton(false)
+      }
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
   }
 
-  // สไตล์ปุ่ม (ใช้ร่วมกัน)
-  const buttonStyle = "h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105"
-  
+  // Variants สำหรับ AnimatePresence ของปุ่มแชท
+  const chatVariants = {
+    hidden: { opacity: 0, y: 20, transition: { type: 'spring', stiffness: 300, damping: 20 } },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
+  }
+
   return (
-    // ** นี่คือส่วนสำคัญที่ทำให้ปุ่มอยู่ขวาล่างเสมอ **
-    // `fixed`  : ทำให้ element ลอยอยู่กับที่บน viewport ไม่ว่าจะ scroll ไปไหน
-    // `bottom-6`: กำหนดระยะห่างจากขอบล่าง 1.5rem (24px)
-    // `right-6` : กำหนดระยะห่างจากขอบขวา 1.5rem (24px)
-    // `z-40`   : กำหนด stack order ให้ลอยอยู่เหนือ element อื่นๆ ส่วนใหญ่
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
-      
-      {/* ปุ่ม BackToTop (จะแสดง/ซ่อน เมื่อ Scrolled) */}
+    <>
+      {/* Back to Top Button */}
       <AnimatePresence>
-        {scrolled && (
+        {showButton && (
           <motion.button
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            exit={{ opacity: 0, y: 20 }}
             onClick={scrollToTop}
-            className={`${buttonStyle} bg-gray-800 text-white dark:bg-gray-200 dark:text-black`}
-            aria-label="Back to top"
+            className="fixed bottom-4 right-4 z-50 p-3 bg-accent text-black rounded-full shadow-lg hover:bg-accent/90 transition-all duration-300"
+            aria-label="Scroll to top"
           >
-            <ArrowUp className="h-6 w-6" />
+            <i className="fa-solid fa-arrow-up text-xl"></i>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* ปุ่ม Chat (แสดงเสมอ) */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 }} 
-        className={`${buttonStyle} bg-accent text-black`} 
-        aria-label="Open chat"
-      >
-        <MessageSquare className="h-6 w-6" />
-      </motion.button>
-    </div>
+      {/* Chat / Contact Buttons */}
+      <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end space-y-3">
+        {/* Toggle Button for Chat Options */}
+        <motion.button
+          onClick={() => setOpenChat(!openChat)}
+          className="p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 w-14 h-14 flex items-center justify-center"
+          aria-label={openChat ? "Close chat options" : "Open chat options"}
+        >
+          {openChat ? (
+            <i className="fa-solid fa-xmark text-2xl"></i> // Icon X เมื่อเปิด
+          ) : (
+            <i className="fa-solid fa-comment-dots text-2xl"></i> // Icon แชทเมื่อปิด
+          )}
+        </motion.button>
+
+        {/* Chat Options (Line, Facebook, Email) */}
+        <AnimatePresence>
+          {openChat && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={chatVariants}
+              className="flex flex-col items-end space-y-3"
+            >
+              {/* Line Button */}
+              <Link
+                href="https://line.me/ti/p/@your_line_id" // **โปรดแก้ไข Line ID ของคุณ**
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-[#00C300] text-white rounded-full shadow-lg hover:bg-[#00A000] transition-all duration-300 w-14 h-14 flex items-center justify-center"
+                aria-label="Chat on Line"
+              >
+                <i className="fa-brands fa-line text-2xl"></i>
+              </Link>
+              {/* Facebook Button */}
+              <Link
+                href="https://m.me/your_facebook_page_id" // **โปรดแก้ไข Facebook Page ID ของคุณ**
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-[#1877F2] text-white rounded-full shadow-lg hover:bg-[#145CBF] transition-all duration-300 w-14 h-14 flex items-center justify-center"
+                aria-label="Chat on Facebook Messenger"
+              >
+                <i className="fa-brands fa-facebook-messenger text-2xl"></i>
+              </Link>
+              {/* Email Button */}
+              <Link
+                href="mailto:your_email@example.com" // **โปรดแก้ไข Email ของคุณ**
+                className="p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 transition-all duration-300 w-14 h-14 flex items-center justify-center"
+                aria-label="Send an email"
+              >
+                <i className="fa-solid fa-envelope text-2xl"></i>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   )
 }
