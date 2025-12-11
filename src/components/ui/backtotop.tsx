@@ -30,8 +30,8 @@ export default function BackToTop() {
 
   // Variants สำหรับ AnimatePresence ของปุ่มแชท
   const chatVariants = {
-    hidden: { opacity: 0, y: 20, transition: { type: 'spring', stiffness: 300, damping: 20 } },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } },
+    hidden: { opacity: 0, y: 20, transition: { type: 'spring' as const, stiffness: 300, damping: 20 } },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 20 } },
   }
 
   return (
