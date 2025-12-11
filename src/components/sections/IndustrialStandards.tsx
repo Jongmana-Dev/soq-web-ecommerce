@@ -1,89 +1,99 @@
 'use client'
 
-import React from 'react'
 import { useLocale } from 'next-intl'
-import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
+
+const CERTIFICATIONS = [
+  { icon: 'fa-solid fa-certificate', label: 'FDA Certified', label_th: 'FDA รับรอง' },
+  { icon: 'fa-solid fa-shield-halved', label: 'ISO 9001', label_th: 'ISO 9001' },
+  { icon: 'fa-solid fa-leaf', label: 'Eco-Friendly', label_th: 'เป็นมิตรกับสิ่งแวดล้อม' },
+  { icon: 'fa-solid fa-flask-vial', label: 'Lab Tested', label_th: 'ทดสอบในห้องปฏิบัติการ' },
+  { icon: 'fa-solid fa-award', label: 'Quality Assured', label_th: 'รับประกันคุณภาพ' },
+  { icon: 'fa-solid fa-handshake', label: 'Trusted Brand', label_th: 'แบรนด์ที่ไว้วางใจ' },
+  { icon: 'fa-solid fa-check-double', label: 'GMP Standard', label_th: 'มาตรฐาน GMP' },
+  { icon: 'fa-solid fa-globe', label: 'World Class', label_th: 'ระดับโลก' },
+]
+
+import { useState } from 'react'
+import StandardsModal from '@/components/modals/StandardsModal'
 
 export default function IndustrialStandards() {
   const locale = useLocale()
-
-  // Data สำหรับโลโก้ AI Partners (ใช้โลโก้ที่เหมาะกับพื้นหลังสีอ่อน)
-  const aiPartners = [
-    { name: 'Canva', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/canva/canva-original.svg' },
-    { name: 'Bard', src: 'https://www.vectorlogo.zone/logos/google_bard/google_bard-icon.svg' },
-    { name: 'OpenAI', src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/OpenAI_logo_white.svg/2000px-OpenAI_logo_white.svg.png' },
-    { name: 'Bing', src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Bing_logo_%282016%29.svg/2000px-Bing_logo_%282016%29.svg.png' },
-    { name: 'NovelAI', src: 'https://novelai.net/assets/logo.png' },
-    { name: 'DALL-E 2', src: 'https://openai.com/dall-e-2/assets/images/logo.svg' },
-    { name: 'ChatGPT', src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/2000px-ChatGPT_logo.svg.png' },
-    { name: 'Google AI', src: 'https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_200x66px.svg' },
-    { name: 'CharacterAI', src: 'https://character.ai/img/logo.54f6.svg' },
-  ];
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <section
       id="industrial-standards"
-      className="bg-light-gray dark:bg-chrome-1 pt-[77px] pb-[77px] w-full min-h-[600px]"
+      ref={ref}
+      className="relative overflow-hidden bg-white py-20 lg:py-28"
     >
-      <div className="container max-w-[1440px] mx-auto px-4">
-        {/* Main Grid for 2 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          {/* Left Column: Industrial Standards Text */}
-          <div className="flex flex-col items-start pt-[50px] pl-[80px]">
-            {/* Headlines: text-black (ตามภาพตัวอย่าง) */}
-            <h2 className="font-prompt text-[40px] leading-[48px] font-semibold text-black dark:text-white mb-4">
-              {locale === 'th' ? 'Industrial Standards' : 'Industrial Standards'}
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 items-center">
+          
+          {/* Left Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col justify-center"
+          >
+            <h2 className="mb-6 font-prompt text-3xl font-light leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              {locale === 'th' ? 'มาตรฐานระดับ' : 'Industrial'} <br/>
+              <span className="font-semibold">{locale === 'th' ? 'อุตสาหกรรม' : 'Standards'}</span>
             </h2>
-            <h3 className="font-prompt text-[40px] leading-[48px] font-semibold text-black dark:text-white mb-6">
-              {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
-            </h3>
-            {/* Description: text-gray-700 (เพื่อให้ดูเข้มขึ้นเล็กน้อยบนพื้นขาว) */}
-            <p className="font-poppins text-lg leading-relaxed text-gray-700 dark:text-gray-300 mb-8 max-w-[375px]">
-              {locale === 'th'
-                ? 'ทำให้เราจัดหาการผลิตที่ได้มาตรฐาน ที่อยู่ในคุณภาพ สามารถใช้งานกับระบบการผลิต และธุรกิจได้อย่างมั่นใจ ให้เป็นไปได้ทุกขั้นตอน'
-                : 'We ensure standard production with quality, usable in production systems and business with confidence, making every step possible.'}
-            </p>
-            {/* Button: text-black, border-black (ตามภาพตัวอย่าง) */}
-            <button className="py-3 px-8 bg-transparent border border-black text-black rounded-md transition-colors hover:bg-black/10">
-              {locale === 'th' ? 'อ่านรายละเอียด' : 'Read More'}
-            </button>
-          </div>
 
-          {/* Right Column: AI Partners Logos */}
-          <div className="flex items-center justify-center p-8">
-            <div className="grid grid-cols-3 gap-8 max-w-[500px]">
-              {/* ใช้ Image component และปรับ src เป็นโลโก้สีดำ/สีเข้มที่เหมาะสม */}
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Canva_Logo.svg/1000px-Canva_Logo.svg.png" alt="Canva" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://www.vectorlogo.zone/logos/google_bard/google_bard-icon.svg" alt="Bard" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/OpenAI.svg/2000px-OpenAI.svg.png" alt="OpenAI" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Bing_logo.svg/2000px-Bing_logo.svg.png" alt="Bing" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://novelai.net/assets/logo.png" alt="NovelAI" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://openai.com/dall-e-2/assets/images/logo.svg" alt="DALL-E 2" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/2000px-ChatGPT_logo.svg.png" alt="ChatGPT" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_200x66px.svg" alt="Google AI" width={100} height={40} className="object-contain max-h-full" />
-              </div>
-              <div className="flex items-center justify-center h-20">
-                <Image src="https://character.ai/img/logo.54f6.svg" alt="CharacterAI" width={100} height={40} className="object-contain max-h-full" />
-              </div>
+            <p className="mb-8 max-w-lg text-base leading-relaxed text-neutral-500 sm:text-lg font-light">
+              {locale === 'th'
+                ? 'ผลิตภัณฑ์ของเราผลิตจากโรงงานที่ได้รับการรับรองมาตรฐานสากล มั่นใจได้ในคุณภาพและความปลอดภัยทุกขั้นตอนการผลิต'
+                : 'Our products are manufactured in internationally certified facilities, ensuring quality and safety at every stage of production.'}
+            </p>
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex h-12 items-center justify-center gap-2 bg-neutral-900 px-8 font-prompt text-sm font-semibold text-white transition-all hover:bg-black hover:scale-105 shadow-lg shadow-black/10"
+              >
+                {locale === 'th' ? 'รายละเอียด' : 'Details'}
+                <i className="fa-solid fa-arrow-right" />
+              </button>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Right: Logo Cloud */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
+             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+               {CERTIFICATIONS.map((cert, index) => (
+                 <motion.div
+                   key={cert.label}
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   animate={inView ? { opacity: 1, scale: 1 } : {}}
+                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                   className="flex items-center gap-3 px-6 py-4 border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-100 transition-colors cursor-default"
+                 >
+                    <i className={`${cert.icon} text-xl opacity-60`} />
+                    <span className="font-prompt font-medium text-sm text-neutral-800">
+                      {locale === 'th' ? cert.label_th : cert.label}
+                    </span>
+                 </motion.div>
+               ))}
+               
+               {/* Decorative floating dots/elements */}
+               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--accent)]/5 blur-3xl -z-10" />
+               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-neutral-200/50 blur-3xl -z-10" />
+             </div>
+          </motion.div>
+
         </div>
       </div>
+
+      {isModalOpen && <StandardsModal onClose={() => setIsModalOpen(false)} />}
     </section>
   )
 }

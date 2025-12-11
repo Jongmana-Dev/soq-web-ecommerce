@@ -1,141 +1,185 @@
 'use client'
 
-import React from 'react'
+import { useState } from 'react'
 import { useLocale } from 'next-intl'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 
-// Data สำหรับ FAQ Cards
-const faqItems = [
-  {
-    icon: 'fa-solid fa-box',
-    title_th: 'สินค้าแตกต่างจากที่อื่นอย่างไร?',
-    title_en: 'How is the product different?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-  {
-    icon: 'fa-solid fa-flask',
-    title_th: 'สินค้าผลิตที่ไหน?',
-    title_en: 'Where are the products made?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-  {
-    icon: 'fa-solid fa-truck-fast',
-    title_th: 'มีการจัดส่งต่างประเทศไหม?',
-    title_en: 'Is international shipping available?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-  {
-    icon: 'fa-solid fa-rotate',
-    title_th: 'นโยบายการคืน,เปลี่ยนสินค้า?',
-    title_en: 'Return and exchange policy?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-  {
-    icon: 'fa-solid fa-clock',
-    title_th: 'ใช้เวลาจัดส่งสินค้านานแค่ไหน?',
-    title_en: 'How long does shipping take?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-  {
-    icon: 'fa-solid fa-headset',
-    title_th: 'ติดต่อฝ่ายบริการลูกค้า?',
-    title_en: 'Contact customer service?',
-    description_th: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    description_en: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-    link_th: 'อ่านรายละเอียด',
-    link_en: 'Read details',
-  },
-];
+type FAQItem = {
+  id: string
+  question_th: string
+  question_en: string
+  answer_th: string
+  answer_en: string
+  icon: string
+}
 
+const FAQ_ITEMS: FAQItem[] = [
+  {
+    id: '1',
+    icon: 'fa-solid fa-box',
+    question_th: 'สินค้าแตกต่างจากที่อื่นอย่างไร?',
+    question_en: 'How is the product different?',
+    answer_th: 'Star San เป็นน้ำยาฆ่าเชื้อที่ไม่ต้องล้างน้ำซ้ำ (No-Rinse) ผลิตภัณฑ์ของเราได้รับการรับรองคุณภาพจากหน่วยงานมาตรฐานและใช้ในอุตสาหกรรมการต้มเบียร์ทั่วโลก',
+    answer_en: 'Star San is a no-rinse sanitizer. Our products are certified by quality standards agencies and used in brewing industries worldwide.',
+  },
+  {
+    id: '2',
+    icon: 'fa-solid fa-flask',
+    question_th: 'สินค้าผลิตที่ไหน?',
+    question_en: 'Where are the products made?',
+    answer_th: 'ผลิตภัณฑ์ของเรานำเข้าจากโรงงานที่ได้รับมาตรฐาน FDA และผ่านการตรวจสอบคุณภาพก่อนจำหน่ายทุกล็อต',
+    answer_en: 'Our products are imported from FDA-certified factories and undergo quality inspection before every batch is sold.',
+  },
+  {
+    id: '3',
+    icon: 'fa-solid fa-truck-fast',
+    question_th: 'มีการจัดส่งต่างประเทศไหม?',
+    question_en: 'Is international shipping available?',
+    answer_th: 'ขณะนี้เราจัดส่งเฉพาะในประเทศไทย แต่กำลังเตรียมการจัดส่งไปยังประเทศในภูมิภาคอาเซียนเร็วๆ นี้',
+    answer_en: 'Currently we only ship within Thailand, but we are preparing to ship to ASEAN countries soon.',
+  },
+  {
+    id: '4',
+    icon: 'fa-solid fa-rotate',
+    question_th: 'นโยบายการคืน/เปลี่ยนสินค้า?',
+    question_en: 'Return/exchange policy?',
+    answer_th: 'สามารถคืนหรือเปลี่ยนสินค้าได้ภายใน 7 วันหลังได้รับสินค้า หากสินค้าชำรุดหรือไม่ตรงตามคำสั่งซื้อ',
+    answer_en: 'You can return or exchange within 7 days of receiving the product if it is damaged or does not match your order.',
+  },
+  {
+    id: '5',
+    icon: 'fa-solid fa-clock',
+    question_th: 'ใช้เวลาจัดส่งนานแค่ไหน?',
+    question_en: 'How long does shipping take?',
+    answer_th: 'จัดส่งภายใน 1-3 วันทำการในเขตกรุงเทพฯ และ 3-5 วันทำการในต่างจังหวัด',
+    answer_en: 'Delivery within 1-3 business days in Bangkok and 3-5 business days for other provinces.',
+  },
+  {
+    id: '6',
+    icon: 'fa-solid fa-headset',
+    question_th: 'ติดต่อฝ่ายบริการลูกค้าได้อย่างไร?',
+    question_en: 'How to contact customer service?',
+    answer_th: 'ติดต่อเราได้ทาง Line Official, Facebook Messenger หรือ Email ตลอด 24 ชั่วโมง',
+    answer_en: 'Contact us via Line Official, Facebook Messenger or Email 24/7.',
+  },
+]
 
 export default function FAQ() {
   const locale = useLocale()
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
+  const [openId, setOpenId] = useState<string | null>(null)
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  const toggleFAQ = (id: string) => {
+    setOpenId(openId === id ? null : id)
   }
 
   return (
     <section
       id="faq"
-      className="bg-light-gray dark:bg-chrome-1 pt-[77px] pb-[77px] w-full min-h-[700px]"
       ref={ref}
+      className="relative bg-[#F5F5F7] py-20 lg:py-28"
     >
-      <div className="container max-w-[1440px] mx-auto px-4">
-        {/* FAQs Heading */}
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
         <motion.div
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={itemVariants}
-          className="flex flex-col items-start mb-12 pl-[80px]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center lg:mb-16"
         >
-          {/* "FAQs." text-gray-400 */}
-          <h2 className="font-prompt text-[40px] leading-[48px] font-semibold text-gray-400 dark:text-white mb-2">
-            {locale === 'th' ? 'FAQs.' : 'FAQs.'}
+          <span className="mb-4 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-medium text-neutral-500 shadow-sm border border-neutral-100">
+            FAQs
+          </span>
+          <h2 className="mb-4 font-prompt text-3xl font-light text-neutral-800 sm:text-4xl lg:text-5xl">
+            {locale === 'th' ? 'คำถามที่' : 'Frequently Asked'} <br/>
+            <span className="font-semibold">{locale === 'th' ? 'พบบ่อย' : 'Questions'}</span>
           </h2>
-          {/* "คำถามที่พบบ่อย" text-black */}
-          <h3 className="font-prompt text-[40px] leading-[48px] font-semibold text-black dark:text-white mb-4">
-            {locale === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
-          </h3>
-          {/* Description text-gray-700 */}
-          <p className="font-poppins text-lg leading-relaxed text-gray-700 dark:text-gray-300 max-w-[400px]">
-            Lorem ipsum is common placeholder text used to demonstrate the graphic elements of a document or visual presentation.
-          </p>
         </motion.div>
 
-        {/* FAQ Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-[80px]">
-          {faqItems.map((item, index) => (
+        {/* FAQ Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {FAQ_ITEMS.map((item, index) => (
             <motion.div
-              key={index}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              variants={itemVariants}
-              transition={{ delay: index * 0.1 }}
-              // Card styles: ไม่มี shadow, ไม่มี border, bg-white
-              className="flex flex-col items-start bg-white dark:bg-chrome-3 p-6 rounded-lg h-[270px]"
+              key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
             >
-              {/* Icon: text-gray-700 (สีเทาเข้ม/ดำ ตามภาพตัวอย่าง) */}
-              <i className={`${item.icon} text-3xl text-gray-700 mb-4`}></i> {/* เปลี่ยนจาก text-accent เป็น text-gray-700 */}
-              {/* Title: text-black */}
-              <h4 className="font-prompt text-xl font-semibold text-black dark:text-white mb-2">
-                {locale === 'th' ? item.title_th : item.title_en}
-              </h4>
-              {/* Description: text-gray-700 */}
-              <p className="font-poppins text-base text-gray-700 dark:text-gray-300 mb-4 flex-grow">
-                {locale === 'th' ? item.description_th : item.description_en}
-              </p>
-              {/* Link: text-gray-700 underline (สีเทาเข้ม/ดำ ตามภาพตัวอย่าง) */}
-              <a
-                href="#"
-                className="font-poppins text-base text-gray-700 dark:text-white underline hover:no-underline" // เปลี่ยนจาก text-black เป็น text-gray-700
+              <div
+                className={`overflow-hidden bg-white shadow-sm transition-all duration-300 ${
+                  openId === item.id
+                    ? 'ring-1 ring-[var(--accent)] border-transparent'
+                    : 'hover:shadow-md border border-gray-100'
+                }`}
               >
-                {locale === 'th' ? item.link_th : item.link_en}
-              </a>
+                <button
+                  onClick={() => toggleFAQ(item.id)}
+                  className="flex w-full items-start gap-4 p-6 text-left"
+                >
+                  <span
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center transition-colors ${
+                      openId === item.id
+                        ? 'bg-[var(--accent)] text-black'
+                        : 'bg-neutral-100 text-neutral-500'
+                    }`}
+                  >
+                    <i className={`${item.icon} text-sm`} />
+                  </span>
+                  
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                       <span className="font-prompt text-lg font-medium text-neutral-900">
+                         {locale === 'th' ? item.question_th : item.question_en}
+                       </span>
+                       <span
+                        className={`ml-2 flex h-6 w-6 shrink-0 items-center justify-center transition-transform duration-300 ${
+                          openId === item.id ? 'rotate-180 text-black' : 'text-neutral-400'
+                        }`}
+                      >
+                        <i className="fa-solid fa-chevron-down text-xs" />
+                      </span>
+                    </div>
+
+                    <AnimatePresence>
+                      {openId === item.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <p className="pt-2 text-neutral-500 leading-relaxed text-sm">
+                             {locale === 'th' ? item.answer_th : item.answer_en}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-16 text-center"
+        >
+          <p className="mb-4 text-neutral-500">
+            {locale === 'th' ? 'ยังมีคำถามอื่นอีกไหม?' : 'Still have questions?'}
+          </p>
+          <a
+            href="#footer"
+            className="inline-flex items-center gap-2 bg-neutral-900 px-6 py-3 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 transition-all hover:bg-black hover:scale-105"
+          >
+            <i className="fa-solid fa-message" />
+            {locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
+          </a>
+        </motion.div>
       </div>
     </section>
   )

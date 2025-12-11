@@ -40,7 +40,7 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
         {/* ========================================== */}
       </head>
       {/* แก้ไข: ยืนยันว่า body มี pt-[76px] */}
-      <body className={`${prompt.variable} ${poppins.variable} font-prompt pt-[76px]`}>
+      <body className={`${prompt.variable} ${poppins.variable} font-prompt`}>
         
         <LuxuryCursor /> 
 

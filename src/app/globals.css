@@ -5,172 +5,257 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Base palette (อัปเดตสีตามภาพตัวอย่าง) ===== */
-:root{
-  --surface:#ffffff; 
-  --surface-2:#f6f7f8; /* <--- สีเทาอ่อนสำหรับพื้นหลัง Card */
-  --text:#1f2328; /* <--- สีดำสำหรับข้อความใน Light Mode */
-  --muted:#6f7780; /* <--- สีเทาสำหรับข้อความรอง */
-  
-  /* --- สีแบรนด์หลัก (สีดำสำหรับ Light Mode) --- */
-  --brand:#1f2328; 
-  --brand-600:#0f1215; 
-  --brand-500:#2d333a; 
-  
-  /* --- สี Accent (สีทอง - ไม่เปลี่ยนตามธีม) --- */
-  --accent:#F3C85B; /* <--- สีทองตามภาพตัวอย่าง */
-  --accent-2:color-mix(in oklch, var(--accent) 80%, #fff);
-  
-  --line:#e6e6e6;
-  --line-strong:#dadada;
-  
-  /* --- สี Dark Mode (สำหรับ Navbar) --- */
-  --chrome:#0f1215; 
-  --chrome-2:#15181d; 
-  --chrome-text:#e9eaec; /* สีขาวสำหรับ text ใน Dark Mode */
-  
-  --background:#f6f4ef; /* <--- เปลี่ยนพื้นหลัง body เป็นสีเทาอ่อน */
-  --foreground:var(--text);
-  --border:var(--line); --card:var(--surface-2); --card-foreground:var(--text);
-  --gold:var(--accent); --ring:var(--brand);
+/* ===== CSS Variables ===== */
+:root {
+  --surface: #ffffff;
+  --surface-2: #f6f7f8;
+  --text: #1f2328;
+  --muted: #6f7780;
+  --brand: #1f2328;
+  --brand-600: #0f1215;
+  --brand-500: #2d333a;
+  --accent: #F3C85B;
+  --accent-2: color-mix(in oklch, var(--accent) 80%, #fff);
+  --line: #e6e6e6;
+  --line-strong: #dadada;
+  --chrome: #0f1215;
+  --chrome-2: #15181d;
+  --chrome-text: #e9eaec;
+  --background: #ffffff;
+  --foreground: var(--text);
+  --border: var(--line);
+  --card: var(--surface-2);
+  --card-foreground: var(--text);
+  --ring: var(--brand);
 }
 
-/* ================================= */
-/* ========= DARK MODE VARS ======== */
-/* ================================= */
-.dark{
-  --surface:var(--chrome);
-  --surface-2:var(--chrome-2);
-  --text:var(--chrome-text); /* สีขาวใน Dark Mode */
-  --muted:#8a9199;
-  
-  --brand:var(--chrome-text); /* <--- สีขาวสำหรับ brand text ใน Dark Mode */
-  --brand-600:var(--chrome-text); 
-  --brand-500:var(--chrome-text); 
-  
-  --accent:#F3C85B; /* <--- สีทองคงเดิม */
-  --accent-2:color-mix(in oklch, var(--accent) 80%, #fff);
-  
-  --line:color-mix(in oklch, var(--chrome-2) 80%, #fff);
-  --line-strong:var(--chrome-2);
-  --background:var(--surface);
-  --foreground:var(--text);
-  --border:var(--line);
-  --card:var(--surface-2);
-  --card-foreground:var(--text);
-  --gold:var(--accent);
-  --ring:var(--brand);
+.dark {
+  --surface: var(--chrome);
+  --surface-2: var(--chrome-2);
+  --text: var(--chrome-text);
+  --muted: #8a9199;
+  --brand: var(--chrome-text);
+  --brand-600: var(--chrome-text);
+  --brand-500: var(--chrome-text);
+  --line: color-mix(in oklch, var(--chrome-2) 80%, #fff);
+  --line-strong: var(--chrome-2);
+  --background: var(--surface);
+  --foreground: var(--text);
+  --border: var(--line);
+  --card: var(--surface-2);
+  --card-foreground: var(--text);
 }
 
-html{scroll-behavior:auto}
-body{
-  color:var(--foreground);
-  background:var(--background);
-}
-.container{ @apply mx-auto px-4; max-width:1440px; } /* <-- max-width 1440px */
-.section{ @apply py-20 md:py-28; }
-.card{
-  @apply rounded-2xl p-6 md:p-8;
-  background:var(--card);
-  border:1px solid var(--line);
-  box-shadow:0 1px 1px rgba(0,0,0,.03), 0 8px 24px rgba(26,52,47,.06);
+/* ===== Base Styles ===== */
+html {
+  /* scroll-behavior: smooth; - Removed to prevent conflict with Lenis */
 }
 
-.dark .card{
-  box-shadow:0 1px 1px rgba(0,0,0,.1), 0 8px 24px rgba(233, 234, 236, 0.03);
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-prompt), system-ui, sans-serif;
 }
 
-.display{ @apply text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight; }
-.btn{
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-medium transition-all;
-  /* ปุ่มทั่วไป */
-  background:#fff; border:1px solid var(--line); color:var(--text);
+/* ===== Layout ===== */
+.container {
+  @apply mx-auto px-4;
+  max-width: 1440px;
 }
-.dark .btn{
-  background:var(--chrome-2);
-}
-.btn:hover{ transform:translateY(-1px); box-shadow:0 12px 28px rgba(0,0,0,.08); }
 
-/* --- อัปเดต .btn-primary ให้ใช้สีทอง --- */
-.btn-primary{
-  color:#1f2328; /* <--- สีดำสำหรับข้อความบนปุ่มทอง */
-  background:var(--accent);
-  border:1px solid var(--accent);
+.section {
+  @apply py-20 md:py-28;
 }
+
+/* ===== Components ===== */
+.card {
+  @apply rounded-none p-6 md:p-8;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03), 0 8px 24px rgba(26, 52, 47, 0.06);
+}
+
+.dark .card {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 8px 24px rgba(233, 234, 236, 0.03);
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-none px-5 py-3 text-sm font-medium transition-all;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.dark .btn {
+  background: var(--chrome-2);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary {
+  color: #1f2328;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
 .btn-primary:hover {
-  background: color-mix(in oklch, var(--accent) 90%, #000); /* <--- สีทองเข้มขึ้นเล็กน้อยเมื่อ hover */
+  background: color-mix(in oklch, var(--accent) 90%, #000);
   border-color: color-mix(in oklch, var(--accent) 90%, #000);
 }
 
-.btn-outline{ background:transparent; border:1px solid var(--line-strong); }
-.badge-gold{
-  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
-  color:#1a1d21; background:var(--accent);
-  border:1px solid color-mix(in oklch,var(--accent) 75%, #000);
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--line-strong);
 }
 
-/* ================= NAV ================= */
-/* ลบ class ที่ไม่ใช้แล้วออก เพื่อให้ Tailwind จัดการทั้งหมด */
+/* ===== Typography ===== */
+.display {
+  @apply text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight;
+}
 
-/* generic links */
-a{ @apply transition-opacity; }
-a{ @apply transition-opacity; }
-a:hover{ @apply opacity-90; }
-/* body {
-  cursor: none;
-} */
-
-/* generic links */
-a{ @apply transition-opacity; }
-a:hover{ @apply opacity-90; }
-
-/* ===== Custom Cursor Hide ===== */
-/* body {
-  cursor: none;
-} */
-
-/* ================ FIX HERE ================ */
-/* ===== Infinite Marquee Animation for Logos ===== */
+/* ===== Animations ===== */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); } /* เลื่อน 50% ของความกว้างทั้งหมด */
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee {
-  animation: marquee 40s linear infinite; /* 40s คือความเร็ว */
+  animation: marquee 30s linear infinite;
 }
 
-/* Optional: Hide scrollbar for the logo div */
-.scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-/* ========================================== */
+@keyframes float {
 
-/* ===== Infinite Marquee Animation for Logos ===== */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); } 
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-.animate-marquee {
-  animation: marquee 40s linear infinite; 
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ===== Utilities ===== */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-/* ================ FIX HERE ================ */
-/* ปรับ line-height สำหรับ h2 และ h1 ที่ใช้ font-prompt */
-h1.font-prompt, h2.font-prompt {
-  line-height: 1.25em; /* ปรับค่านี้เพื่อให้ระยะห่างบรรทัดแคบลง */
-  text-wrap: balance; /* ช่วยจัดข้อความให้สมดุล */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ===== Selection ===== */
+::selection {
+  background-color: var(--accent);
+  color: #000;
+}
+
+/* ===== Focus States ===== */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Links ===== */
+a {
+  @apply transition-colors;
+}
+
+/* ===== Luxury Cursor ===== */
+.lux-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.lux-cursor--dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-top: -4px;
+  margin-left: -4px;
+}
+
+.lux-cursor--ring {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  margin-top: -20px;
+  margin-left: -20px;
+  transition: width 0.3s, height 0.3s, margin 0.3s, background-color 0.3s, border-color 0.3s;
+}
+
+.lux-cursor--ring[data-hover="true"] {
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  margin-left: -30px;
+  background-color: rgba(243, 200, 91, 0.1);
+  border-color: rgba(243, 200, 91, 0.3);
+}
+
+.lux-cursor--ring[data-down="true"] {
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  margin-left: -15px;
+}
+
+.lux-cursor--ripple {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+  animation: cursor-ripple 0.6s linear forwards;
+}
+
+@keyframes cursor-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
 }

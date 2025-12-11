@@ -1,124 +1,194 @@
 'use client'
 
-import React from 'react'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
 
 export default function Footer() {
   const locale = useLocale()
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
 
-  // Class สำหรับลิงก์ในเมนู footer
-  const footerLinkClass = "relative hover:text-white transition-colors before:content-['•'] before:absolute before:-left-4 before:text-gray-400 before:dark:text-gray-300"
-  // ^^^ เพิ่ม bullet point ด้วย pseudo-element 'before'
+  const footerLinks = {
+    products: {
+      title: locale === 'th' ? 'สินค้า' : 'Products',
+      links: [
+        { label: 'Star San 330ml', href: '#products' },
+        { label: 'Star San 1L', href: '#products' },
+        { label: 'Star San 20L', href: '#products' },
+      ],
+    },
+    company: {
+      title: locale === 'th' ? 'บริษัท' : 'Company',
+      links: [
+        { label: locale === 'th' ? 'เกี่ยวกับเรา' : 'About Us', href: '#' },
+        { label: locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards', href: '#industrial-standards' },
+        { label: locale === 'th' ? 'รีวิวลูกค้า' : 'Reviews', href: '#testimonials' },
+      ],
+    },
+    support: {
+      title: locale === 'th' ? 'ช่วยเหลือ' : 'Support',
+      links: [
+        { label: locale === 'th' ? 'คำถามที่พบบ่อย' : 'FAQs', href: '#faq' },
+        { label: locale === 'th' ? 'การจัดส่ง' : 'Shipping', href: '#faq' },
+        { label: locale === 'th' ? 'นโยบายคืนสินค้า' : 'Returns', href: '#faq' },
+      ],
+    },
+  }
+
+  const socialLinks = [
+    { icon: 'fa-brands fa-line', href: '#', label: 'Line' },
+    { icon: 'fa-brands fa-facebook-f', href: '#', label: 'Facebook' },
+    { icon: 'fa-solid fa-envelope', href: 'mailto:contact@soq.co.th', label: 'Email' },
+  ]
 
   return (
     <footer
       id="footer"
-      // พื้นหลังสีเทาเข้ม (#333333 หรือใกล้เคียง) text-gray-300 (สีข้อความทั่วไป) dark:text-gray-300
-      className="bg-[#333333] dark:bg-chrome-footer pt-[100px] pb-[40px] w-full min-h-[400px] text-gray-300 dark:text-gray-300"
+      ref={ref}
+      className="relative bg-[#1A1A1A] text-white pt-24 pb-12 z-10"
     >
-      <div className="container max-w-[1440px] mx-auto px-4">
-        {/* Main Grid for Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-start pl-[80px] pr-[80px]">
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+          
+          {/* 1. Left: Large Logo (Spans 4 cols) */}
+          <motion.div 
+             initial={{ opacity: 0 }}
+             animate={inView ? { opacity: 1 } : {}}
+             transition={{ duration: 0.6 }}
+             className="lg:col-span-5 flex flex-col justify-between"
+          >
+             <div className="flex-1 flex items-center justify-center lg:justify-start py-10 lg:py-0">
+                {/* Logo SVG Representation */}
+                <div className="relative">
+                   <h1 className="text-[8rem] lg:text-[10rem] leading-none font-bold tracking-tighter text-white/90">
+                     SOQ.
+                   </h1>
+                   {/* Decorative lines/circles could go here to match the graphic exactly if we had the SVG, using text for now as requested */}
+                </div>
+             </div>
+             
+             <div className="mt-8 text-neutral-500 text-sm hidden lg:block">
+               © {new Date().getFullYear()} — Copyright
+             </div>
+          </motion.div>
 
-          {/* Column 1: SOQ Logo & Copyright */}
-          <div className="flex flex-col col-span-1 md:col-span-1 pr-4">
-            {/* Logo SOQ */}
-            <Image
-              src="/path/to/your/soq-logo-white.png" // **โปรดแก้ไข Path ไปยังโลโก้ SOQ ของคุณ (สีขาว)**
-              alt="SOQ Logo"
-              width={180}
-              height={60}
-              className="h-[60px] w-auto mb-4"
-            />
-          </div>
+          {/* 2. Center: Links (Spans 4 cols) */}
+          <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={inView ? { opacity: 1, y: 0 } : {}}
+             transition={{ duration: 0.6, delay: 0.2 }}
+             className="lg:col-span-4 grid grid-cols-2 gap-8 lg:pl-12"
+          >
+             {/* Col 1 */}
+             <div className="space-y-10">
+                <div>
+                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
+                     ● {locale === 'th' ? 'สินค้า' : 'Product'}
+                   </h4>
+                   <ul className="space-y-2">
+                     <li>
+                       <Link href="#products" className="text-lg font-medium hover:text-[var(--accent)] transition-colors">Star San</Link>
+                     </li>
+                   </ul>
+                </div>
 
-          {/* Columns 2-5: Navigation Links and QR Code */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 col-span-1 md:col-span-4 gap-8">
-            {/* Column 2 (Original Footer Col 1): สินค้า */}
-            <div className="flex flex-col items-start">
-              <h4 className="font-prompt text-lg font-semibold mb-4 text-white">
-                {locale === 'th' ? 'สินค้า' : 'Products'}
-              </h4>
-              <ul className="space-y-2 font-poppins text-base">
-                <li><Link href="#" className={footerLinkClass}>Star San</Link></li>
-              </ul>
-            </div>
+                <div>
+                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
+                     ● {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
+                   </h4>
+                   <ul className="space-y-2">
+                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Factory Certification</Link></li>
+                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Manufacturing License</Link></li>
+                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Factory Accreditation</Link></li>
+                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Production Certification</Link></li>
+                   </ul>
+                </div>
+                
+                <div>
+                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
+                     ● {locale === 'th' ? 'ติดต่อ' : 'Contact'}
+                   </h4>
+                   <ul className="space-y-2 font-medium">
+                     <li>Line</li>
+                     <li>Facebook</li>
+                     <li>{locale === 'th' ? 'ที่อยู่' : 'Address'}</li>
+                   </ul>
+                </div>
+             </div>
 
-            {/* Column 3 (Original Footer Col 2): มาตรฐานโรงงาน */}
-            <div className="flex flex-col items-start">
-              <h4 className="font-prompt text-lg font-semibold mb-4 text-white">
-                {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
-              </h4>
-              <ul className="space-y-2 font-poppins text-base">
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'Factory Certification' : 'Factory Certification'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'Manufacturing License' : 'Manufacturing License'}</Link></li>
-                <li><Link href="#" className="hover:text-accent transition-colors hidden">{locale === 'th' ? 'Factory Accreditation' : 'Factory Accreditation'}</Link></li> {/* ซ่อนชั่วคราวตามภาพตัวอย่าง */}
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'Production Certification' : 'Production Certification'}</Link></li>
-              </ul>
-            </div>
+             {/* Col 2 */}
+             <div className="space-y-10">
+                <div>
+                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
+                     ● {locale === 'th' ? 'รีวิว' : 'Reviews'}
+                   </h4>
+                   <ul className="space-y-2">
+                     <li>
+                       <Link href="#testimonials" className="font-light hover:text-[var(--accent)] transition-colors">
+                         {locale === 'th' ? 'รีวิวจากลูกค้า' : 'Customer Reviews'}
+                       </Link>
+                     </li>
+                   </ul>
+                </div>
 
-            {/* Column 4 (Original Footer Col 3): บริการ */}
-            <div className="flex flex-col items-start">
-              <h4 className="font-prompt text-lg font-semibold mb-4 text-white">
-                {locale === 'th' ? 'บริการ' : 'Services'}
-              </h4>
-              <ul className="space-y-2 font-poppins text-base">
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'รีวิวลูกค้า' : 'Customer Reviews'}</Link></li>
-              </ul>
-            </div>
+                <div>
+                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
+                     ● {locale === 'th' ? 'คำถามที่พบบ่อย' : 'FAQs'}
+                   </h4>
+                   <ul className="space-y-2">
+                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'สินค้าแตกต่าง...?': 'How differs?'}</Link></li>
+                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'ผลิตที่ไหน?' : 'Where made?'}</Link></li>
+                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'ส่งต่างประเทศ?' : 'Intl Shipping?'}</Link></li>
+                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'นโยบายคืน?' : 'Return Policy'}</Link></li>
+                   </ul>
+                </div>
+             </div>
+          </motion.div>
 
-            {/* Column 5 (New): คำถามที่พบบ่อย */}
-            <div className="flex flex-col items-start">
-              <h4 className="font-prompt text-lg font-semibold mb-4 text-white">
-                {locale === 'th' ? 'คำถามที่พบบ่อย' : 'FAQs'}
-              </h4>
-              <ul className="space-y-2 font-poppins text-base">
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'สินค้าแตกต่างจากที่อื่นอย่างไร?' : 'How is the product different?'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'สินค้าผลิตที่ไหน?' : 'Where are the products made?'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'มีการจัดส่งต่างประเทศไหม?' : 'Is international shipping available?'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'นโยบายการคืน,เปลี่ยนสินค้า?' : 'Return and exchange policy?'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'ใช้เวลาจัดส่งสินค้านานแค่ไหน?' : 'How long does shipping take?'}</Link></li>
-                <li><Link href="#" className={footerLinkClass}>{locale === 'th' ? 'ติดต่อฝ่ายบริการลูกค้า?' : 'Contact customer service?'}</Link></li>
-              </ul>
-            </div>
-          </div>
+          {/* 3. Right: QR & Social (Spans 3 cols) */}
+          <motion.div 
+             initial={{ opacity: 0, x: 20 }}
+             animate={inView ? { opacity: 1, x: 0 } : {}}
+             transition={{ duration: 0.6, delay: 0.3 }}
+             className="lg:col-span-3 flex flex-col items-center lg:items-end gap-8"
+          >
+             {/* QR Code */}
+             <div className="bg-white p-3 w-48 h-48 flex items-center justify-center">
+                {/* Placeholder for QR Code */}
+                <div className="w-full h-full border-2 border-dashed border-neutral-300 flex items-center justify-center text-neutral-400">
+                    <span className="text-xs">QR CODE</span>
+                </div>
+             </div>
 
-          {/* QR Code and Social Media Icons (แยกออกมาอยู่ด้านขวาสุด) */}
-          <div className="flex flex-col items-end justify-start col-span-1 sm:col-span-2 md:col-span-1 lg:col-span-1 order-last md:order-none">
-            <div className="mt-0 md:mt-0 flex flex-col items-end">
-              <Image
-                src="https://via.placeholder.com/150x150/FFFFFF/000000?text=LINE_QR" // **โปรดแก้ไข URL เป็น QR Code ของ Line ของคุณ (พื้นหลังขาว โค้ดดำ)**
-                alt="LINE QR Code"
-                width={150}
-                height={150}
-                className="rounded-lg mb-4"
-              />
-              <p className="font-poppins text-sm text-white mb-4"> {/* เปลี่ยนเป็น text-white */}
-                {locale === 'th' ? 'ช่องทางติดต่อ' : 'Contact Channels'}
-              </p>
-              <div className="flex gap-4">
-                <a href="#" aria-label="Line" className="p-2 border border-white rounded-full"><i className="fa-brands fa-line text-xl text-white hover:text-accent transition-colors"></i></a>
-                <a href="#" aria-label="Facebook" className="p-2 border border-white rounded-full"><i className="fa-brands fa-facebook-f text-xl text-white hover:text-accent transition-colors"></i></a>
-                <a href="#" aria-label="Email" className="p-2 border border-white rounded-full"><i className="fa-solid fa-envelope text-xl text-white hover:text-accent transition-colors"></i></a>
-              </div>
-            </div>
-          </div>
+             <div className="flex flex-col items-center lg:items-end gap-4">
+                <span className="text-neutral-500 text-sm">{locale === 'th' ? 'ติดตามเราได้ที่' : 'Follow Us'}</span>
+                <div className="flex gap-4">
+                   <a href="#" className="w-10 h-10 flex items-center justify-center bg-white rounded-full text-black hover:scale-110 transition-transform">
+                     <i className="fa-brands fa-facebook-f" />
+                   </a>
+                   <a href="#" className="w-10 h-10 flex items-center justify-center bg-white rounded-full text-black hover:scale-110 transition-transform">
+                     <i className="fa-brands fa-line" />
+                   </a>
+                </div>
+             </div>
+
+             <div className="mt-auto pt-8 lg:pt-0 w-full flex justify-center lg:justify-end gap-4 text-xs font-medium text-neutral-500">
+                <button onClick={() => window.location.href='/en'} className={locale === 'en' ? 'text-white' : 'hover:text-white'}>Eng</button>
+                <button onClick={() => window.location.href='/th'} className={locale === 'th' ? 'text-white' : 'hover:text-white'}>ไทย</button>
+             </div>
+
+          </motion.div>
+
         </div>
 
-        {/* Bottom Bar: Copyright, Privacy, Language Selector */}
-        <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-700 font-poppins text-sm">
-          <div className="flex gap-4 pl-[80px]">
-            <p className="text-gray-400">© 2024 - Copyright</p>
-            <Link href="#" className="hover:text-white transition-colors text-gray-400">Privacy</Link>
-          </div>
-          <div className="pr-[80px]">
-            <Link href="#" className="hover:text-white transition-colors mr-2 text-gray-400">Eng</Link>
-            <span>|</span>
-            <Link href="#" className="hover:text-white transition-colors ml-2 text-gray-400">ไทย</Link>
-          </div>
+        {/* Mobile Copyright */}
+        <div className="mt-12 text-center text-neutral-500 text-xs lg:hidden">
+            © {new Date().getFullYear()} — Copyright
         </div>
+
       </div>
     </footer>
   )

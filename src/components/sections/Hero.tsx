@@ -2,71 +2,91 @@
 
 import { motion } from 'framer-motion'
 import { useLocale } from 'next-intl'
-import Image from 'next/image' 
-
-// Path ไปยังรูปภาพ Mockup 3 ขวด
-const HERO_BACKGROUND_IMAGE = '/images/hero-mockup-bottles.png'
+import Image from 'next/image'
 
 export default function Hero() {
   const locale = useLocale()
-  
+
   return (
-    <section 
-      id="hero" 
-      className="relative flex min-h-[calc(100vh-50px)] items-start overflow-hidden bg-contain bg-center"
-      style={{
-        backgroundImage: `url(${HERO_BACKGROUND_IMAGE})`
-      }}
+    <section
+      id="hero"
+      className="relative min-h-screen w-full overflow-hidden bg-[#EFEFEF]"
     >
-      <div className="container relative z-10 mx-auto">
-        <div className="grid md:grid-cols-2 gap-10">
-          
+      {/* Background pattern */}
+      {/* <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(243,200,91,0.1),transparent_50%)]" />
+      </div> */}
+
+      <div className="container relative z-10 mx-auto flex min-h-screen items-center px-4 sm:px-6 lg:px-8">
+        <div className="grid w-full grid-cols-1 items-center gap-8 py-24 lg:grid-cols-2 lg:gap-16 lg:py-0">
+
+          {/* Left Content */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="flex w-full flex-col items-start gap-5 pt-16 md:pt-24 pb-10 md:pb-0" 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-start gap-6 text-center sm:text-left relative z-20"
           >
-            {/* 1. Headline (Star San) - สีเหลือง (Accent) */}
-            <h1 
-              className="font-prompt font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px]"
-              style={{ color: 'var(--accent)' }} // <-- สีเหลือง (ถูกต้องตามภาพ)
+            {/* Headlines */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="space-y-4"
             >
-              Star San
-            </h1>
+              <h1 className="font-prompt text-5xl font-light leading-tight sm:text-6xl lg:text-8xl xl:text-9xl text-[var(--accent)] tracking-tighter">
+                SOQ.
+              </h1>
+              <h2 className="font-prompt text-4xl font-light leading-tight text-neutral-900 sm:text-5xl lg:text-7xl xl:text-8xl uppercase tracking-wide">
+                SAFE FOR SIP
+              </h2>
+            </motion.div>
 
-            {/* ================ FIX HERE (TEXT COLOR) ================ */}
-            {/* 2. Headline (Sanitizer) - สีขาว (ตามภาพ) */}
-            <h1 
-              className="font-prompt font-light text-[50px] leading-[60px] md:text-[80px] md:leading-[100px] text-white -mt-8" // <-- เปลี่ยนเป็น text-white
-            >
-              Sanitizer
-            </h1>
-
-            {/* 3. Description (น้ำยาทำความสะอาด...) - สีขาว (ตามภาพ) */}
-            <p 
-              className="font-prompt font-light text-lg leading-7 text-white max-w-md" // <-- เปลี่ยนเป็น text-white
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="max-w-md font-poppins text-base leading-relaxed text-neutral-500 sm:text-lg"
             >
               {locale === 'th'
-                ? 'น้ำยาทำความสะอาดและทำลายจุลินทรีย์ชั้นสูงแบบไม่ใช้ออกซิเจน ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูง'
+                ? 'น้ำยาฆ่าเชื้อและทำความสะอาดอุปกรณ์ดิบ เบียร์และไวน์แบบไม่ต้องล้างออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูง'
                 : 'Superior cleaner and high-foaming sanitizer that is effective and safe to use. No-rinse formula.'}
-            </p>
-            {/* ========================================== */}
+            </motion.p>
 
-            {/* 4. Button (ซื้อเลย) - สีทอง (ถูกต้อง) */}
-            <a 
-              href="#contact" 
-              className="btn btn-primary flex h-[50px] w-full max-w-[227px] items-center justify-center text-center font-semibold text-lg" 
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex flex-col gap-4 sm:flex-row mt-4"
             >
-              {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
-            </a>
-
+              <a
+                href="#products"
+                className="group relative inline-flex h-14 items-center justify-center overflow-hidden bg-[var(--accent)] px-12 font-prompt text-lg font-bold text-black transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-[var(--accent)]/20 shadow-black/5"
+              >
+                <span className="relative z-10">{locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}</span>
+              </a>
+            </motion.div>
           </motion.div>
 
-          <div className="hidden md:block">
-            {/* ... (ส่วนนี้ว่างไว้) ... */}
-          </div>
-
+          {/* Right Image - Expanded */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, x: 50 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="relative flex items-center justify-center lg:justify-end h-[60vh] lg:h-screen w-full"
+          >
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[120%] lg:w-[140%] h-[120%] lg:-right-20 pointer-events-none">
+              <Image
+                src="/images/hero-mockup-bottles.png"
+                alt="Star San Sanitizer Products"
+                fill
+                className="object-contain drop-shadow-2xl scale-125 lg:scale-150 origin-center lg:origin-right"
+                priority
+              />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
