@@ -9,4 +9,4 @@ deploy:
     - main
   script:
     - npm install -g @railway/cli
-    - railway up --service bpp-member-admin-services --detach
+    - railway up --service soq-web-ecommerce --detach
