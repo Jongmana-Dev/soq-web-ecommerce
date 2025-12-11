@@ -1,173 +1,184 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import type { Route } from 'next'
-import { useLocale } from 'next-intl'
-import { usePathname } from 'next/navigation'
-// 1. Import useState
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { UserRound, ShoppingCart, Menu as MenuIcon, X, ChevronDown } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { useTheme } from 'next-themes'
+import React from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingCartIcon, UserIcon } from "@heroicons/react/24/outline";
+import { MiniCart } from "@/components/MiniCart";
+import { useCartStore } from "@/store/cart";
+import type { CartStore } from "@/store/cart";
 
-// เมนู (เหมือนเดิม)
-type MenuItem = { id: string; th: string; en: string }
-const MENU: MenuItem[] = [
-  { id: 'features', th: 'สินค้า', en: 'Products' },
-  { id: 'reviews', th: 'รีวิว', en: 'Reviews' },
-  { id: 'standards', th: 'มาตราฐานโรงงาน', en: 'Standards' },
-  { id: 'faqs', th: 'คำถามที่พบบ่อย', en: 'FAQs' },
-  { id: 'contact', th: 'ติดต่อ', en: 'Contact' },
-] as const
+function Navbar() {
+  const tCommon = useTranslations();
+  const tHeader = useTranslations("Header");
 
-export default function Navbar() {
-  const locale = useLocale()
-  const pathname = usePathname()
-  const { theme } = useTheme()
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const [active, setActive] = useState<string>('hero')
-  const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [isCartOpen, setCartOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
 
-  // 2. สร้าง State สำหรับเก็บเมนูที่กำลัง Hover
-  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  // นับจำนวนสินค้าทั้งหมดในรถเข็น
+  const itemCount = useCartStore((state: CartStore) =>
+    state.items.reduce((total, item) => total + item.quantity, 0)
+  );
 
-  // Logic ติดตาม Active Section และ Scroll (เหมือนเดิม)
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY
-      setActive(document.body.dataset.activeSection ?? (y > 160 ? 'features' : 'hero'))
-      setScrolled(y > 50)
+  // เช็คว่า scroll เกิน 10px หรือยัง
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (typeof window === "undefined") return;
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    handleScroll(); // เช็คครั้งแรกตอน mount
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // เปลี่ยน locale แล้ว push path เดิมแต่เปลี่ยน segment แรก
+  const changeLocale = (newLocale: string) => {
+    const segments = pathname.split("/");
+    if (segments.length > 1) {
+      segments[1] = newLocale;
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    router.push(segments.join("/") as any);
+  };
 
-  // Logic สลับภาษา (เหมือนเดิม)
-  const homeHref = (`/${locale}`) as Route
-  const switchTo = locale === 'th' ? 'en' : 'th'
-  const swapHref = (pathname ? pathname.replace(`/${locale}`, `/${switchTo}`) : `/${switchTo}`) as Route
-  const langTitle = locale === 'th' ? 'English' : 'ภาษาไทย'
+  const navClass =
+    "fixed top-0 left-0 right-0 z-40 transition-all duration-300 " +
+    (isScrolled
+      ? "bg-black/60 backdrop-blur-md border-b border-white/10 translate-y-0"
+      : "bg-transparent border-b border-transparent translate-y-0");
 
-  // กำหนดสีของข้อความและไอคอนตาม theme และการ scrolled
-  const textColorClass = theme === 'dark' 
-    ? 'text-white' 
-    : (scrolled ? 'text-black' : 'text-black');
+  const menuLinkColor = isScrolled
+    ? "text-white/90 hover:text-white"
+    : "text-black hover:text-black/60";
 
-  const iconColorClass = theme === 'dark' 
-    ? 'text-white' 
-    : (scrolled ? 'text-black' : 'text-black');
+  const iconColor = isScrolled
+    ? "text-white/80 hover:text-white"
+    : "text-black/70 hover:text-black";
+
+  const langColor = isScrolled
+    ? "text-white/90 hover:text-white"
+    : "text-black hover:text-black/70";
 
   return (
-    <>
-      <header 
-        // Navbar หลัก (พื้นหลังโปร่งใส -> ขาว/เข้ม ตอน scroll)
-        className={`fixed top-0 z-50 flex h-[76px] w-full items-center justify-center transition-all duration-300
-          ${scrolled 
-            ? 'bg-white shadow-[0px_4px_4px_#F6F7F8] dark:bg-chrome-2 dark:shadow-none'
-            : 'bg-transparent dark:bg-chrome-2 dark:shadow-none'
-          }`}
-        aria-label="Main Navigation"
-      >
-        <div className="container flex h-full max-w-[1440px] items-center justify-between px-4">
-          
-          {/* 1. โลโก้ "SOQ." (ซ้าย) */}
-          <Link href={homeHref} className={`font-poppins text-2xl font-semibold leading-9 ${textColorClass}`}>
-            SOQ.
-          </Link>
+    <nav className={navClass}>
+      <div className="mx-auto flex h-[76px] max-w-[1440px] items-center px-8">
+        {/* โลโก้ */}
+        <Link
+          href={`/${locale}`}
+          className="mr-20 flex items-center"
+          aria-label="Home"
+        >
+          <Image
+            src="/logo.svg"
+            alt="SOQ logo"
+            width={120}
+            height={36}
+            className={
+              "h-9 w-auto transition-all duration-300 " +
+              (isScrolled ? "invert brightness-100" : "invert-0 brightness-100")
+            }
+          />
+        </Link>
 
-          {/* 2. เมนูและไอคอน (Desktop - ชิดขวา) */}
-          <div className="hidden md:flex items-center gap-10"> 
-            
-            {/* กลุ่มที่ 1: เมนู (16px) */}
-            <nav 
-              className="flex items-center gap-4"
-              onMouseLeave={() => setHoveredMenu(null)} // 3. Reset เมื่อเมาส์ออกจาก <nav>
-            >
-              {MENU.map((m) => (
-                <a
-                  key={m.id}
-                  href={`#${m.id}`}
-                  className={`relative font-prompt text-base font-normal ${textColorClass} transition-opacity hover:opacity-70 whitespace-nowrap px-2 py-1`} // เพิ่ม padding
-                  onMouseEnter={() => setHoveredMenu(m.id)} // 4. Set เมนูที่กำลัง Hover
-                >
-                  {locale === 'th' ? m.th : m.en}
-                  
-                  {/* 5. "Wow" Motion: ขีดเส้นใต้สีทองเมื่อ Hover */}
-                  {hoveredMenu === m.id && (
-                    <motion.span 
-                      className="absolute -bottom-1 left-0 h-0.5 w-full rounded-full"
-                      style={{ backgroundColor: 'var(--accent)' }} // <-- สีทอง #F3C85B
-                      layoutId="underline" // <-- นี่คือ "Magic" motion
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                    />
-                  )}
-                </a>
-              ))}
-            </nav>
-
-            {/* กลุ่มที่ 2: ไอคอน (24px) */}
-            <div className="flex items-center gap-4"> 
-              <button
-                type="button"
-                className={`h-6 w-6 ${iconColorClass} transition-colors hover:opacity-70`}
-                aria-label="User account"
-                title="User account"
+        {/* กลุ่มเมนู + ไอคอน ชิดขวา */}
+        <div className="hidden flex-1 items-center justify-end lg:flex">
+          {/* เมนูหลัก */}
+          <ul className="flex items-center gap-[50px] text-[16px] font-normal">
+            <li>
+              <Link
+                href={`/${locale}#reviews`}
+                className={`transition-colors ${menuLinkColor}`}
               >
-                <UserRound />
-              </button>
-              <button
-                type="button"
-                className={`h-6 w-6 ${iconColorClass} relative transition-colors hover:opacity-70`}
-                aria-label="Open cart"
-                title="Open cart"
-              >
-                <ShoppingCart />
-                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  3
-                </span>
-              </button>
-              
-              <Link 
-                href={swapHref} 
-                prefetch={false} 
-                className={`flex items-center gap-1 font-prompt text-base font-normal ${textColorClass} transition-opacity hover:opacity-70 whitespace-nowrap`}
-                aria-label="Switch language"
-                title={langTitle}
-              >
-                {locale === 'th' ? 'ไทย' : 'EN'}
-                <ChevronDown className="h-4 w-4" />
+                {tHeader("reviews")}
               </Link>
+            </li>
+            <li>
+              <Link
+                href={`/${locale}#products`}
+                className={`transition-colors ${menuLinkColor}`}
+              >
+                {tHeader("products")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={`/${locale}#standards`}
+                className={`transition-colors ${menuLinkColor}`}
+              >
+                {tHeader("standards")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={`/${locale}#faq`}
+                className={`transition-colors ${menuLinkColor}`}
+              >
+                {tHeader("faq")}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={`/${locale}#contact`}
+                className={`transition-colors ${menuLinkColor}`}
+              >
+                {tHeader("contact")}
+              </Link>
+            </li>
+          </ul>
 
-              <ThemeToggle />
-            </div>
-          </div>
-
-
-          {/* 3. Hamburger (Mobile) */}
-          <div className="md:hidden">
-            <button
-              className={`h-6 w-6 ${iconColorClass}`}
-              onClick={() => setOpen((v) => !v)}
-              aria-label="Open navigation"
-              title="Open navigation"
+          {/* ไอคอน account / cart / language */}
+          <div className="ml-[50px] flex items-center gap-5">
+            {/* account */}
+            <Link
+              href={(`/${locale}/profile` as any)}
+              className={`inline-flex p-2 transition-colors ${iconColor}`}
+              aria-label={tHeader("account")}
             >
-              <MenuIcon />
+              <UserIcon className="w-6 h-6" />
+            </Link>
+
+            {/* cart */}
+            <button
+              onClick={() => setCartOpen((open) => !open)}
+              className={`relative inline-flex p-2 transition-colors ${iconColor}`}
+              aria-label={tHeader("cart")}
+            >
+              <ShoppingCartIcon className="w-6 h-6" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 rounded-full bg-red-500 px-[6px] text-[9px] leading-none text-white">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+
+            {/* language */}
+            <button
+              onClick={() => changeLocale(locale === "en" ? "th" : "en")}
+              className={`inline-flex items-center gap-1 text-[16px] transition-colors ${langColor}`}
+              aria-label={tCommon("language") || "Change language"}
+            >
+              {locale === "en" ? "EN" : "ไทย"}
+              <span className="text-xs align-middle">▼</span>
             </button>
           </div>
-
         </div>
-      </header>
+      </div>
 
-      {/* Mobile drawer (ไม่เปลี่ยนแปลง) */}
-      <AnimatePresence>
-        {/* ... (โค้ด Mobile Drawer ทั้งหมด) ... */}
-      </AnimatePresence>
-    </>
-  )
+      {/* Mini cart panel ด้านขวาใต้ navbar */}
+      {isCartOpen && (
+        <div className="absolute right-8 top-[76px] z-50">
+          <MiniCart onClose={() => setCartOpen(false)} />
+        </div>
+      )}
+    </nav>
+  );
 }
+
+export default Navbar;
+export { Navbar };

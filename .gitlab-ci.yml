@@ -1,0 +1,12 @@
+image: node:lts
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  script:
+    - npm install -g @railway/cli
+    - railway up --service bpp-member-admin-services --detach

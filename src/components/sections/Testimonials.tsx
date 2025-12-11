@@ -11,21 +11,21 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 // โลโก้บริษัทสำหรับแถบเลื่อน (ใช้ CDN ที่มีรูปโลโก้หรือ text placeholder)
 const COMPANY_LOGOS = [
-  { name: 'Tum Yuen', src: 'https://cdn.pixabay.com/photo/2021/08/04/13/06/logo-6521873_1280.png' }, // Generic Logo CDN
-  { name: 'MARTHA', src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Martha_Stewart_Living_Omnimedia_logo.svg/1200px-Martha_Stewart_Living_Omnimedia_logo.svg.png' }, // Martha Logo CDN
-  { name: 'Psycho', src: 'https://static.vecteezy.com/system/resources/previews/018/930/690/original/abstract-psycho-logo-design-template-free-vector.jpg' }, // Psycho Logo CDN
-  { name: 'CLARITY BREWING', src: 'https://placehold.co/120x40/f0f0f0/333333?text=CLARITY+BREWING&font=lato' }, // Text Placeholder
-  { name: 'Ka', src: 'https://placehold.co/80x40/f0f0f0/333333?text=Ka&font=lato' }, // Text Placeholder
-  { name: 'Andechs', src: 'https://www.andechs.de/fileadmin/template/img/logo.svg' }, // Andechs Logo CDN
-  { name: 'WKO', src: 'https://placehold.co/100x40/f0f0f0/333333?text=WKO&font=lato' }, // Text Placeholder
+  { name: 'Tum Yuen', src: '/testimonial.png' }, // Generic Logo CDN
+  { name: 'MARTHA', src: '/testimonial.png' }, // Martha Logo CDN
+  { name: 'Psycho', src: '/testimonial.png' }, // Psycho Logo CDN
+  { name: 'CLARITY BREWING', src: '/testimonial.png' }, // Text Placeholder
+  { name: 'Ka', src: '/testimonial.png' }, // Text Placeholder
+  { name: 'Andechs', src: '/testimonial.png' }, // Andechs Logo CDN
+  { name: 'WKO', src: '/testimonial.png' }, // Text Placeholder
   // ทำซ้ำสำหรับ Infinite Scroll
-  { name: 'Tum Yuen 2', src: 'https://cdn.pixabay.com/photo/2021/08/04/13/06/logo-6521873_1280.png' },
-  { name: 'MARTHA 2', src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Martha_Stewart_Living_Omnimedia_logo.svg/1200px-Martha_Stewart_Living_Omnimedia_logo.svg.png' },
-  { name: 'Psycho 2', src: 'https://static.vecteezy.com/system/resources/previews/018/930/690/original/abstract-psycho-logo-design-template-free-vector.jpg' },
-  { name: 'CLARITY BREWING 2', src: 'https://placehold.co/120x40/f0f0f0/333333?text=CLARITY+BREWING&font=lato' },
-  { name: 'Ka 2', src: 'https://placehold.co/80x40/f0f0f0/333333?text=Ka&font=lato' },
-  { name: 'Andechs 2', src: 'https://www.andechs.de/fileadmin/template/img/logo.svg' },
-  { name: 'WKO 2', src: 'https://placehold.co/100x40/f0f0f0/333333?text=WKO&font=lato' },
+  { name: 'Tum Yuen 2', src: '/testimonial.png' },
+  { name: 'MARTHA 2', src: '/testimonial.png'},
+  { name: 'Psycho 2', src: '/testimonial.png' },
+  { name: 'CLARITY BREWING 2', src: '/testimonial.png' },
+  { name: 'Ka 2', src: '/testimonial.png' },
+  { name: 'Andechs 2', src: '/testimonial.png' },
+  { name: 'WKO 2', src: '/testimonial.png' },
 ]
 
 type TestimonialContentType = {
@@ -52,7 +52,7 @@ const ALL_TESTIMONIAL_PAGES: TestimonialPage[] = [
   {
     content: {
       type: 'video',
-      src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1', // ตัวอย่าง YouTube embed
+      src: 'https://www.youtube.com/watch?v=J_mVPZfpf5k&list=RDJ_mVPZfpf5k&start_radio=1', // ตัวอย่าง YouTube embed
       thumbnail: 'https://i.ibb.co/L51HkLw/testimonial-video-placeholder.webp', // รูป Thumbnail วิดีโอ (CDN)
       alt: 'Video Testimonial from Jane Cooper',
     },

@@ -54,7 +54,7 @@
   "footer": {
     "rights": "© 2024 — Copyright"
   },
-   "Header": {
+  "Header": {
     "products": "Products",
     "reviews": "Reviews",
     "standards": "Standards",
@@ -72,6 +72,20 @@
     "addToCart": "Add to Cart",
     "size": "Size",
     "quantity": "Quantity"
-  }
-
+  },
+  "reviews": "Reviews",
+  "products": "Products",
+  "standards": "Standards",
+  "faq": "FAQ",
+  "contact": "Contact",
+  "cart": "Cart",
+  "account": "Account",
+  "language": "Language",
+  "title": "Welcome to SOQ Store",
+  "add_to_cart": "Add to cart",
+  "empty_cart": "Your cart is empty",
+  "subtotal": "Subtotal",
+  "shipping": "Shipping",
+  "total": "Total",
+  "checkout": "Checkout"
 }

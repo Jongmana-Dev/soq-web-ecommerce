@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl'
 import Image from 'next/image' 
 
 // Path ไปยังรูปภาพ Mockup 3 ขวด
-const HERO_BACKGROUND_IMAGE = '/images/hero-mockup-bottles.jpg'
+const HERO_BACKGROUND_IMAGE = '/images/hero-mockup-bottles.png'
 
 export default function Hero() {
   const locale = useLocale()
@@ -13,7 +13,7 @@ export default function Hero() {
   return (
     <section 
       id="hero" 
-      className="relative flex min-h-[calc(100vh-50px)] items-start overflow-hidden bg-fit bg-center"
+      className="relative flex min-h-[calc(100vh-50px)] items-start overflow-hidden bg-contain bg-center"
       style={{
         backgroundImage: `url(${HERO_BACKGROUND_IMAGE})`
       }}
