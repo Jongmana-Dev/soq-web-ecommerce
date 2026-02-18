@@ -7,6 +7,16 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 const nextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  async redirects() {
+    return [
+      // Redirect bare paths (without locale) to default locale
+      { source: '/cart', destination: '/th/cart', permanent: false },
+      { source: '/products/:slug', destination: '/th/products/:slug', permanent: false },
+      { source: '/profile', destination: '/th/profile', permanent: false },
+      { source: '/checkout', destination: '/th/checkout', permanent: false },
+      { source: '/checkout/confirmation', destination: '/th/checkout/confirmation', permanent: false },
+    ]
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
@@ -21,6 +31,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'static.vecteezy.com', pathname: '/**' },
       { protocol: 'https', hostname: 'i.pravatar.cc', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'profile.line-scdn.net', pathname: '/**' },
     ]
   }
 } satisfies NextConfig

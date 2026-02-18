@@ -12,21 +12,30 @@ export default function LuxuryCursor(){
     let x = window.innerWidth/2, y = window.innerHeight/2
     let rx = x, ry = y
     let rafId = 0
+    let running = false
 
     const raf = () => {
       rx += (x - rx) * 0.18
       ry += (y - ry) * 0.18
-      dot.current!.style.transform  = `translate3d(${x}px, ${y}px, 0)`
-      ring.current!.style.transform = `translate3d(${rx}px, ${ry}px, 0)`
+      if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`
+      if (ring.current) ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`
+      // Stop loop when ring has caught up (idle)
+      if (Math.abs(x - rx) < 0.5 && Math.abs(y - ry) < 0.5) {
+        running = false
+        return
+      }
       rafId = requestAnimationFrame(raf)
     }
-    const move = (e: MouseEvent) => { x = e.clientX; y = e.clientY }
+    const startLoop = () => {
+      if (!running) { running = true; rafId = requestAnimationFrame(raf) }
+    }
+    const move = (e: MouseEvent) => { x = e.clientX; y = e.clientY; startLoop() }
     const over = (e: MouseEvent) => {
       const t = (e.target as HTMLElement).closest('a,button,[data-hover=cursor]') as HTMLElement | null
-      ring.current!.dataset.hover = t ? 'true' : 'false'
+      if (ring.current) ring.current.dataset.hover = t ? 'true' : 'false'
     }
-    const down = () => ring.current!.dataset.down = 'true'
-    const up   = () => { ring.current!.dataset.down = 'false'; ripple(rx, ry) }
+    const down = () => { if (ring.current) ring.current.dataset.down = 'true' }
+    const up   = () => { if (ring.current) ring.current.dataset.down = 'false'; ripple(rx, ry) }
 
     function ripple(cx: number, cy: number){
       const r = document.createElement('div')
@@ -36,11 +45,10 @@ export default function LuxuryCursor(){
       setTimeout(() => r.remove(), 350)
     }
 
-    document.addEventListener('mousemove', move)
-    document.addEventListener('mouseover', over)
+    document.addEventListener('mousemove', move, { passive: true })
+    document.addEventListener('mouseover', over, { passive: true })
     document.addEventListener('mousedown', down)
     document.addEventListener('mouseup', up)
-    rafId = requestAnimationFrame(raf)
 
     return () => {
       document.removeEventListener('mousemove', move)

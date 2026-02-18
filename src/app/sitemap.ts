@@ -7,7 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const out: MetadataRoute.Sitemap = []
 
   for (const l of routing.locales) {
-    const root = l === routing.defaultLocale && routing.localePrefix === 'as-needed' ? '' : `/${l}`
+    const root = `/${l}`
     out.push({ url: `${base}${root}`, changeFrequency: 'weekly', priority: 1 })
   }
   return out

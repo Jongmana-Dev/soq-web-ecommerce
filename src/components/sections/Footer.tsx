@@ -1,195 +1,293 @@
 'use client'
 
-import { useLocale } from 'next-intl'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { useTranslations, useLocale } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import ContactModal from '@/components/modals/ContactModal'
 
-export default function Footer() {
-  const locale = useLocale()
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+/* ─── Terms Modal (portalled to body → z-[300] above everything) ─── */
+function TermsModal({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('footer')
 
-  const footerLinks = {
-    products: {
-      title: locale === 'th' ? 'สินค้า' : 'Products',
-      links: [
-        { label: 'Star San 330ml', href: '#products' },
-        { label: 'Star San 1L', href: '#products' },
-        { label: 'Star San 20L', href: '#products' },
-      ],
-    },
-    company: {
-      title: locale === 'th' ? 'บริษัท' : 'Company',
-      links: [
-        { label: locale === 'th' ? 'เกี่ยวกับเรา' : 'About Us', href: '#' },
-        { label: locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards', href: '#industrial-standards' },
-        { label: locale === 'th' ? 'รีวิวลูกค้า' : 'Reviews', href: '#testimonials' },
-      ],
-    },
-    support: {
-      title: locale === 'th' ? 'ช่วยเหลือ' : 'Support',
-      links: [
-        { label: locale === 'th' ? 'คำถามที่พบบ่อย' : 'FAQs', href: '#faq' },
-        { label: locale === 'th' ? 'การจัดส่ง' : 'Shipping', href: '#faq' },
-        { label: locale === 'th' ? 'นโยบายคืนสินค้า' : 'Returns', href: '#faq' },
-      ],
-    },
-  }
+  // Lock body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
 
-  const socialLinks = [
-    { icon: 'fa-brands fa-line', href: '#', label: 'Line' },
-    { icon: 'fa-brands fa-facebook-f', href: '#', label: 'Facebook' },
-    { icon: 'fa-solid fa-envelope', href: 'mailto:contact@soq.co.th', label: 'Email' },
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const sections = [
+    { title: t('termsGeneral'), body: t('termsGeneralDesc') },
+    { title: t('termsProduct'), body: t('termsProductDesc') },
+    { title: t('termsOrder'), body: t('termsOrderDesc') },
+    { title: t('termsShipping'), body: t('termsShippingDesc') },
+    { title: t('termsReturn'), body: t('termsReturnDesc') },
+    { title: t('termsPrivacy'), body: t('termsPrivacyDesc') },
   ]
 
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+      >
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        />
+
+        {/* Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          onWheel={(e) => e.stopPropagation()}
+          className="relative w-full max-w-2xl max-h-[80vh] bg-white text-neutral-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+            <h2 className="text-lg font-semibold">{t('termsTitle')}</h2>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-900"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-6 space-y-6">
+            <p className="text-sm text-neutral-500 leading-relaxed">
+              {t('termsIntro')}
+            </p>
+
+            {sections.map((section, i) => (
+              <div key={i}>
+                <h3 className="text-sm font-semibold text-neutral-900 mb-2">
+                  {i + 1}. {section.title}
+                </h3>
+                <p className="text-sm text-neutral-600 leading-relaxed">
+                  {section.body}
+                </p>
+              </div>
+            ))}
+
+            <p className="text-sm text-neutral-500 leading-relaxed pt-2 border-t border-neutral-100">
+              {t('termsContact')}
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50">
+            <button
+              onClick={onClose}
+              className="w-full py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body,
+  )
+}
+
+/* ─── Footer ─── */
+export default function Footer() {
+  const t = useTranslations('footer')
+  const tHeader = useTranslations('Header')
+  const locale = useLocale()
+  const router = useRouter()
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+  const [showTerms, setShowTerms] = useState(false)
+  const [showContact, setShowContact] = useState(false)
+
+  const changeLocale = (newLocale: 'th' | 'en') => {
+    router.replace('/', { locale: newLocale })
+  }
+
+  const navLinks = [
+    { href: '#testimonials', label: tHeader('reviews') },
+    { href: '#industrial-standards', label: tHeader('standards') },
+    { href: '#faq', label: tHeader('faq') },
+  ]
+
+  const contactLabel = tHeader('contact')
+
   return (
-    <footer
-      id="footer"
-      ref={ref}
-      className="relative bg-[#1A1A1A] text-white pt-24 pb-12 z-10"
-    >
-      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
-          
-          {/* 1. Left: Large Logo (Spans 4 cols) */}
-          <motion.div 
-             initial={{ opacity: 0 }}
-             animate={inView ? { opacity: 1 } : {}}
-             transition={{ duration: 0.6 }}
-             className="lg:col-span-5 flex flex-col justify-between"
-          >
-             <div className="flex-1 flex items-center justify-center lg:justify-start py-10 lg:py-0">
-                {/* Logo SVG Representation */}
-                <div className="relative">
-                   <h1 className="text-[8rem] lg:text-[10rem] leading-none font-bold tracking-tighter text-white/90">
-                     SOQ.
-                   </h1>
-                   {/* Decorative lines/circles could go here to match the graphic exactly if we had the SVG, using text for now as requested */}
+    <>
+      <footer id="footer" ref={ref} className="relative bg-[#0f0f0f] text-white z-10">
+        {/* Main */}
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+
+            {/* Left — Brand + tagline + nav */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-5"
+            >
+              <h2 className="text-7xl lg:text-8xl font-bold tracking-tighter text-white/90">
+                SOQ.
+              </h2>
+              <p className="mt-4 text-neutral-400 text-sm leading-relaxed max-w-xs">
+                {t('tagline')}
+              </p>
+
+              {/* Nav — desktop */}
+              <nav className="mt-10 hidden lg:block">
+                <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                  {navLinks.map((link) => (
+                    <li key={link.href}>
+                      <a
+                        href={link.href}
+                        className="text-sm text-neutral-500 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                  <li>
+                    <button
+                      onClick={() => setShowContact(true)}
+                      className="text-sm text-neutral-500 hover:text-white transition-colors"
+                    >
+                      {contactLabel}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </motion.div>
+
+            {/* Right — QR + social */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="lg:col-span-4 lg:col-start-9 flex flex-col items-center lg:items-end gap-6"
+            >
+              {/* LINE QR Code */}
+              <div className="bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
+                <div className="w-40 h-40 flex items-center justify-center">
+                  <div className="w-full h-full border-2 border-dashed border-neutral-300 rounded-lg flex items-center justify-center text-neutral-400">
+                    <span className="text-xs">LINE QR</span>
+                  </div>
                 </div>
-             </div>
-             
-             <div className="mt-8 text-neutral-500 text-sm hidden lg:block">
-               © {new Date().getFullYear()} — Copyright
-             </div>
-          </motion.div>
+              </div>
 
-          {/* 2. Center: Links (Spans 4 cols) */}
-          <motion.div 
-             initial={{ opacity: 0, y: 20 }}
-             animate={inView ? { opacity: 1, y: 0 } : {}}
-             transition={{ duration: 0.6, delay: 0.2 }}
-             className="lg:col-span-4 grid grid-cols-2 gap-8 lg:pl-12"
-          >
-             {/* Col 1 */}
-             <div className="space-y-10">
-                <div>
-                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
-                     ● {locale === 'th' ? 'สินค้า' : 'Product'}
-                   </h4>
-                   <ul className="space-y-2">
-                     <li>
-                       <Link href="#products" className="text-lg font-medium hover:text-[var(--accent)] transition-colors">Star San</Link>
-                     </li>
-                   </ul>
-                </div>
+              <p className="text-neutral-500 text-sm">{t('addLine')}</p>
 
-                <div>
-                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
-                     ● {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
-                   </h4>
-                   <ul className="space-y-2">
-                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Factory Certification</Link></li>
-                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Manufacturing License</Link></li>
-                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Factory Accreditation</Link></li>
-                     <li><Link href="#" className="font-light hover:text-[var(--accent)] transition-colors">Production Certification</Link></li>
-                   </ul>
-                </div>
-                
-                <div>
-                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
-                     ● {locale === 'th' ? 'ติดต่อ' : 'Contact'}
-                   </h4>
-                   <ul className="space-y-2 font-medium">
-                     <li>Line</li>
-                     <li>Facebook</li>
-                     <li>{locale === 'th' ? 'ที่อยู่' : 'Address'}</li>
-                   </ul>
-                </div>
-             </div>
+              {/* Social icons */}
+              <div className="flex gap-3">
+                <a
+                  href="#"
+                  aria-label="Facebook"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
+                >
+                  <i className="fa-brands fa-facebook-f text-sm" />
+                </a>
+                <a
+                  href="#"
+                  aria-label="LINE"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#06C755] hover:text-[#06C755] transition-colors"
+                >
+                  <i className="fa-brands fa-line text-sm" />
+                </a>
+                <a
+                  href="mailto:contact@soq.co.th"
+                  aria-label="Email"
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
+                >
+                  <i className="fa-solid fa-envelope text-sm" />
+                </a>
+              </div>
 
-             {/* Col 2 */}
-             <div className="space-y-10">
-                <div>
-                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
-                     ● {locale === 'th' ? 'รีวิว' : 'Reviews'}
-                   </h4>
-                   <ul className="space-y-2">
-                     <li>
-                       <Link href="#testimonials" className="font-light hover:text-[var(--accent)] transition-colors">
-                         {locale === 'th' ? 'รีวิวจากลูกค้า' : 'Customer Reviews'}
-                       </Link>
-                     </li>
-                   </ul>
-                </div>
+              {/* Nav — mobile */}
+              <nav className="lg:hidden mt-4">
+                <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                  {navLinks.map((link) => (
+                    <li key={link.href}>
+                      <a
+                        href={link.href}
+                        className="text-sm text-neutral-500 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                  <li>
+                    <button
+                      onClick={() => setShowContact(true)}
+                      className="text-sm text-neutral-500 hover:text-white transition-colors"
+                    >
+                      {contactLabel}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </motion.div>
 
-                <div>
-                   <h4 className="text-neutral-500 text-sm mb-4 font-light">
-                     ● {locale === 'th' ? 'คำถามที่พบบ่อย' : 'FAQs'}
-                   </h4>
-                   <ul className="space-y-2">
-                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'สินค้าแตกต่าง...?': 'How differs?'}</Link></li>
-                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'ผลิตที่ไหน?' : 'Where made?'}</Link></li>
-                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'ส่งต่างประเทศ?' : 'Intl Shipping?'}</Link></li>
-                     <li><Link href="#faq" className="font-light hover:text-[var(--accent)] transition-colors">{locale === 'th' ? 'นโยบายคืน?' : 'Return Policy'}</Link></li>
-                   </ul>
-                </div>
-             </div>
-          </motion.div>
-
-          {/* 3. Right: QR & Social (Spans 3 cols) */}
-          <motion.div 
-             initial={{ opacity: 0, x: 20 }}
-             animate={inView ? { opacity: 1, x: 0 } : {}}
-             transition={{ duration: 0.6, delay: 0.3 }}
-             className="lg:col-span-3 flex flex-col items-center lg:items-end gap-8"
-          >
-             {/* QR Code */}
-             <div className="bg-white p-3 w-48 h-48 flex items-center justify-center">
-                {/* Placeholder for QR Code */}
-                <div className="w-full h-full border-2 border-dashed border-neutral-300 flex items-center justify-center text-neutral-400">
-                    <span className="text-xs">QR CODE</span>
-                </div>
-             </div>
-
-             <div className="flex flex-col items-center lg:items-end gap-4">
-                <span className="text-neutral-500 text-sm">{locale === 'th' ? 'ติดตามเราได้ที่' : 'Follow Us'}</span>
-                <div className="flex gap-4">
-                   <a href="#" className="w-10 h-10 flex items-center justify-center bg-white rounded-full text-black hover:scale-110 transition-transform">
-                     <i className="fa-brands fa-facebook-f" />
-                   </a>
-                   <a href="#" className="w-10 h-10 flex items-center justify-center bg-white rounded-full text-black hover:scale-110 transition-transform">
-                     <i className="fa-brands fa-line" />
-                   </a>
-                </div>
-             </div>
-
-             <div className="mt-auto pt-8 lg:pt-0 w-full flex justify-center lg:justify-end gap-4 text-xs font-medium text-neutral-500">
-                <button onClick={() => window.location.href='/en'} className={locale === 'en' ? 'text-white' : 'hover:text-white'}>Eng</button>
-                <button onClick={() => window.location.href='/th'} className={locale === 'th' ? 'text-white' : 'hover:text-white'}>ไทย</button>
-             </div>
-
-          </motion.div>
-
+          </div>
         </div>
 
-        {/* Mobile Copyright */}
-        <div className="mt-12 text-center text-neutral-500 text-xs lg:hidden">
-            © {new Date().getFullYear()} — Copyright
-        </div>
+        {/* Bottom bar */}
+        <div className="border-t border-neutral-800">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-neutral-500 text-xs">
+              <span>&copy; {new Date().getFullYear()} SOQ. All rights reserved.</span>
+              <span className="text-neutral-700">|</span>
+              <button
+                onClick={() => setShowTerms(true)}
+                className="hover:text-white transition-colors underline underline-offset-2"
+              >
+                {t('terms')}
+              </button>
+            </div>
 
-      </div>
-    </footer>
+            <div className="flex gap-4 text-xs font-medium">
+              <button
+                onClick={() => changeLocale('en')}
+                className={`transition-colors ${locale === 'en' ? 'text-white' : 'text-neutral-500 hover:text-white'}`}
+              >
+                Eng
+              </button>
+              <span className="text-neutral-700">|</span>
+              <button
+                onClick={() => changeLocale('th')}
+                className={`transition-colors ${locale === 'th' ? 'text-white' : 'text-neutral-500 hover:text-white'}`}
+              >
+                ไทย
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* Terms modal — portalled to body, z-[300] above BackToTop(z-50) & CartToast(z-200) */}
+      {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
+    </>
   )
 }

@@ -4,14 +4,24 @@ import Product from '@/components/sections/Product'
 import Standards from '@/components/sections/IndustrialStandards'
 import FAQs from '@/components/sections/FAQs'
 import Footer from '@/components/sections/Footer'
+import { getProducts } from '@/lib/products'
+import { getReviews, getCertifications } from '@/lib/cms'
 
-export default function IndexPage() {
+export const revalidate = 60
+
+export default async function IndexPage() {
+  const [products, reviews, certifications] = await Promise.all([
+    getProducts(),
+    getReviews(),
+    getCertifications(),
+  ])
+
   return (
     <>
       <Hero />
-      <Testimonials />
-      <Product />
-      <Standards />
+      <Testimonials reviews={reviews} />
+      <Product products={products} />
+      <Standards certifications={certifications} />
       <FAQs />
       <Footer />
     </>

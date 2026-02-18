@@ -1,9 +1,9 @@
 import Image from 'next/image'
 
 const products = [
-  { id: 1, title: 'SOQ Classic', desc: 'เรียบหรู ใช้ง่าย ครบ', img: '/assets/product-1.png' },
-  { id: 2, title: 'SOQ Pro', desc: 'ปรับแต่งยืดหยุ่น ภาพคม', img: '/assets/product-2.png' },
-  { id: 3, title: 'SOQ Ultra', desc: 'จัดเต็ม Animation/Effects', img: '/assets/product-3.png' }
+  { id: 1, title: 'SOQ Classic', desc: 'เรียบหรู ใช้ง่าย ครบ', img: '/images/hero-starsan.png' },
+  { id: 2, title: 'SOQ Pro', desc: 'ปรับแต่งยืดหยุ่น ภาพคม', img: '/images/hero-mockup-bottles.png' },
+  { id: 3, title: 'SOQ Ultra', desc: 'จัดเต็ม Animation/Effects', img: '/images/hero-mockup-bottles-2.png' }
 ]
 
 export default function Showcase() {

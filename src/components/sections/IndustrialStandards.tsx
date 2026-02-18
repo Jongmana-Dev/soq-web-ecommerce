@@ -1,24 +1,17 @@
 'use client'
 
+import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-
-const CERTIFICATIONS = [
-  { icon: 'fa-solid fa-certificate', label: 'FDA Certified', label_th: 'FDA รับรอง' },
-  { icon: 'fa-solid fa-shield-halved', label: 'ISO 9001', label_th: 'ISO 9001' },
-  { icon: 'fa-solid fa-leaf', label: 'Eco-Friendly', label_th: 'เป็นมิตรกับสิ่งแวดล้อม' },
-  { icon: 'fa-solid fa-flask-vial', label: 'Lab Tested', label_th: 'ทดสอบในห้องปฏิบัติการ' },
-  { icon: 'fa-solid fa-award', label: 'Quality Assured', label_th: 'รับประกันคุณภาพ' },
-  { icon: 'fa-solid fa-handshake', label: 'Trusted Brand', label_th: 'แบรนด์ที่ไว้วางใจ' },
-  { icon: 'fa-solid fa-check-double', label: 'GMP Standard', label_th: 'มาตรฐาน GMP' },
-  { icon: 'fa-solid fa-globe', label: 'World Class', label_th: 'ระดับโลก' },
-]
-
-import { useState } from 'react'
 import StandardsModal from '@/components/modals/StandardsModal'
+import type { Certification } from '@/lib/cms'
 
-export default function IndustrialStandards() {
+type IndustrialStandardsProps = {
+  certifications: Certification[]
+}
+
+export default function IndustrialStandards({ certifications }: IndustrialStandardsProps) {
   const locale = useLocale()
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -31,7 +24,7 @@ export default function IndustrialStandards() {
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 items-center">
-          
+
           {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -69,9 +62,9 @@ export default function IndustrialStandards() {
             className="relative"
           >
              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-               {CERTIFICATIONS.map((cert, index) => (
+               {certifications.map((cert, index) => (
                  <motion.div
-                   key={cert.label}
+                   key={cert.id}
                    initial={{ opacity: 0, scale: 0.8 }}
                    animate={inView ? { opacity: 1, scale: 1 } : {}}
                    transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -79,11 +72,11 @@ export default function IndustrialStandards() {
                  >
                     <i className={`${cert.icon} text-xl opacity-60`} />
                     <span className="font-prompt font-medium text-sm text-neutral-800">
-                      {locale === 'th' ? cert.label_th : cert.label}
+                      {locale === 'th' ? cert.label_th : cert.label_en}
                     </span>
                  </motion.div>
                ))}
-               
+
                {/* Decorative floating dots/elements */}
                <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--accent)]/5 blur-3xl -z-10" />
                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-neutral-200/50 blur-3xl -z-10" />
@@ -93,7 +86,12 @@ export default function IndustrialStandards() {
         </div>
       </div>
 
-      {isModalOpen && <StandardsModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <StandardsModal
+          certifications={certifications}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </section>
   )
 }

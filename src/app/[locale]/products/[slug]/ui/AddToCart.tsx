@@ -1,20 +1,36 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
-import { useCart } from '@/store/cart';
+import { useCart } from '@/lib/store';
+import { useCartToast } from '@/lib/cart-toast';
 
-export default function AddToCart({ price }: { price: number }) {
+interface AddToCartProps {
+  productId: string
+  sizeId: string
+  sizeLabel: string
+  name: string
+  price: number
+  image?: string
+}
+
+export default function AddToCart({ productId, sizeId, sizeLabel, name, price, image }: AddToCartProps) {
   const t = useTranslations();
-  const addItem = useCart((state) => state.addItem);
+  const add = useCart((state) => state.add);
+  const showToast = useCartToast((s) => s.show);
 
   const handleAddToCart = () => {
-    const product = {
-      id: Math.random().toString(36).slice(2),
-      name: 'Custom Product',
+    const item = {
+      id: `${productId}::${sizeId}`,
+      product_id: productId,
+      size_id: sizeId,
+      size_label: sizeLabel,
+      name,
       price,
-      image: '',
+      qty: 1,
+      image: image ?? '',
     };
-    addItem(product);
+    add(item);
+    showToast({ ...item, size_label: sizeLabel });
   };
 
   return (

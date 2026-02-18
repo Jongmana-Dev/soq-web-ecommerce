@@ -1,6 +1,6 @@
 'use client'
 
-import { useCart } from '@/lib/cart'
+import { useCart } from '@/lib/store'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Trash2 } from 'lucide-react'
@@ -15,9 +15,10 @@ type CartItem = {
 }
 
 export default function CartSheet() {
-  // ไม่บังคับ type ของ hook เดิม — แค่แปลง items ฝั่งนี้ให้ชัด
-  const { items, updateQty, remove, clear } = useCart()
-  const cartItems = (items ?? []) as CartItem[]
+  const cartItems = useCart((s) => s.items) as CartItem[]
+  const updateQty = useCart((s) => s.updateQty)
+  const remove = useCart((s) => s.remove)
+  const clear = useCart((s) => s.clear)
 
   // ✅ บอก TS ว่า accumulator เป็น number และ item เป็น CartItem
   const total = cartItems.reduce<number>((sum, item) => sum + item.price * item.qty, 0)
@@ -27,7 +28,7 @@ export default function CartSheet() {
       <SheetTrigger aria-label="cart" className="relative p-1">
         <ShoppingCart className="size-5" />
         {cartItems.length > 0 && (
-          <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+          <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] text-neutral-900 font-bold">
             {cartItems.length}
           </span>
         )}

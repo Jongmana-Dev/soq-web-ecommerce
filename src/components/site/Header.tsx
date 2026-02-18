@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { ShoppingCart, Languages, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useCart } from '@/providers/CartProvider'
+import { useCart } from '@/lib/store'
 import CartSheet from '@/components/site/cart/CartSheet'
 import clsx from 'clsx'
 
@@ -24,13 +24,25 @@ export default function Header() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const locale = useLocale()
   const tNav = useTranslations('nav')
-  const { count } = useCart()
+  const count = useCart((state) => state.items.reduce((sum, it) => sum + it.qty, 0))
+  const items = useCart((state) => state.items)
+  const total = useCart((state) => state.items.reduce((sum, it) => sum + it.price * it.qty, 0))
+  const remove = useCart((state) => state.remove)
+  const clear = useCart((state) => state.clear)
 
   const [isSticky, setSticky] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setSticky(window.scrollY > 80)
-    window.addEventListener('scroll', onScroll)
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        setSticky(window.scrollY > 80)
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -101,7 +113,14 @@ export default function Header() {
         </div>
       </div>
 
-      {/* <CartSheet open={sheetOpen} onOpenChange={setSheetOpen} /> */}
+      <CartSheet
+        items={items.map(it => ({ ...it, quantity: it.qty }))}
+        total={total}
+        onRemove={(item) => remove(String(item.id ?? ''))}
+        onClear={clear}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </header>
   )
 }

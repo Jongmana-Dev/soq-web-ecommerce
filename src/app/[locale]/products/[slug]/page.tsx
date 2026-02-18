@@ -1,5 +1,11 @@
-import Navbar from '@/components/sections/Navbar'
-import Footer from '@/components/sections/Footer'
+import { notFound } from 'next/navigation'
+import Image from 'next/image'
+import { getProductBySlug, getProducts } from '@/lib/products'
+
+export async function generateStaticParams() {
+  const products = await getProducts()
+  return products.map((p) => ({ slug: p.slug }))
+}
 
 export default async function ProductPage({
   params,
@@ -7,32 +13,54 @@ export default async function ProductPage({
   params: Promise<{ locale: string; slug: string }>
 }) {
   const { slug, locale } = await params
+  const product = await getProductBySlug(slug)
+
+  if (!product) return notFound()
+
+  const name = locale === 'th' ? product.name_th : product.name_en
+  const desc =
+    locale === 'th'
+      ? (product.long_desc_th ?? product.short_desc_th)
+      : (product.long_desc_en ?? product.short_desc_en)
 
   return (
-    <>
-      <Navbar />
-      <section className="container py-10">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-          <div className="card glow">
-            <h1 className="display leading-tight">Product: {slug}</h1>
-            <p className="text-white/70 mt-3">Locale: {locale}</p>
-            <div className="prose prose-invert max-w-none mt-5">
-              <p>
-                This is a minimal product page placeholder. Replace with real product
-                content, gallery, and purchase flow as needed.
-              </p>
-            </div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-white/70 space-y-2">
-              <div>• Premium formulation</div>
-              <div>• Safe for stainless</div>
-              <div>• Low odor</div>
-            </div>
+    <section className="container mx-auto px-4 py-16 max-w-5xl">
+      <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+        {/* Image */}
+        <div className="relative aspect-square bg-[#EAEAEA] flex items-center justify-center">
+          <Image
+            src={product.image}
+            alt={name}
+            fill
+            className="object-contain p-8"
+          />
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col justify-center">
+          <h1 className="text-4xl font-bold text-neutral-900 mb-4">{name}</h1>
+          <p className="text-neutral-500 leading-relaxed mb-8">{desc}</p>
+
+          {/* Sizes */}
+          <div className="space-y-3">
+            {product.sizes.map((size) => (
+              <div
+                key={size.id}
+                className="flex items-center justify-between border border-neutral-200 px-5 py-3"
+              >
+                <span className="font-medium text-neutral-800">
+                  {locale === 'th' ? size.label_th : size.label_en}{' '}
+                  <span className="text-neutral-400 text-sm">({size.volume})</span>
+                </span>
+                <span className="font-bold text-neutral-900">
+                  {size.price.toLocaleString('th-TH', { minimumFractionDigits: 2 })}{' '}
+                  {locale === 'th' ? 'บาท' : 'THB'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
-      </section>
-      <Footer />
-    </>
+      </div>
+    </section>
   )
 }

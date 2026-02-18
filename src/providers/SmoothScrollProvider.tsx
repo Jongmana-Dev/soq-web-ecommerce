@@ -6,7 +6,7 @@ type Props = { children: React.ReactNode }
 
 export default function SmoothScrollProvider({children}: Props) {
   useEffect(() => {
-    const lenis = new Lenis({ duration: 1.2, smoothWheel: true, lerp: 0.09 })
+    const lenis = new Lenis({ duration: 0.8, smoothWheel: true, lerp: 0.12, wheelMultiplier: 1.2 })
 
     let rafId = 0
     const raf = (t: number) => {  lenis.raf(t); rafId = requestAnimationFrame(raf) }

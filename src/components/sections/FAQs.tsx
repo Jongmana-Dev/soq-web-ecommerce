@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import ContactModal from '@/components/modals/ContactModal'
 
 type FAQItem = {
   id: string
@@ -68,6 +69,7 @@ const FAQ_ITEMS: FAQItem[] = [
 export default function FAQ() {
   const locale = useLocale()
   const [openId, setOpenId] = useState<string | null>(null)
+  const [showContact, setShowContact] = useState(false)
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
 
   const toggleFAQ = (id: string) => {
@@ -115,6 +117,7 @@ export default function FAQ() {
               >
                 <button
                   onClick={() => toggleFAQ(item.id)}
+                  aria-expanded={openId === item.id}
                   className="flex w-full items-start gap-4 p-6 text-left"
                 >
                   <span
@@ -172,15 +175,17 @@ export default function FAQ() {
           <p className="mb-4 text-neutral-500">
             {locale === 'th' ? 'ยังมีคำถามอื่นอีกไหม?' : 'Still have questions?'}
           </p>
-          <a
-            href="#footer"
+          <button
+            onClick={() => setShowContact(true)}
             className="inline-flex items-center gap-2 bg-neutral-900 px-6 py-3 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 transition-all hover:bg-black hover:scale-105"
           >
             <i className="fa-solid fa-message" />
             {locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
-          </a>
+          </button>
         </motion.div>
       </div>
+
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
     </section>
   )
 }

@@ -1,12 +1,34 @@
-image: node:lts
+image: node:22-slim
 
 stages:
   - deploy
 
-deploy:
+.deploy_template:
   stage: deploy
-  only:
-    - main
-  script:
+  before_script:
     - npm install -g @railway/cli
-    - railway up --service soq-web-ecommerce --detach
+  script:
+    - railway up --project $PROJECT_ID --service $SERVICE_NAME --environment $ENV_NAME --detach
+
+deploy-uat:
+  extends: .deploy_template
+  variables:
+    RAILWAY_TOKEN: $RAILWAY_TOKEN_UAT
+    PROJECT_ID: $RAILWAY_PROJECT_ID_UAT
+    SERVICE_NAME: "soq-web-ecommerce"
+    ENV_NAME: "production"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "uat"
+      when: always
+
+deploy-prod:
+  extends: .deploy_template
+  variables:
+    RAILWAY_TOKEN: $RAILWAY_TOKEN_PROD
+    PROJECT_ID: $RAILWAY_PROJECT_ID_PROD
+    SERVICE_NAME: "soq-web-ecommerce"
+    ENV_NAME: "production"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      allow_failure: false

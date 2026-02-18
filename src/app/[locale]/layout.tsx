@@ -1,11 +1,14 @@
 import { NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { ThemeProvider } from 'next-themes'
-import { Prompt, Poppins } from 'next/font/google' 
+import { Prompt, Poppins } from 'next/font/google'
 import Navbar from '@/components/sections/Navbar'
 import { LenisProvider } from '@/providers/SmoothScrollProvider'
-import LuxuryCursor from '@/components/cursor/LuxuryCursor' 
-import BackToTop from '@/components/ui/backtotop' 
+import LuxuryCursor from '@/components/cursor/LuxuryCursor'
+import BackToTop from '@/components/ui/backtotop'
+import CartToast from '@/components/ui/CartToast'
+import AlertToast from '@/components/ui/AlertToast'
+import SessionProvider from '@/providers/SessionProvider'
 import '@/app/globals.css'
 
 const prompt = Prompt({ 
@@ -41,22 +44,26 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
       </head>
       {/* แก้ไข: ยืนยันว่า body มี pt-[76px] */}
       <body className={`${prompt.variable} ${poppins.variable} font-prompt`}>
-        
-        <LuxuryCursor /> 
 
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark" 
-          enableSystem
-        >
-          <NextIntlClientProvider locale={locale}>
-            <LenisProvider>
-              <Navbar />
-              {props.children}
-              <BackToTop /> 
-            </LenisProvider>
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <LuxuryCursor />
+
+        <SessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+          >
+            <NextIntlClientProvider locale={locale}>
+              <LenisProvider>
+                <Navbar />
+                {props.children}
+                <BackToTop />
+                <CartToast />
+                <AlertToast />
+              </LenisProvider>
+            </NextIntlClientProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   )

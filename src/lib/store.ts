@@ -4,7 +4,10 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type CartItem = {
-  id: string
+  id: string           // composite key: `${product_id}::${size_id}`
+  product_id: string   // UUID of product
+  size_id: string      // UUID of product_size
+  size_label: string   // e.g. "330ml" (snapshot for display)
   name: string
   price: number
   qty: number
@@ -13,6 +16,7 @@ export type CartItem = {
 
 type Store = {
   items: CartItem[]
+  _hydrated: boolean
   // derived
   count: number
   total: number
@@ -23,20 +27,11 @@ type Store = {
   clear: () => void
 }
 
-// ป้องกัน SSR: คืน storage จำลองเมื่อยังไม่มี window (แต่ไฟล์นี้เป็น 'use client' อยู่แล้ว)
-const safeStorage = () =>
-  typeof window !== 'undefined'
-    ? localStorage
-    : ({
-        getItem: () => null,
-        setItem: () => {},
-        removeItem: () => {}
-      } as unknown as Storage)
-
 export const useCart = create<Store>()(
   persist(
     (set, get) => ({
       items: [],
+      _hydrated: false,
 
       // derived
       get count() {
@@ -70,10 +65,37 @@ export const useCart = create<Store>()(
       clear: () => set({ items: [] })
     }),
     {
-      name: 'soq_cart',                         // key ใน localStorage
-      version: 1,
-      storage: createJSONStorage(safeStorage),   // ปลอดภัยกับ SSR
-      partialize: (s) => ({ items: s.items })    // persist เฉพาะ items
+      name: 'soq_cart',
+      version: 2,
+      storage: createJSONStorage(() =>
+        typeof window !== 'undefined'
+          ? localStorage
+          : ({
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+            } as unknown as Storage),
+      ),
+      partialize: (s) => ({ items: s.items }),
+      migrate: (persisted: any, version: number) => {
+        // เฉพาะ version เก่า (< 2) ที่ไม่มี size fields → ต้อง clear
+        if (version < 2) {
+          return { items: [] }
+        }
+        // version 2+ → เก็บ items เดิมไว้
+        return persisted as { items: CartItem[] }
+      },
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<Store>),
+      }),
+      onRehydrateStorage: () => {
+        return (_state, error) => {
+          if (!error) {
+            useCart.setState({ _hydrated: true })
+          }
+        }
+      },
     }
   )
 )

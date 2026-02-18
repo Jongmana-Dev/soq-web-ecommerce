@@ -6,89 +6,51 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import ProductModal from '@/components/modals/ProductModal'
+import type { ProductData } from '@/lib/products'
 
-type ProductSize = {
-  label_th: string
-  label_en: string
-  volume: string
-  price: number
-}
-
-const PRODUCT_SIZES: ProductSize[] = [
-  { label_th: '330 มล.', label_en: '330ml', volume: '330ml', price: 149 },
-  { label_th: '1 ลิตร', label_en: '1 Liter', volume: '1L', price: 390 },
-  { label_th: '20 ลิตร', label_en: '20 Liter', volume: '20L', price: 5900 },
+const FEATURES = [
+  {
+    id: 'feature-1',
+    number: '01',
+    title_th: 'ผสมผลิตภัณฑ์',
+    title_en: 'Simple Mix',
+    description_th: 'ผสมผลิตภัณฑ์ SOQ 30 มิลลิลิตร ต่อน้ำ 18 ลิตร',
+    description_en: 'Mix 30ml of SOQ product per 18 liters of water.',
+    image: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?q=80&w=2670&auto=format&fit=crop',
+  },
+  {
+    id: 'feature-2',
+    number: '02',
+    title_th: 'นำไปใช้งาน',
+    title_en: 'Easy Application',
+    description_th: 'นำผลิตภัณฑ์ที่ผสมแล้วฆ่าเชื้ออุปกรณ์ โดยการแช่ เช็ด หรือฉีดพ่นให้ทั่วพื้นผิว',
+    description_en: 'Apply solution to equipment by soaking, wiping, or spraying surfaces.',
+    image: 'https://images.unsplash.com/photo-1615631648086-325cd3d0006d?q=80&w=2670&auto=format&fit=crop',
+  },
+  {
+    id: 'feature-3',
+    number: '03',
+    title_th: 'พร้อมใช้งาน',
+    title_en: 'Ready to Use',
+    description_th: 'เทผลิตภัณฑ์ออก โดยไม่ต้องล้างน้ำ สะอาดฆ่าเชื้ออุปกรณ์ จะพร้อมใช้งานทันที',
+    description_en: 'Drain the solution. No rinsing needed. Equipment is sanitized and ready.',
+    image: 'https://images.unsplash.com/photo-1585751918361-b1e6cb747304?q=80&w=2670&auto=format&fit=crop',
+  },
 ]
 
-type ProductPage = {
-  id: string
-  name_th: string
-  name_en: string
-  short_desc_th: string
-  short_desc_en: string
-  long_desc_th: string
-  long_desc_en: string
-  galleryImages: string[]
-  sizes: ProductSize[]
-  features: {
-    id: string
-    number: string
-    title_th: string
-    title_en: string
-    description_th: string
-    description_en: string
-    image: string
-  }[]
+interface Props {
+  products: ProductData[]
 }
 
-const PRODUCT_DATA: ProductPage = {
-  id: 'star-san-premium',
-  name_th: 'Star San Sanitizer Premium',
-  name_en: 'Star San Sanitizer Premium',
-  short_desc_th: 'น้ำยาฆ่าเชื้อเกรดพรีเมียมที่เป็นที่ยอมรับทั่วโลก สำหรับอุปกรณ์การต้มเบียร์และอาหาร ด้วยสูตร No-Rinse ใช้งานง่าย ปลอดภัย',
-  short_desc_en: 'A world-class premium sanitizer for brewing and food equipment. Featuring a No-Rinse formula, it is easy to use and safe.',
-  long_desc_th: 'Star San เป็นน้ำยาฆ่าเชื้อที่มีประสิทธิภาพสูงซึ่งเป็นกรด (acid-based) ที่ไม่ต้องล้างน้ำออก (no-rinse) ได้รับการยอมรับจากผู้ทำเบียร์ทั่วโลกว่าเป็นมาตรฐานอุตสาหกรรม ด้วยคุณสมบัติที่ทำความสะอาดได้ล้ำลึกและไม่ทิ้งสารตกค้าง ทำให้มั่นใจได้ในความปลอดภัยของผลิตภัณฑ์ของคุณ',
-  long_desc_en: 'Star San is a high-foaming, acid-based, no-rinse sanitizer. Trusted by brewers worldwide as the industry standard. With deep cleaning properties and no residue, you can be confident in the safety of your product.',
-  galleryImages: [
-    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1887&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1887&auto=format&fit=crop', // Placeholder for other angles
-  ],
-  sizes: PRODUCT_SIZES,
-  features: [
-    {
-      id: 'feature-1',
-      number: '01',
-      title_th: 'ผสมผลิตภัณฑ์',
-      title_en: 'Simple Mix',
-      description_th: 'ผสมผลิตภัณฑ์ SOQ 30 มิลลิลิตร ต่อน้ำ 18 ลิตร',
-      description_en: 'Mix 30ml of SOQ product per 18 liters of water.',
-      image: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?q=80&w=2670&auto=format&fit=crop', 
-    },
-    {
-      id: 'feature-2',
-      number: '02',
-      title_th: 'นำไปใช้งาน',
-      title_en: 'Easy Application',
-      description_th: 'นำผลิตภัณฑ์ที่ผสมแล้วฆ่าเชื้ออุปกรณ์ โดยการแช่ เช็ด หรือฉีดพ่นให้ทั่วพื้นผิว',
-      description_en: 'Apply solution to equipment by soaking, wiping, or spraying surfaces.',
-      image: 'https://images.unsplash.com/photo-1615631648086-325cd3d0006d?q=80&w=2670&auto=format&fit=crop',
-    },
-    {
-      id: 'feature-3',
-      number: '03',
-      title_th: 'พร้อมใช้งาน',
-      title_en: 'Ready to Use',
-      description_th: 'เทผลิตภัณฑ์ออก โดยไม่ต้องล้างน้ำ สะอาดฆ่าเชื้ออุปกรณ์ จะพร้อมใช้งานทันที',
-      description_en: 'Drain the solution. No rinsing needed. Equipment is sanitized and ready.',
-      image: 'https://images.unsplash.com/photo-1585751918361-b1e6cb747304?q=80&w=2670&auto=format&fit=crop',
-    },
-  ],
-}
-
-export default function ProductShowcase() {
+export default function ProductShowcase({ products }: Props) {
   const locale = useLocale()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+
+  // Use first product from API (Star San 330ml)
+  const product = products[0]
+
+  if (!product) return null
 
   return (
     <section
@@ -107,14 +69,16 @@ export default function ProductShowcase() {
             transition={{ duration: 0.6 }}
             className="lg:w-1/3 pt-10"
           >
-             <h3 className="text-[var(--accent)] font-medium text-4xl mb-2">Star San</h3>
+             <h3 className="text-[var(--accent)] font-medium text-4xl mb-2">
+               {locale === 'th' ? product.name_th : product.name_en}
+             </h3>
              <h2 className="text-neutral-800 font-light text-6xl leading-[1.1] mb-8">
                Sanitizer <br/>
                <span className="font-medium">Premium</span>
              </h2>
 
              <p className="text-neutral-500 text-lg leading-relaxed mb-10 max-w-md font-light">
-               {locale === 'th' ? PRODUCT_DATA.short_desc_th : PRODUCT_DATA.short_desc_en}
+               {locale === 'th' ? product.short_desc_th : product.short_desc_en}
              </p>
 
              <button
@@ -127,7 +91,7 @@ export default function ProductShowcase() {
 
           {/* Right Column: 3-Step Features */}
           <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-3 gap-6">
-             {PRODUCT_DATA.features.map((feature, index) => (
+             {FEATURES.map((feature, index) => (
                 <motion.div
                   key={feature.id}
                   initial={{ opacity: 0, y: 40 }}
@@ -172,7 +136,15 @@ export default function ProductShowcase() {
       {/* Modal */}
       {isModalOpen && (
         <ProductModal
-          product={PRODUCT_DATA}
+          product={{
+            id: product.id,
+            name_th: product.name_th,
+            name_en: product.name_en,
+            long_desc_th: product.long_desc_th ?? product.short_desc_th,
+            long_desc_en: product.long_desc_en ?? product.short_desc_en,
+            image: product.image,
+            sizes: product.sizes,
+          }}
           onClose={() => setIsModalOpen(false)}
           locale={locale}
         />

@@ -3,9 +3,13 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from '@/i18n/navigation'
+import { useCart } from '@/lib/store'
+import { useCartToast } from '@/lib/cart-toast'
 
 
 interface ProductSize {
+  id: string
   label_th: string
   label_en: string
   volume: string
@@ -19,7 +23,7 @@ interface ProductModalProps {
     name_en: string
     long_desc_th: string
     long_desc_en: string
-    galleryImages: string[]
+    image: string
     sizes: ProductSize[]
   }
   onClose: () => void
@@ -27,8 +31,11 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, onClose, locale }: ProductModalProps) {
+  const router = useRouter()
   const [selectedSize, setSelectedSize] = useState<ProductSize>(product.sizes[0])
   const [quantity, setQuantity] = useState(1)
+  const add = useCart((state) => state.add)
+  const showToast = useCartToast((s) => s.show)
 
   const handleQuantityChange = (type: 'increase' | 'decrease') => {
     setQuantity((prev) => {
@@ -59,15 +66,9 @@ export default function ProductModal({ product, onClose, locale }: ProductModalP
       content_th: 'จัดส่งฟรีทั่วประเทศเมื่อสั่งซื้อครบ 1,000 บาท',
       content_en: 'Free shipping nationwide on orders over 1,000 THB.',
     },
-    {
-      title_th: 'ติดต่อ',
-      title_en: 'Contact',
-      content_th: 'ต้องการความช่วยเหลือ? ติดต่อเราได้ที่ contact@soq.co.th',
-      content_en: 'Need help? Contact us at contact@soq.co.th',
-    },
   ]
 
-const AccordionItem = ({ title, content }: { title: string; content: string }) => {
+const AccordionItem = ({ title, children }: { title: string; children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -87,8 +88,8 @@ const AccordionItem = ({ title, content }: { title: string; content: string }) =
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-4 text-neutral-500 text-sm leading-relaxed whitespace-pre-line pl-4 border-l-2 border-[var(--accent)]/30">
-              {content}
+            <div className="mt-4">
+              {children}
             </div>
           </motion.div>
         )}
@@ -111,6 +112,7 @@ const AccordionItem = ({ title, content }: { title: string; content: string }) =
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
           className="relative w-full max-w-6xl bg-[#F5F5F7] overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
         >
           {/* Close Button */}
@@ -125,8 +127,8 @@ const AccordionItem = ({ title, content }: { title: string; content: string }) =
           <div className="lg:w-1/2 bg-[#EAEAEA] relative min-h-[400px] lg:min-h-full flex items-center justify-center p-12">
             <div className="relative w-full h-full max-w-md aspect-[3/4]">
               <Image
-                src={product.galleryImages[0]}
-                alt="Product Image"
+                src={product.image}
+                alt={locale === 'th' ? product.name_th : product.name_en}
                 fill
                 className="object-contain drop-shadow-2xl mix-blend-multiply"
               />
@@ -135,36 +137,36 @@ const AccordionItem = ({ title, content }: { title: string; content: string }) =
                  <span className="text-9xl font-bold font-sans tracking-tighter">SOQ</span>
               </div>
             </div>
-            
-            {/* Thumbnails (Static for visual) */}
-            <div className="absolute bottom-8 right-8 w-24 aspect-[3/4] bg-white shadow-lg border-2 border-white overflow-hidden hidden lg:block">
-               <Image 
-                 src="https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2670&auto=format&fit=crop"
-                 alt="Thumbnail"
-                 fill
-                 className="object-cover"
-               />
-            </div>
           </div>
 
 
           {/* Right: Details Container */}
-          <div className="lg:w-1/2 bg-[#F5F5F7] p-8 lg:p-12 overflow-y-auto custom-scrollbar">
+          <div className="lg:w-1/2 bg-[#F5F5F7] p-8 lg:p-12 overflow-y-auto overscroll-contain custom-scrollbar">
             
             {/* Header */}
             <div className="mb-8">
               <h2 className="text-5xl font-light text-neutral-800 leading-tight mb-2">
-                <span className="text-[var(--accent)] font-medium">Star San</span> <br/>
-                Sanitizer
+                {locale === 'th' ? product.name_th : product.name_en}
               </h2>
               
-              {/* Rating */}
-              <div className="flex items-center gap-2 mt-4">
-                <div className="flex text-[var(--accent)] text-sm">
-                  {[1,2,3,4,5].map(i => <i key={i} className="fa-solid fa-star" />)}
+              {/* Size selector */}
+              {product.sizes.length > 1 && (
+                <div className="flex gap-2 mt-4">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size.volume}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-4 py-2 text-sm border transition-colors ${
+                        selectedSize.volume === size.volume
+                          ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-neutral-900 font-medium'
+                          : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
+                      }`}
+                    >
+                      {locale === 'th' ? size.label_th : size.label_en}
+                    </button>
+                  ))}
                 </div>
-                <span className="text-sm font-semibold text-neutral-800 ml-1">288 reviews</span>
-              </div>
+              )}
             </div>
 
             {/* Price */}
@@ -182,46 +184,93 @@ const AccordionItem = ({ title, content }: { title: string; content: string }) =
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-4 mb-10 pb-10 border-b border-neutral-200">
                {/* Quantity */}
-               <div className="flex items-center bg-white border border-neutral-200 h-12">
-                  <button onClick={() => handleQuantityChange('decrease')} className="w-10 h-full hover:bg-neutral-50 transition-colors">
+               <div className="flex items-center bg-white border border-neutral-300 h-12">
+                  <button onClick={() => handleQuantityChange('decrease')} className="w-10 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
-                  <span className="w-10 text-center font-medium">{quantity}</span>
-                  <button onClick={() => handleQuantityChange('increase')} className="w-10 h-full hover:bg-neutral-50 transition-colors">
+                  <span className="w-10 text-center font-bold text-neutral-900">{quantity}</span>
+                  <button onClick={() => handleQuantityChange('increase')} className="w-10 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
                     <i className="fa-solid fa-plus text-xs" />
                   </button>
                </div>
 
-               {/* Add to Cart */}
-               <button className="h-12 px-6 border border-neutral-300 font-medium hover:border-black transition-colors bg-white">
-                  {locale === 'th' ? 'เพิ่มลงตะกร้า' : 'Add to Cart'}
-               </button>
-
-               {/* Buy Now */}
-               <button className="h-12 px-8 bg-[var(--accent)] font-bold text-neutral-900 hover:bg-[#F3C85B]/90 transition-colors shadow-sm flex-1">
-                  {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
+               {/* Go to Cart */}
+               <button
+                  onClick={() => {
+                    const item = {
+                      id: `${product.id}::${selectedSize.id}`,
+                      product_id: product.id,
+                      size_id: selectedSize.id,
+                      size_label: locale === 'th' ? selectedSize.label_th : selectedSize.label_en,
+                      name: locale === 'th' ? product.name_th : product.name_en,
+                      price: selectedSize.price,
+                      qty: quantity,
+                      image: product.image,
+                    }
+                    add(item)
+                    onClose()
+                    router.push('/cart')
+                  }}
+                  className="h-12 px-8 bg-neutral-900 font-bold text-white hover:bg-neutral-800 transition-all shadow-md flex-1"
+               >
+                  <i className="fa-solid fa-cart-shopping mr-2" />
+                  {locale === 'th' ? 'ไปที่รถเข็น' : 'Go to Cart'}
                </button>
             </div>
 
             {/* Accordions */}
             <div className="space-y-4 mb-10">
               {ACCORDION_ITEMS.map((item, index) => (
-                <AccordionItem 
-                   key={index} 
+                <AccordionItem
+                   key={index}
                    title={locale === 'th' ? item.title_th : item.title_en}
-                   content={locale === 'th' ? item.content_th : item.content_en}
-                />
+                >
+                  <div className="text-neutral-500 text-sm leading-relaxed whitespace-pre-line pl-4 border-l-2 border-[var(--accent)]/30">
+                    {locale === 'th' ? item.content_th : item.content_en}
+                  </div>
+                </AccordionItem>
               ))}
+
+              {/* Ask More */}
+              <AccordionItem title={locale === 'th' ? 'สอบถามเพิ่มเติม' : 'Ask Us'}>
+                <div className="flex flex-col gap-3 pl-4 border-l-2 border-[var(--accent)]/30">
+                  <p className="text-neutral-500 text-sm mb-1">
+                    {locale === 'th' ? 'แชทกับเราได้เลย' : 'Chat with us'}
+                  </p>
+                  <a
+                    href="https://m.me/soqthailand"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 border border-neutral-200 text-neutral-700 hover:border-[#1877F2] hover:text-[#1877F2] transition-all text-sm"
+                  >
+                    <i className="fa-brands fa-facebook-messenger text-lg w-5 text-center" />
+                    <span className="font-medium">{locale === 'th' ? 'แชท Facebook' : 'Chat Facebook'}</span>
+                    <i className="fa-solid fa-arrow-up-right-from-square ml-auto text-xs opacity-40" />
+                  </a>
+                  <a
+                    href="https://line.me/R/ti/p/@soq"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 border border-neutral-200 text-neutral-700 hover:border-[#06C755] hover:text-[#06C755] transition-all text-sm"
+                  >
+                    <i className="fa-brands fa-line text-lg w-5 text-center" />
+                    <span className="font-medium">{locale === 'th' ? 'แชท LINE OA' : 'Chat LINE OA'}</span>
+                    <i className="fa-solid fa-arrow-up-right-from-square ml-auto text-xs opacity-40" />
+                  </a>
+                </div>
+              </AccordionItem>
             </div>
 
             {/* Footer Socials */}
             <div className="flex items-center gap-6">
-               <span className="font-semibold text-sm">{locale === 'th' ? 'ติดต่อต่อ' : 'Contact'}</span>
+               <span className="font-semibold text-sm">{locale === 'th' ? 'ติดตามเราได้ที่' : 'Follow Us'}</span>
                <div className="flex gap-4 text-neutral-400">
-                  <i className="fa-brands fa-facebook hover:text-black transition-colors cursor-pointer text-lg" />
-                  <i className="fa-brands fa-line hover:text-black transition-colors cursor-pointer text-lg" />
-                  <i className="fa-brands fa-twitter hover:text-black transition-colors cursor-pointer text-lg" />
-                  <i className="fa-solid fa-arrow-up-right-from-square hover:text-black transition-colors cursor-pointer text-lg" />
+                  <a href="https://facebook.com/soqthailand" target="_blank" rel="noopener noreferrer">
+                    <i className="fa-brands fa-facebook hover:text-[#1877F2] transition-colors cursor-pointer text-lg" />
+                  </a>
+                  <a href="https://line.me/R/ti/p/@soq" target="_blank" rel="noopener noreferrer">
+                    <i className="fa-brands fa-line hover:text-[#06C755] transition-colors cursor-pointer text-lg" />
+                  </a>
                </div>
             </div>
 

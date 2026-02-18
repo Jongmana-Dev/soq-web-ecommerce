@@ -1,28 +1,47 @@
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
+import { apiFetch } from './api'
+
+export interface ProductSize {
+  id: string
+  label_th: string
+  label_en: string
+  volume: string
+  price: number
+  stock?: number
+  sku?: string
 }
 
-// In a real app this data would come from a database or API.
-export const products: Product[] = [
-  {
-    id: '1',
-    name: 'Product 1',
-    price: 19.99,
-    image: '/images/product1.png',
-  },
-  {
-    id: '2',
-    name: 'Product 2',
-    price: 29.99,
-    image: '/images/product2.png',
-  },
-  {
-    id: '3',
-    name: 'Product 3',
-    price: 39.99,
-    image: '/images/product3.png',
-  },
-];
+export interface ProductData {
+  id: string
+  slug: string
+  name_th: string
+  name_en: string
+  short_desc_th: string
+  short_desc_en: string
+  long_desc_th?: string | null
+  long_desc_en?: string | null
+  image: string
+  sizes: ProductSize[]
+}
+
+interface ApiResponse<T> {
+  data: T
+  meta?: { total: number }
+}
+
+export async function getProducts(): Promise<ProductData[]> {
+  const res = await apiFetch<ApiResponse<ProductData[]>>('/api/products', {
+    next: { revalidate: 60 },
+  })
+  return res.data
+}
+
+export async function getProductBySlug(slug: string): Promise<ProductData | undefined> {
+  try {
+    const res = await apiFetch<ApiResponse<ProductData>>(`/api/products/${slug}`, {
+      next: { revalidate: 60 },
+    })
+    return res.data
+  } catch {
+    return undefined
+  }
+}
