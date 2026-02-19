@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useCart, useCartHydrated } from '@/lib/store';
@@ -37,6 +37,12 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Order state (created before showing QR)
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [orderCreatedAt, setOrderCreatedAt] = useState<string | null>(null);
+  const [orderTotal, setOrderTotal] = useState<number>(0);
+
   // Shipping config from API
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [remoteProvinces, setRemoteProvinces] = useState<RemoteProvince[]>([]);
@@ -69,11 +75,52 @@ export default function CheckoutPage() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = subtotal + shippingFee + remoteAreaFee;
 
+  // --- Sync qty changes to backend when order exists ---
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevItemsRef = useRef<string>('');
+
+  const syncItemsToBackend = useCallback(async () => {
+    if (!orderId || items.length === 0) return;
+    try {
+      const res = await fetch(`/api/orders-proxy/${orderId}/update-items`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            size_id: item.size_id,
+            quantity: item.qty,
+          })),
+        }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setOrderTotal(result.data.total);
+      }
+    } catch {
+      // non-critical sync failure
+    }
+  }, [orderId, items]);
+
+  useEffect(() => {
+    if (!orderId) return;
+    const serialized = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
+    if (serialized === prevItemsRef.current) return;
+    prevItemsRef.current = serialized;
+
+    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(syncItemsToBackend, 500);
+
+    return () => {
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    };
+  }, [orderId, items, syncItemsToBackend]);
+
   if (!hydrated) {
     return <FullscreenLoading />;
   }
 
-  if (items.length === 0) {
+  // Empty cart guard (allow payment step since cart is still present)
+  if (items.length === 0 && step !== 'payment') {
     return (
       <div className="min-h-screen bg-white text-neutral-900 pt-24">
         <div className="container mx-auto px-4 py-12 text-center">
@@ -87,13 +134,11 @@ export default function CheckoutPage() {
     );
   }
 
+  // --- Shipping submit: confirm → create order → show QR ---
   const handleShippingSubmit = (data: ShippingData) => {
     setShippingData(data);
     setSelectedProvince(data.shipping_province);
-    setStep('payment');
-  };
 
-  const handleUploadSlip = (slipBase64: string) => {
     useAlertStore.getState().showConfirm({
       title: locale === 'th' ? 'ยืนยันคำสั่งซื้อ' : 'Confirm Order',
       message: locale === 'th'
@@ -102,69 +147,66 @@ export default function CheckoutPage() {
       confirmText: locale === 'th' ? 'ยืนยัน' : 'Confirm',
       cancelText: locale === 'th' ? 'ยกเลิก' : 'Cancel',
       variant: 'info',
-      onConfirm: () => submitOrder(slipBase64),
+      onConfirm: () => createOrder(data),
     });
   };
 
-  const submitOrder = async (slipBase64: string) => {
-    if (!shippingData) return;
-    setSubmitting(true);
+  const createOrder = async (data: ShippingData) => {
     setError(null);
 
+    // Save new address if requested
+    if (data.save_address && !data.address_id) {
+      try {
+        await fetch('/api/auth-proxy/addresses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipient_name: data.customer_name,
+            phone: data.customer_phone,
+            address_line: data.shipping_address,
+            subdistrict: data.shipping_subdistrict || undefined,
+            district: data.shipping_district,
+            province: data.shipping_province,
+            postal_code: data.shipping_postal_code,
+          }),
+        });
+      } catch {
+        // non-critical
+      }
+    }
+
+    // Auto-save tax info
+    if (data.tax_invoice && data.tax_info) {
+      try {
+        await fetch('/api/auth-proxy/tax-info', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data.tax_info),
+        });
+      } catch {
+        // non-critical
+      }
+    }
+
     try {
-      // Save new address if requested
-      if (shippingData.save_address && !shippingData.address_id) {
-        try {
-          await fetch('/api/auth-proxy/addresses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              recipient_name: shippingData.customer_name,
-              phone: shippingData.customer_phone,
-              address_line: shippingData.shipping_address,
-              subdistrict: shippingData.shipping_subdistrict || undefined,
-              district: shippingData.shipping_district,
-              province: shippingData.shipping_province,
-              postal_code: shippingData.shipping_postal_code,
-            }),
-          });
-        } catch {
-          // non-critical
-        }
-      }
-
-      // Auto-save tax info
-      if (shippingData.tax_invoice && shippingData.tax_info) {
-        try {
-          await fetch('/api/auth-proxy/tax-info', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(shippingData.tax_info),
-          });
-        } catch {
-          // non-critical
-        }
-      }
-
-      // Create order
       const orderBody = {
-        ...(shippingData.address_id ? { address_id: shippingData.address_id } : {}),
-        customer_name: shippingData.customer_name,
-        customer_phone: shippingData.customer_phone,
-        shipping_address: shippingData.shipping_address,
-        shipping_subdistrict: shippingData.shipping_subdistrict || undefined,
-        shipping_district: shippingData.shipping_district || undefined,
-        shipping_province: shippingData.shipping_province,
-        shipping_postal_code: shippingData.shipping_postal_code,
+        ...(data.address_id ? { address_id: data.address_id } : {}),
+        customer_name: data.customer_name,
+        customer_phone: data.customer_phone,
+        shipping_address: data.shipping_address,
+        shipping_subdistrict: data.shipping_subdistrict || undefined,
+        shipping_district: data.shipping_district || undefined,
+        shipping_province: data.shipping_province,
+        shipping_postal_code: data.shipping_postal_code,
         items: items.map((item) => ({
           product_id: item.product_id,
           size_id: item.size_id,
           quantity: item.qty,
         })),
-        referral_source: shippingData.referral_source || undefined,
-        tax_invoice: shippingData.tax_invoice,
-        tax_info: shippingData.tax_info,
-        note: shippingData.note || undefined,
+        referral_source: data.referral_source || undefined,
+        tax_invoice: data.tax_invoice,
+        tax_info: data.tax_info,
+        note: data.note || undefined,
       };
 
       const orderRes = await fetch('/api/orders-proxy', {
@@ -181,8 +223,29 @@ export default function CheckoutPage() {
       const orderResult = await orderRes.json();
       const order = orderResult.data;
 
-      // Upload payment slip
-      const paymentRes = await fetch(`/api/orders-proxy/${order.id}/payment`, {
+      setOrderId(order.id);
+      setOrderNumber(order.order_number);
+      setOrderCreatedAt(order.created_at);
+      setOrderTotal(order.total);
+      prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
+      setStep('payment');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+      useAlertStore.getState().showAlert('error',
+        locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error',
+        err instanceof Error ? err.message : 'Something went wrong',
+      );
+    }
+  };
+
+  // --- Upload slip (order already exists) ---
+  const handleUploadSlip = async (slipBase64: string) => {
+    if (!orderId) return;
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const paymentRes = await fetch(`/api/orders-proxy/${orderId}/payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -197,15 +260,27 @@ export default function CheckoutPage() {
       }
 
       clear();
-      router.push({ pathname: '/checkout/confirmation', query: { order: order.order_number ?? '' } });
+      router.push({ pathname: '/checkout/confirmation', query: { order: orderNumber ?? '' } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
-      useAlertStore.getState().showAlert('error',
-        locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error',
-        err instanceof Error ? err.message : 'Something went wrong',
-      );
       setSubmitting(false);
     }
+  };
+
+  // --- Back button: cancel order → go back to shipping ---
+  const handleBack = async () => {
+    if (orderId) {
+      try {
+        await fetch(`/api/orders-proxy/${orderId}/cancel`, { method: 'PATCH' });
+      } catch {
+        // non-critical
+      }
+      setOrderId(null);
+      setOrderNumber(null);
+      setOrderCreatedAt(null);
+      setOrderTotal(0);
+    }
+    setStep('shipping');
   };
 
   return (
@@ -222,7 +297,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Forms */}
           <div className="lg:col-span-2">
-            {/* ShippingForm stays mounted (hidden when payment step) to preserve state */}
+            {/* ShippingForm stays mounted (hidden) to preserve state */}
             <div className={step === 'shipping' ? '' : 'hidden'}>
               <ShippingForm
                 onSubmit={handleShippingSubmit}
@@ -232,9 +307,11 @@ export default function CheckoutPage() {
 
             {step === 'payment' && (
               <PaymentStep
-                total={total}
+                total={orderTotal}
+                orderNumber={orderNumber ?? undefined}
+                createdAt={orderCreatedAt ?? undefined}
                 onSubmit={handleUploadSlip}
-                onBack={() => setStep('shipping')}
+                onBack={handleBack}
                 submitting={submitting}
               />
             )}

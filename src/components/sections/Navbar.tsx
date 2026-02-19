@@ -201,7 +201,7 @@ function Navbar() {
             {/* Desktop Icons */}
             <div className="flex items-center gap-2 ml-8 pl-0">
               {/* User / Auth */}
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative group" ref={dropdownRef}>
                 {isAuthenticated && session.user.image ? (
                   <button
                     onClick={handleUserClick}
@@ -238,6 +238,17 @@ function Navbar() {
                       </span>
                     )}
                   </button>
+                )}
+
+                {/* Pending orders tooltip */}
+                {pendingCount > 0 && !isUserDropdownOpen && (
+                  <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                    <div className="bg-neutral-900 text-white text-xs px-3 py-1.5 rounded shadow-lg">
+                      {locale === "th"
+                        ? `มี ${pendingCount} รายการรอแจ้งชำระเงิน`
+                        : `${pendingCount} order${pendingCount > 1 ? "s" : ""} pending payment`}
+                    </div>
+                  </div>
                 )}
 
                 {/* Dropdown */}
