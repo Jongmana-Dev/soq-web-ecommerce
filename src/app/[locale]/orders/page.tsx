@@ -2,29 +2,42 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { Link } from '@/i18n/navigation'
 import { motion } from 'framer-motion'
 import Footer from '@/components/sections/Footer'
+import PaymentModal from '@/components/orders/PaymentModal'
+import { useAlertStore } from '@/lib/alert-store'
+import { usePendingOrders } from '@/lib/pending-orders-store'
+import FullscreenLoading from '@/components/ui/FullscreenLoading'
 import type { Order, OrderStatus } from '@/types/order'
 
 const statusColor: Record<OrderStatus, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  paid: 'bg-emerald-100 text-emerald-700',
+  pending_payment: 'bg-amber-100 text-amber-700',
+  confirm_payment: 'bg-emerald-100 text-emerald-700',
   shipped: 'bg-purple-100 text-purple-700',
   delivered: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  refunded: 'bg-neutral-100 text-neutral-600',
+  cancel_order: 'bg-red-100 text-red-700',
+  expire: 'bg-neutral-100 text-neutral-600',
 }
 
 export default function OrdersPage() {
   const t = useTranslations('orders')
+  const locale = useLocale()
   const { status } = useSession()
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [payingOrder, setPayingOrder] = useState<Order | null>(null)
+
+  const fetchOrders = () => {
+    fetch('/api/orders-proxy')
+      .then((res) => res.json())
+      .then((res) => setOrders(res.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -32,20 +45,50 @@ export default function OrdersPage() {
       return
     }
     if (status !== 'authenticated') return
-
-    fetch('/api/orders-proxy')
-      .then((res) => res.json())
-      .then((res) => setOrders(res.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    fetchOrders()
   }, [status, router])
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-[76px]">
-        <i className="fa-solid fa-spinner fa-spin text-neutral-400 text-2xl" />
-      </div>
+  const handleCancel = (order: Order) => {
+    useAlertStore.getState().showConfirm({
+      title: t('cancelConfirmTitle'),
+      message: locale === 'th'
+        ? `คุณต้องการยกเลิกคำสั่งซื้อ ${order.order_number} ใช่หรือไม่?`
+        : `Are you sure you want to cancel order ${order.order_number}?`,
+      confirmText: t('cancelConfirmBtn'),
+      cancelText: t('cancelCancelBtn'),
+      variant: 'danger',
+      onConfirm: async () => {
+        const res = await fetch(`/api/orders-proxy/${order.id}/cancel`, {
+          method: 'PATCH',
+        })
+        if (res.ok) {
+          useAlertStore.getState().showAlert('success',
+            t('orderCancelled'),
+          )
+          fetchOrders()
+          usePendingOrders.getState().fetch()
+        } else {
+          const data = await res.json()
+          useAlertStore.getState().showAlert('error',
+            locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error',
+            data.message || 'Failed to cancel order',
+          )
+        }
+      },
+    })
+  }
+
+  const handlePaymentSuccess = () => {
+    setPayingOrder(null)
+    useAlertStore.getState().showAlert('success',
+      locale === 'th' ? 'แจ้งชำระเงินเรียบร้อย' : 'Payment submitted',
     )
+    fetchOrders()
+    usePendingOrders.getState().fetch()
+  }
+
+  if (status === 'loading' || loading) {
+    return <FullscreenLoading />
   }
 
   return (
@@ -74,10 +117,11 @@ export default function OrdersPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
+                  className="bg-white border border-neutral-200 hover:border-neutral-400 transition-colors"
                 >
                   <Link
                     href={{ pathname: '/orders/[id]', params: { id: order.id } }}
-                    className="block bg-white border border-neutral-200 p-5 hover:border-neutral-400 transition-colors group"
+                    className="block p-5"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
@@ -105,9 +149,40 @@ export default function OrdersPage() {
                           </span>
                         </p>
                       </div>
-                      <i className="fa-solid fa-chevron-right text-xs text-neutral-300 group-hover:text-neutral-500 transition-colors mt-1" />
+                      <i className="fa-solid fa-chevron-right text-xs text-neutral-300 mt-1" />
                     </div>
                   </Link>
+
+                  {/* Action buttons */}
+                  {order.status === 'pending_payment' && (
+                    <div className="px-5 pb-4 flex gap-2">
+                      <button
+                        onClick={(e) => { e.preventDefault(); setPayingOrder(order) }}
+                        className="flex-1 bg-neutral-900 text-white py-2.5 text-sm font-medium hover:bg-black transition-colors"
+                      >
+                        <i className="fa-solid fa-credit-card mr-2 text-xs" />
+                        {t('notifyPayment')}
+                      </button>
+                      <button
+                        onClick={(e) => { e.preventDefault(); handleCancel(order) }}
+                        className="px-4 py-2.5 border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors"
+                      >
+                        {t('cancelOrder')}
+                      </button>
+                    </div>
+                  )}
+
+                  {(order.status === 'confirm_payment' || order.status === 'shipped') && (
+                    <div className="px-5 pb-4">
+                      <Link
+                        href={{ pathname: '/orders/[id]', params: { id: order.id } }}
+                        className="block w-full text-center bg-neutral-100 text-neutral-700 py-2.5 text-sm font-medium hover:bg-neutral-200 transition-colors"
+                      >
+                        <i className="fa-solid fa-truck mr-2 text-xs" />
+                        {t('trackDelivery')}
+                      </Link>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -115,6 +190,15 @@ export default function OrdersPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Payment Modal */}
+      {payingOrder && (
+        <PaymentModal
+          order={payingOrder}
+          onClose={() => setPayingOrder(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </>
   )
 }

@@ -8,12 +8,14 @@ import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import ProfileForm from '@/components/profile/ProfileForm'
+import FullscreenLoading from '@/components/ui/FullscreenLoading'
 import AddressList from '@/components/profile/AddressList'
+import TaxInfoForm from '@/components/profile/TaxInfoForm'
 import Footer from '@/components/sections/Footer'
 
-type Tab = 'personal' | 'addresses'
+type Tab = 'personal' | 'addresses' | 'tax-info'
 
-const validTabs: Tab[] = ['personal', 'addresses']
+const validTabs: Tab[] = ['personal', 'addresses', 'tax-info']
 
 export default function ProfilePage() {
   const locale = useLocale()
@@ -36,15 +38,12 @@ export default function ProfilePage() {
     title: locale === 'th' ? 'โปรไฟล์' : 'Profile',
     personal: locale === 'th' ? 'ข้อมูลส่วนตัว' : 'Personal Info',
     addresses: locale === 'th' ? 'ที่อยู่จัดส่ง' : 'Addresses',
+    taxInfo: locale === 'th' ? 'ใบกำกับภาษี' : 'Tax Invoice',
     loading: locale === 'th' ? 'กำลังโหลด...' : 'Loading...',
   }
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <i className="fa-solid fa-spinner fa-spin text-neutral-400 text-2xl" />
-      </div>
-    )
+    return <FullscreenLoading />
   }
 
   if (status === 'unauthenticated') {
@@ -56,6 +55,7 @@ export default function ProfilePage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'personal', label: t.personal },
     { key: 'addresses', label: t.addresses },
+    { key: 'tax-info', label: t.taxInfo },
   ]
 
   return (
@@ -112,6 +112,9 @@ export default function ProfilePage() {
             )}
             {activeTab === 'addresses' && (
               <AddressList locale={locale} />
+            )}
+            {activeTab === 'tax-info' && (
+              <TaxInfoForm locale={locale} />
             )}
           </div>
         </div>

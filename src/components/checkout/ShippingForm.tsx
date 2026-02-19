@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { useThaiGeography, useGeoSelections } from '@/hooks/useThaiGeography';
+import { useAlertStore } from '@/lib/alert-store';
 
 interface Address {
   id: string;
@@ -30,25 +31,26 @@ export interface ShippingData {
   save_address: boolean;
   referral_source: string;
   tax_invoice: boolean;
-  tax_info?: { name: string; tax_id: string; address: string };
+  tax_info?: { name: string; tax_id: string; address: string; note?: string };
   note: string;
 }
 
 interface ShippingFormProps {
   onSubmit: (data: ShippingData) => void;
+  onProvinceChange?: (province: string) => void;
 }
 
 const REFERRAL_OPTIONS = ['search', 'facebook', 'line', 'friend', 'ig', 'event', 'other'] as const;
 
-export default function ShippingForm({ onSubmit }: ShippingFormProps) {
+export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
-  const [addressMode, setAddressMode] = useState<'saved' | 'new'>('new');
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
-  // Form fields
+  // Form fields (for "other" or no-saved-address mode)
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressLine, setAddressLine] = useState('');
@@ -56,32 +58,50 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
   const [district, setDistrict] = useState('');
   const [subdistrict, setSubdistrict] = useState('');
   const [postalCode, setPostalCode] = useState('');
-  const [saveAddress, setSaveAddress] = useState(false);
   const [referralSource, setReferralSource] = useState('');
   const [taxInvoice, setTaxInvoice] = useState(false);
   const [taxName, setTaxName] = useState('');
   const [taxId, setTaxId] = useState('');
   const [taxAddress, setTaxAddress] = useState('');
+  const [taxNote, setTaxNote] = useState('');
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [savedTaxInfo, setSavedTaxInfo] = useState<{ name: string; tax_id: string; address: string; note?: string } | null>(null);
+
+  // "other" = กรอกที่อยู่ใหม่ (กรณีมีที่อยู่อยู่แล้วแต่ต้องการส่งที่อื่น)
+  const isOtherMode = selectedAddressId === '__other__';
+  const showForm = savedAddresses.length === 0 || isOtherMode;
 
   // Thai geography
   const { data: geoData } = useThaiGeography();
   const { provinces, districts, subdistricts } = useGeoSelections(geoData, province, district, locale);
 
   useEffect(() => {
-    fetch('/api/auth-proxy/addresses')
-      .then((res) => res.json())
-      .then((res) => {
-        const addresses = res.data ?? [];
+    const fetchAddr = async () => {
+      const res = await fetch('/api/auth-proxy/addresses');
+      if (!res.ok) throw new Error(`addresses ${res.status}`);
+      return res.json();
+    };
+    const fetchTax = async () => {
+      const res = await fetch('/api/auth-proxy/tax-info');
+      if (!res.ok) return { data: null };
+      return res.json();
+    };
+
+    Promise.all([fetchAddr(), fetchTax()])
+      .then(([addrRes, taxRes]) => {
+        const addresses = addrRes.data ?? [];
         setSavedAddresses(addresses);
         if (addresses.length > 0) {
-          setAddressMode('saved');
           const defaultAddr = addresses.find((a: Address) => a.is_default) ?? addresses[0];
           setSelectedAddressId(defaultAddr.id);
+          onProvinceChange?.(defaultAddr.province);
+        }
+        if (taxRes.data) {
+          setSavedTaxInfo(taxRes.data);
         }
       })
-      .catch(() => {})
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -90,6 +110,7 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
     setDistrict('');
     setSubdistrict('');
     setPostalCode('');
+    onProvinceChange?.(value);
   };
 
   const handleDistrictChange = (value: string) => {
@@ -106,36 +127,55 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
 
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
+    const req = locale === 'th' ? 'จำเป็น' : 'Required';
 
-    if (addressMode === 'new') {
-      if (!customerName.trim()) errs.customerName = (locale === 'th' ? 'จำเป็น' : 'Required');
+    if (showForm) {
+      // กรอกใหม่
+      if (!customerName.trim()) errs.customerName = req;
       else if (customerName.trim().length > 100) errs.customerName = locale === 'th' ? 'ชื่อต้องไม่เกิน 100 ตัวอักษร' : 'Max 100 characters';
-      if (!phone.trim()) errs.phone = (locale === 'th' ? 'จำเป็น' : 'Required');
+      if (!phone.trim()) errs.phone = req;
       else if (!/^\d{10}$/.test(phone)) errs.phone = locale === 'th' ? 'เบอร์โทรต้องเป็นตัวเลข 10 หลัก' : 'Must be 10 digits';
-      if (!addressLine.trim()) errs.addressLine = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!province) errs.province = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!district) errs.district = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!subdistrict) errs.subdistrict = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!postalCode.trim()) errs.postalCode = (locale === 'th' ? 'จำเป็น' : 'Required');
+      if (!addressLine.trim()) errs.addressLine = req;
+      if (!province) errs.province = req;
+      if (!district) errs.district = req;
+      if (!subdistrict) errs.subdistrict = req;
+      if (!postalCode.trim()) errs.postalCode = req;
     } else {
-      if (!selectedAddressId) errs.selectedAddress = (locale === 'th' ? 'จำเป็น' : 'Required');
+      // เลือกที่อยู่เดิม
+      if (!selectedAddressId) errs.selectedAddress = req;
     }
 
     if (taxInvoice) {
-      if (!taxName.trim()) errs.taxName = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!taxId.trim()) errs.taxId = (locale === 'th' ? 'จำเป็น' : 'Required');
-      if (!taxAddress.trim()) errs.taxAddress = (locale === 'th' ? 'จำเป็น' : 'Required');
+      if (!taxName.trim()) errs.taxName = req;
+      if (!taxId.trim()) errs.taxId = req;
+      if (!taxAddress.trim()) errs.taxAddress = req;
     }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
+  const buildNewAddressData = (saveAddress: boolean): ShippingData => ({
+    customer_name: customerName,
+    customer_phone: phone,
+    shipping_address: addressLine,
+    shipping_subdistrict: subdistrict,
+    shipping_district: district,
+    shipping_province: province,
+    shipping_postal_code: postalCode,
+    save_address: saveAddress,
+    referral_source: referralSource,
+    tax_invoice: taxInvoice,
+    tax_info: taxInvoice ? { name: taxName, tax_id: taxId, address: taxAddress, note: taxNote || undefined } : undefined,
+    note,
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (addressMode === 'saved') {
+    // Case 1-2: เลือกจากที่อยู่ที่บันทึกไว้
+    if (!showForm) {
       const addr = savedAddresses.find((a) => a.id === selectedAddressId)!;
       onSubmit({
         address_id: addr.id,
@@ -149,25 +189,30 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
         save_address: false,
         referral_source: referralSource,
         tax_invoice: taxInvoice,
-        tax_info: taxInvoice ? { name: taxName, tax_id: taxId, address: taxAddress } : undefined,
+        tax_info: taxInvoice ? { name: taxName, tax_id: taxId, address: taxAddress, note: taxNote || undefined } : undefined,
         note,
       });
-    } else {
-      onSubmit({
-        customer_name: customerName,
-        customer_phone: phone,
-        shipping_address: addressLine,
-        shipping_subdistrict: subdistrict,
-        shipping_district: district,
-        shipping_province: province,
-        shipping_postal_code: postalCode,
-        save_address: saveAddress,
-        referral_source: referralSource,
-        tax_invoice: taxInvoice,
-        tax_info: taxInvoice ? { name: taxName, tax_id: taxId, address: taxAddress } : undefined,
-        note,
-      });
+      return;
     }
+
+    // Case 3: มีที่อยู่อยู่แล้ว แต่เลือก "อื่นๆ" → ไม่บันทึก
+    if (isOtherMode) {
+      onSubmit(buildNewAddressData(false));
+      return;
+    }
+
+    // Case 4: ไม่เคยมีที่อยู่เลย → ถาม confirmbox ว่าจะบันทึกเป็นที่อยู่หลักหรือไม่
+    useAlertStore.getState().showConfirm({
+      title: locale === 'th' ? 'บันทึกที่อยู่' : 'Save Address',
+      message: locale === 'th'
+        ? 'ต้องการบันทึกที่อยู่นี้เป็นที่อยู่หลักสำหรับการสั่งซื้อครั้งถัดไปหรือไม่?'
+        : 'Save this address as your primary address for future orders?',
+      confirmText: locale === 'th' ? 'บันทึก' : 'Save',
+      cancelText: locale === 'th' ? 'ไม่บันทึก' : "Don't Save",
+      variant: 'info',
+      onConfirm: () => onSubmit(buildNewAddressData(true)),
+      onCancel: () => onSubmit(buildNewAddressData(false)),
+    });
   };
 
   const inputClass = 'w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 transition-colors';
@@ -182,41 +227,32 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
     return <div className="animate-pulse h-64 bg-neutral-100" />;
   }
 
+  if (fetchError) {
+    return (
+      <div className="border border-red-200 bg-red-50 p-6 text-center">
+        <p className="text-red-700 text-sm mb-3">
+          {locale === 'th' ? 'ไม่สามารถโหลดข้อมูลที่อยู่ได้ กรุณาลองใหม่อีกครั้ง' : 'Could not load address data. Please try again.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="text-sm text-red-600 underline underline-offset-4 hover:text-red-800"
+        >
+          {locale === 'th' ? 'โหลดใหม่' : 'Reload'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Shipping Address Section */}
       <div>
         <h3 className="text-lg font-semibold mb-4">{t('checkout.shipping')}</h3>
 
-        {/* Address Mode Toggle */}
-        {savedAddresses.length > 0 && (
-          <div className="flex gap-4 mb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="addressMode"
-                checked={addressMode === 'saved'}
-                onChange={() => setAddressMode('saved')}
-                className="accent-[var(--accent)]"
-              />
-              <span className="text-sm">{t('checkout.useExisting')}</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="addressMode"
-                checked={addressMode === 'new'}
-                onChange={() => setAddressMode('new')}
-                className="accent-[var(--accent)]"
-              />
-              <span className="text-sm">{t('checkout.newAddress')}</span>
-            </label>
-          </div>
-        )}
-
-        {/* Saved Addresses */}
-        {addressMode === 'saved' && (
+        {savedAddresses.length > 0 ? (
           <div className="space-y-2">
+            {/* ที่อยู่ที่บันทึกไว้ */}
             {savedAddresses.map((addr) => (
               <label
                 key={addr.id}
@@ -231,7 +267,7 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
                   name="savedAddress"
                   value={addr.id}
                   checked={selectedAddressId === addr.id}
-                  onChange={() => setSelectedAddressId(addr.id)}
+                  onChange={() => { setSelectedAddressId(addr.id); onProvinceChange?.(addr.province); }}
                   className="sr-only"
                 />
                 <p className="font-medium text-sm">{addr.recipient_name} — {addr.phone}</p>
@@ -248,13 +284,36 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
                 )}
               </label>
             ))}
+
+            {/* ตัวเลือก "อื่นๆ" */}
+            <label
+              className={`block border p-3 cursor-pointer transition-colors ${
+                isOtherMode
+                  ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+                  : 'border-neutral-200 hover:border-neutral-400'
+              }`}
+            >
+              <input
+                type="radio"
+                name="savedAddress"
+                value="__other__"
+                checked={isOtherMode}
+                onChange={() => setSelectedAddressId('__other__')}
+                className="sr-only"
+              />
+              <p className="text-sm text-neutral-600">
+                <i className="fa-solid fa-plus text-xs mr-1.5" />
+                {locale === 'th' ? 'จัดส่งที่อยู่อื่น' : 'Ship to another address'}
+              </p>
+            </label>
+
             {errors.selectedAddress && <p className={errorClass}>{errors.selectedAddress}</p>}
           </div>
-        )}
+        ) : null}
 
-        {/* New Address Form */}
-        {addressMode === 'new' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* ฟอร์มกรอกที่อยู่ใหม่ — แสดงเมื่อไม่มีที่อยู่เลย หรือเลือก "อื่นๆ" */}
+        {showForm && (
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${isOtherMode ? 'mt-4' : ''}`}>
             <div>
               <label className={labelClass}>{t('checkout.recipientName')}</label>
               <input className={inputClass} value={customerName} onChange={(e) => setCustomerName(e.target.value)} maxLength={100} />
@@ -325,18 +384,6 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
               />
               {errors.postalCode && <p className={errorClass}>{errors.postalCode}</p>}
             </div>
-
-            <div className="sm:col-span-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={saveAddress}
-                  onChange={(e) => setSaveAddress(e.target.checked)}
-                  className="accent-[var(--accent)]"
-                />
-                <span className="text-sm text-neutral-600">{t('checkout.saveAddress')}</span>
-              </label>
-            </div>
           </div>
         )}
       </div>
@@ -364,7 +411,16 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
           <input
             type="checkbox"
             checked={taxInvoice}
-            onChange={(e) => setTaxInvoice(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setTaxInvoice(checked);
+              if (checked && savedTaxInfo && !taxName && !taxId && !taxAddress) {
+                setTaxName(savedTaxInfo.name);
+                setTaxId(savedTaxInfo.tax_id);
+                setTaxAddress(savedTaxInfo.address);
+                setTaxNote(savedTaxInfo.note ?? '');
+              }
+            }}
             className="accent-[var(--accent)]"
           />
           <span className="text-sm font-medium text-neutral-700">{t('checkout.taxInvoice')}</span>
@@ -386,6 +442,15 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
               <label className={labelClass}>{t('checkout.taxAddress')}</label>
               <input className={inputClass} value={taxAddress} onChange={(e) => setTaxAddress(e.target.value)} />
               {errors.taxAddress && <p className={errorClass}>{errors.taxAddress}</p>}
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>{locale === 'th' ? 'หมายเหตุเพิ่มเติม' : 'Additional Notes'}</label>
+              <textarea
+                className={`${inputClass} min-h-[60px] resize-y`}
+                value={taxNote}
+                onChange={(e) => setTaxNote(e.target.value)}
+                placeholder={locale === 'th' ? 'ระบุรายละเอียดเพิ่มเติม (ถ้ามี)' : 'Additional details (if any)'}
+              />
             </div>
           </div>
         )}

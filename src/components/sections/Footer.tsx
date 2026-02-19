@@ -149,9 +149,11 @@ export default function Footer() {
               transition={{ duration: 0.6 }}
               className="lg:col-span-5"
             >
-              <h2 className="text-7xl lg:text-8xl font-bold tracking-tighter text-white/90">
-                SOQ.
-              </h2>
+              <img
+                src="/logo.svg"
+                alt="SOQ"
+                className="h-16 lg:h-20 w-auto invert"
+              />
               <p className="mt-4 text-neutral-400 text-sm leading-relaxed max-w-xs">
                 {t('tagline')}
               </p>

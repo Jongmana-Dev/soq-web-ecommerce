@@ -96,6 +96,11 @@ export default function AddressList({ locale }: Props) {
     saveSuccess: locale === 'th' ? 'บันทึกที่อยู่แล้ว' : 'Address Saved',
     updateSuccess: locale === 'th' ? 'อัปเดตที่อยู่แล้ว' : 'Address Updated',
     errorMsg: locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Something went wrong',
+    autoDefault: locale === 'th' ? 'ที่อยู่แรกเป็นที่อยู่หลักอัตโนมัติ' : 'First address is automatically set as primary',
+    confirmSaveTitle: locale === 'th' ? 'ยืนยันการบันทึก' : 'Confirm Save',
+    confirmSaveMsg: locale === 'th' ? 'ต้องการบันทึกที่อยู่นี้หรือไม่?' : 'Save this address?',
+    confirmSaveBtn: locale === 'th' ? 'บันทึก' : 'Save',
+    confirmCancelBtn: locale === 'th' ? 'ยกเลิก' : 'Cancel',
   }
 
   const fetchAddresses = useCallback(async () => {
@@ -136,9 +141,11 @@ export default function AddressList({ locale }: Props) {
     }))
   }
 
+  const isFirstAddress = addresses.length === 0
+
   const openAdd = () => {
     setEditingId(null)
-    setForm(emptyForm)
+    setForm(isFirstAddress ? { ...emptyForm, is_default: true } : emptyForm)
     setErrors({})
     setShowForm(true)
   }
@@ -159,23 +166,7 @@ export default function AddressList({ locale }: Props) {
     setShowForm(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const result = addressSchema.safeParse(form)
-    if (!result.success) {
-      const fieldErrors: Partial<Record<keyof AddressForm, string>> = {}
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof AddressForm
-        if (!fieldErrors[field]) {
-          if (issue.message === 'phone_invalid') fieldErrors[field] = t.phoneInvalid
-          else if (issue.message === 'name_too_long') fieldErrors[field] = t.nameTooLong
-          else fieldErrors[field] = t.required
-        }
-      }
-      setErrors(fieldErrors)
-      return
-    }
-
+  const doSaveAddress = async (data: AddressForm) => {
     setSaving(true)
     try {
       const url = editingId
@@ -184,7 +175,7 @@ export default function AddressList({ locale }: Props) {
       const res = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify(data),
       })
       if (res.ok) {
         setShowForm(false)
@@ -201,6 +192,33 @@ export default function AddressList({ locale }: Props) {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const result = addressSchema.safeParse(form)
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof AddressForm, string>> = {}
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof AddressForm
+        if (!fieldErrors[field]) {
+          if (issue.message === 'phone_invalid') fieldErrors[field] = t.phoneInvalid
+          else if (issue.message === 'name_too_long') fieldErrors[field] = t.nameTooLong
+          else fieldErrors[field] = t.required
+        }
+      }
+      setErrors(fieldErrors)
+      return
+    }
+
+    useAlertStore.getState().showConfirm({
+      title: t.confirmSaveTitle,
+      message: t.confirmSaveMsg,
+      confirmText: t.confirmSaveBtn,
+      cancelText: t.confirmCancelBtn,
+      variant: 'info',
+      onConfirm: () => doSaveAddress(result.data),
+    })
   }
 
   const handleDelete = (id: string) => {
@@ -371,15 +389,21 @@ export default function AddressList({ locale }: Props) {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.is_default ?? false}
-              onChange={(e) => handleChange('is_default', e.target.checked)}
-              className="accent-neutral-900"
-            />
-            {t.makeDefault}
-          </label>
+          <div>
+            <label className={`flex items-center gap-2 text-sm text-neutral-600 ${isFirstAddress && !editingId ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+              <input
+                type="checkbox"
+                checked={form.is_default ?? false}
+                onChange={(e) => handleChange('is_default', e.target.checked)}
+                className="accent-neutral-900"
+                disabled={isFirstAddress && !editingId}
+              />
+              {t.makeDefault}
+            </label>
+            {isFirstAddress && !editingId && (
+              <p className="text-xs text-neutral-400 mt-1 ml-5">{t.autoDefault}</p>
+            )}
+          </div>
 
           <div className="flex gap-3">
             <button

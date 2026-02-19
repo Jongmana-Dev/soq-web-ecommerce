@@ -2,24 +2,27 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useRouter, Link } from '@/i18n/navigation'
 import { motion } from 'framer-motion'
 import Footer from '@/components/sections/Footer'
+import PaymentModal from '@/components/orders/PaymentModal'
+import { useAlertStore } from '@/lib/alert-store'
+import { usePendingOrders } from '@/lib/pending-orders-store'
+import FullscreenLoading from '@/components/ui/FullscreenLoading'
 import type { Order, OrderStatus } from '@/types/order'
 
 const statusColor: Record<OrderStatus, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  paid: 'bg-emerald-100 text-emerald-700',
+  pending_payment: 'bg-amber-100 text-amber-700',
+  confirm_payment: 'bg-emerald-100 text-emerald-700',
   shipped: 'bg-purple-100 text-purple-700',
   delivered: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  refunded: 'bg-neutral-100 text-neutral-600',
+  cancel_order: 'bg-red-100 text-red-700',
+  expire: 'bg-neutral-100 text-neutral-600',
 }
 
-const TIMELINE_STEPS: OrderStatus[] = ['pending', 'confirmed', 'paid', 'shipped', 'delivered']
+const TIMELINE_STEPS: OrderStatus[] = ['pending_payment', 'confirm_payment', 'shipped', 'delivered']
 
 function getStepIndex(status: OrderStatus): number {
   const idx = TIMELINE_STEPS.indexOf(status)
@@ -28,20 +31,17 @@ function getStepIndex(status: OrderStatus): number {
 
 export default function OrderDetailPage() {
   const t = useTranslations('orders')
+  const locale = useLocale()
   const { status: authStatus } = useSession()
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
 
-  useEffect(() => {
-    if (authStatus === 'unauthenticated') {
-      router.replace('/')
-      return
-    }
-    if (authStatus !== 'authenticated' || !params.id) return
-
+  const fetchOrder = () => {
+    if (!params.id) return
     fetch(`/api/orders-proxy/${params.id}`)
       .then((res) => {
         if (!res.ok) throw new Error()
@@ -50,14 +50,58 @@ export default function OrderDetailPage() {
       .then((res) => setOrder(res.data))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    if (authStatus === 'unauthenticated') {
+      router.replace('/')
+      return
+    }
+    if (authStatus !== 'authenticated' || !params.id) return
+    fetchOrder()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authStatus, params.id, router])
 
-  if (authStatus === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-[76px]">
-        <i className="fa-solid fa-spinner fa-spin text-neutral-400 text-2xl" />
-      </div>
+  const handleCancel = () => {
+    if (!order) return
+    useAlertStore.getState().showConfirm({
+      title: t('cancelConfirmTitle'),
+      message: locale === 'th'
+        ? `คุณต้องการยกเลิกคำสั่งซื้อ ${order.order_number} ใช่หรือไม่?`
+        : `Are you sure you want to cancel order ${order.order_number}?`,
+      confirmText: t('cancelConfirmBtn'),
+      cancelText: t('cancelCancelBtn'),
+      variant: 'danger',
+      onConfirm: async () => {
+        const res = await fetch(`/api/orders-proxy/${order.id}/cancel`, {
+          method: 'PATCH',
+        })
+        if (res.ok) {
+          useAlertStore.getState().showAlert('success', t('orderCancelled'))
+          fetchOrder()
+          usePendingOrders.getState().fetch()
+        } else {
+          const data = await res.json()
+          useAlertStore.getState().showAlert('error',
+            locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error',
+            data.message || 'Failed to cancel order',
+          )
+        }
+      },
+    })
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowPayment(false)
+    useAlertStore.getState().showAlert('success',
+      locale === 'th' ? 'แจ้งชำระเงินเรียบร้อย' : 'Payment submitted',
     )
+    fetchOrder()
+    usePendingOrders.getState().fetch()
+  }
+
+  if (authStatus === 'loading' || loading) {
+    return <FullscreenLoading />
   }
 
   if (error || !order) {
@@ -80,7 +124,7 @@ export default function OrderDetailPage() {
     )
   }
 
-  const isCancelledOrRefunded = order.status === 'cancelled' || order.status === 'refunded'
+  const isTerminal = order.status === 'cancel_order' || order.status === 'expire'
   const currentStepIdx = getStepIndex(order.status)
   const payment = order.payments[0]
 
@@ -123,6 +167,44 @@ export default function OrderDetailPage() {
             </div>
           </motion.div>
 
+          {/* Action buttons */}
+          {order.status === 'pending_payment' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.03 }}
+              className="flex gap-3 mb-4"
+            >
+              <button
+                onClick={() => setShowPayment(true)}
+                className="flex-1 bg-neutral-900 text-white py-3 text-sm font-semibold hover:bg-black transition-colors"
+              >
+                <i className="fa-solid fa-credit-card mr-2 text-xs" />
+                {t('notifyPayment')}
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-6 py-3 border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+              >
+                {t('cancelOrder')}
+              </button>
+            </motion.div>
+          )}
+
+          {(order.status === 'confirm_payment' || order.status === 'shipped') && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.03 }}
+              className="mb-4"
+            >
+              <div className="w-full text-center bg-neutral-100 text-neutral-700 py-3 text-sm font-medium">
+                <i className="fa-solid fa-truck mr-2 text-xs" />
+                {t('trackDelivery')}
+              </div>
+            </motion.div>
+          )}
+
           {/* Timeline Tracking */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -132,7 +214,7 @@ export default function OrderDetailPage() {
           >
             <h2 className="text-sm font-semibold text-neutral-900 mb-5">{t('tracking')}</h2>
 
-            {isCancelledOrRefunded ? (
+            {isTerminal ? (
               <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded">
                 <i className="fa-solid fa-xmark text-red-500" />
                 <span className="text-sm font-medium text-red-700">
@@ -235,6 +317,12 @@ export default function OrderDetailPage() {
                   {order.shipping_fee === 0 ? t('free') : `฿${order.shipping_fee.toLocaleString()}`}
                 </span>
               </div>
+              {order.remote_area_fee > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">{t('remoteAreaFee')}</span>
+                  <span className="text-neutral-900">+฿{order.remote_area_fee.toLocaleString()}</span>
+                </div>
+              )}
               {order.discount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-neutral-500">{t('discount')}</span>
@@ -293,7 +381,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-neutral-400">—</p>
+                <p className="text-sm text-neutral-400">&mdash;</p>
               )}
             </motion.div>
           </div>
@@ -316,6 +404,15 @@ export default function OrderDetailPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Payment Modal */}
+      {showPayment && order && (
+        <PaymentModal
+          order={order}
+          onClose={() => setShowPayment(false)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </>
   )
 }

@@ -25,13 +25,19 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
   const [phone, setPhone] = useState('')
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isEditing, setIsEditing] = useState(false)
+  const [originalName, setOriginalName] = useState(user?.name ?? '')
+  const [originalPhone, setOriginalPhone] = useState('')
 
   // Fetch phone from backend (not in JWT session)
   useEffect(() => {
     fetch('/api/auth-proxy/profile')
       .then((res) => res.json())
       .then((res) => {
-        if (res.data?.phone) setPhone(res.data.phone)
+        if (res.data?.phone) {
+          setPhone(res.data.phone)
+          setOriginalPhone(res.data.phone)
+        }
       })
       .catch(() => {})
   }, [])
@@ -48,9 +54,50 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
     successTitle: locale === 'th' ? 'บันทึกสำเร็จ' : 'Profile Updated',
     successMsg: locale === 'th' ? 'ข้อมูลของคุณถูกอัปเดตแล้ว' : 'Your information has been updated.',
     errorMsg: locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Something went wrong',
+    editBtn: locale === 'th' ? 'แก้ไข' : 'Edit',
+    cancelBtn: locale === 'th' ? 'ยกเลิก' : 'Cancel',
+    confirmSaveTitle: locale === 'th' ? 'ยืนยันการบันทึก' : 'Confirm Save',
+    confirmSaveMsg: locale === 'th' ? 'ต้องการบันทึกข้อมูลส่วนตัวหรือไม่?' : 'Save your profile changes?',
+    confirmBtn: locale === 'th' ? 'บันทึก' : 'Save',
+    confirmCancelBtn: locale === 'th' ? 'ยกเลิก' : 'Cancel',
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCancel = () => {
+    setName(originalName)
+    setPhone(originalPhone)
+    setErrors({})
+    setIsEditing(false)
+  }
+
+  const doSave = async (data: z.infer<typeof profileSchema>) => {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/auth-proxy/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          phone: data.phone || undefined,
+        }),
+      })
+
+      if (res.ok) {
+        await onUpdate({ name: data.name })
+        setOriginalName(data.name)
+        setOriginalPhone(data.phone || '')
+        setIsEditing(false)
+        useAlertStore.getState().showAlert('success', t.successTitle, t.successMsg)
+      } else {
+        useAlertStore.getState().showAlert('error', t.errorMsg)
+      }
+    } catch {
+      useAlertStore.getState().showAlert('error', t.errorMsg)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
 
@@ -69,34 +116,22 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
       return
     }
 
-    setSaving(true)
-    try {
-      const res = await fetch('/api/auth-proxy/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: result.data.name,
-          phone: result.data.phone || undefined,
-        }),
-      })
-
-      if (res.ok) {
-        await onUpdate({ name: result.data.name })
-        useAlertStore.getState().showAlert('success', t.successTitle, t.successMsg)
-      } else {
-        useAlertStore.getState().showAlert('error', t.errorMsg)
-      }
-    } catch {
-      useAlertStore.getState().showAlert('error', t.errorMsg)
-    } finally {
-      setSaving(false)
-    }
+    useAlertStore.getState().showConfirm({
+      title: t.confirmSaveTitle,
+      message: t.confirmSaveMsg,
+      confirmText: t.confirmBtn,
+      cancelText: t.confirmCancelBtn,
+      variant: 'info',
+      onConfirm: () => doSave(result.data),
+    })
   }
 
   const inputCls = (field: string) =>
-    `w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${
-      errors[field] ? 'border-red-400' : 'border-neutral-200'
-    }`
+    isEditing
+      ? `w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${
+          errors[field] ? 'border-red-400' : 'border-neutral-200'
+        }`
+      : 'w-full px-4 py-2.5 border border-neutral-100 text-sm text-neutral-400 bg-neutral-50'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
@@ -111,6 +146,7 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
           onChange={(e) => { setName(e.target.value); setErrors({}) }}
           className={inputCls('name')}
           maxLength={100}
+          disabled={!isEditing}
         />
         {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
       </div>
@@ -128,6 +164,7 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
           placeholder="0xxxxxxxxx"
           autoComplete="tel"
           maxLength={10}
+          disabled={!isEditing}
         />
         {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
       </div>
@@ -145,18 +182,39 @@ export default function ProfileForm({ session, onUpdate, locale }: Props) {
         />
       </div>
 
-      {/* Save */}
-      <button
-        type="submit"
-        disabled={saving}
-        className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium hover:bg-black transition-colors disabled:opacity-50"
-      >
-        {saving ? (
-          <><i className="fa-solid fa-spinner fa-spin mr-2" />{t.saving}</>
-        ) : (
-          t.save
-        )}
-      </button>
+      {/* Buttons */}
+      {isEditing ? (
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-6 py-2.5 bg-neutral-900 text-white text-sm font-medium hover:bg-black transition-colors disabled:opacity-50"
+          >
+            {saving ? (
+              <><i className="fa-solid fa-spinner fa-spin mr-2" />{t.saving}</>
+            ) : (
+              t.save
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={saving}
+            className="px-6 py-2.5 border border-neutral-200 text-sm text-neutral-600 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+          >
+            {t.cancelBtn}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          className="px-6 py-2.5 border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all"
+        >
+          <i className="fa-solid fa-pen mr-2 text-xs" />
+          {t.editBtn}
+        </button>
+      )}
     </form>
   )
 }

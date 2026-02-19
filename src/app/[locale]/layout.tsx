@@ -8,6 +8,7 @@ import LuxuryCursor from '@/components/cursor/LuxuryCursor'
 import BackToTop from '@/components/ui/backtotop'
 import CartToast from '@/components/ui/CartToast'
 import AlertToast from '@/components/ui/AlertToast'
+import CartExpiryGuard from '@/components/cart/CartExpiryGuard'
 import SessionProvider from '@/providers/SessionProvider'
 import '@/app/globals.css'
 
@@ -60,6 +61,7 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
                 <BackToTop />
                 <CartToast />
                 <AlertToast />
+                <CartExpiryGuard />
               </LenisProvider>
             </NextIntlClientProvider>
           </ThemeProvider>

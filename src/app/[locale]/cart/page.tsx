@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { useCart } from '@/lib/store';
+import { useCart, useCartHydrated } from '@/lib/store';
 import { Minus, Plus } from 'lucide-react';
 import LoginModal from '@/components/modals/LoginModal';
 
@@ -15,6 +15,7 @@ export default function CartPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const items = useCart((state) => state.items);
+  const hydrated = useCartHydrated();
   const updateQty = useCart((state) => state.updateQty);
   const remove = useCart((state) => state.remove);
   const clear = useCart((state) => state.clear);
@@ -29,6 +30,21 @@ export default function CartPage() {
       setShowLogin(true);
     }
   };
+
+  // รอ hydration จาก localStorage ก่อนแสดงผล
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-white text-neutral-900 pt-24">
+        <div className="container mx-auto px-4 py-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 w-48 bg-neutral-100" />
+            <div className="h-24 bg-neutral-100" />
+            <div className="h-24 bg-neutral-100" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

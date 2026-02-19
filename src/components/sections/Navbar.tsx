@@ -12,6 +12,7 @@ import { useCart } from "@/lib/store";
 import ContactModal from "@/components/modals/ContactModal";
 import LoginModal from "@/components/modals/LoginModal";
 import { useSession, signOut } from "next-auth/react";
+import { usePendingOrders } from "@/lib/pending-orders-store";
 
 function Navbar() {
   const tCommon = useTranslations();
@@ -23,6 +24,18 @@ function Navbar() {
   const searchParams = useSearchParams();
 
   const { data: session, status } = useSession();
+
+  const pendingCount = usePendingOrders((s) => s.count);
+  const fetchPending = usePendingOrders((s) => s.fetch);
+  const clearPending = usePendingOrders((s) => s.clear);
+
+  React.useEffect(() => {
+    if (status === "authenticated") {
+      fetchPending();
+    } else {
+      clearPending();
+    }
+  }, [status, fetchPending, clearPending]);
 
   const [isCartOpen, setCartOpen] = React.useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -94,6 +107,9 @@ function Navbar() {
   // Check if we're on the landing page (home)
   const isHomePage = pathname === `/${locale}` || pathname === "/";
 
+  // Dark navbar for member pages (profile, orders)
+  const isDarkNav = pathname.includes("/profile") || pathname.includes("/orders");
+
   const navLinks = [
     { hash: "testimonials", label: tHeader("reviews") },
     { hash: "products", label: tHeader("products") },
@@ -134,15 +150,21 @@ function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || isMobileMenuOpen
-            ? "bg-white/90 backdrop-blur-xl border-b border-neutral-200 shadow-sm"
-            : "bg-transparent border-b border-transparent"
+          isDarkNav
+            ? "bg-neutral-950 border-b border-neutral-800"
+            : isScrolled || isMobileMenuOpen
+              ? "bg-white/90 backdrop-blur-xl border-b border-neutral-200 shadow-sm"
+              : "bg-transparent border-b border-transparent"
         }`}
       >
         <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center" aria-label="Home">
-            <span className="font-bold text-3xl tracking-tight text-neutral-900">SOQ.</span>
+            <img
+              src="/logo.svg"
+              alt="SOQ"
+              className={`h-7 w-auto ${isDarkNav ? "invert" : ""}`}
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -152,7 +174,11 @@ function Navbar() {
                 <li key={link.hash}>
                     <a
                       href={getNavHref(link.hash)}
-                      className="relative text-[15px] font-medium text-neutral-600 transition-colors hover:text-black"
+                      className={`relative text-[15px] font-medium transition-colors ${
+                        isDarkNav
+                          ? "text-neutral-400 hover:text-white"
+                          : "text-neutral-600 hover:text-black"
+                      }`}
                     >
                       {link.label}
                     </a>
@@ -161,7 +187,11 @@ function Navbar() {
               <li>
                 <button
                   onClick={() => setContactOpen(true)}
-                  className="relative text-[15px] font-medium text-neutral-600 transition-colors hover:text-black"
+                  className={`relative text-[15px] font-medium transition-colors ${
+                    isDarkNav
+                      ? "text-neutral-400 hover:text-white"
+                      : "text-neutral-600 hover:text-black"
+                  }`}
                 >
                   {contactLabel}
                 </button>
@@ -175,7 +205,7 @@ function Navbar() {
                 {isAuthenticated && session.user.image ? (
                   <button
                     onClick={handleUserClick}
-                    className="p-1 rounded-full hover:ring-2 hover:ring-neutral-300 transition-all"
+                    className="relative p-1 rounded-full hover:ring-2 hover:ring-neutral-300 transition-all"
                     aria-label={tHeader("account")}
                   >
                     <Image
@@ -185,14 +215,28 @@ function Navbar() {
                       height={32}
                       className="rounded-full"
                     />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full">
+                        {pendingCount}
+                      </span>
+                    )}
                   </button>
                 ) : (
                   <button
                     onClick={handleUserClick}
-                    className="p-2 text-neutral-600 hover:text-black hover:bg-black/5 transition-colors"
+                    className={`relative p-2 transition-colors ${
+                      isDarkNav
+                        ? "text-neutral-400 hover:text-white hover:bg-white/10"
+                        : "text-neutral-600 hover:text-black hover:bg-black/5"
+                    }`}
                     aria-label={tHeader("account")}
                   >
                     <UserIcon className="w-5 h-5" strokeWidth={1.5} />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full">
+                        {pendingCount}
+                      </span>
+                    )}
                   </button>
                 )}
 
@@ -204,19 +248,27 @@ function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -5, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-48 bg-white border border-neutral-200 shadow-lg py-1 z-50"
+                      className={`absolute right-0 top-full mt-2 w-48 shadow-lg py-1 z-50 ${
+                        isDarkNav
+                          ? "bg-neutral-900 border border-neutral-700"
+                          : "bg-white border border-neutral-200"
+                      }`}
                     >
-                      <div className="px-4 py-2 border-b border-neutral-100">
-                        <p className="text-sm font-medium text-neutral-900 truncate">
+                      <div className={`px-4 py-2 border-b ${isDarkNav ? "border-neutral-700" : "border-neutral-100"}`}>
+                        <p className={`text-sm font-medium truncate ${isDarkNav ? "text-white" : "text-neutral-900"}`}>
                           {session.user.name}
                         </p>
-                        <p className="text-xs text-neutral-500 truncate">
+                        <p className={`text-xs truncate ${isDarkNav ? "text-neutral-400" : "text-neutral-500"}`}>
                           {session.user.email}
                         </p>
                       </div>
                       <a
                         href={`/${locale}/profile`}
-                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        className={`block px-4 py-2 text-sm transition-colors ${
+                          isDarkNav
+                            ? "text-neutral-300 hover:bg-white/5 hover:text-white"
+                            : "text-neutral-700 hover:bg-neutral-50"
+                        }`}
                         onClick={() => setUserDropdownOpen(false)}
                       >
                         <i className="fa-solid fa-user mr-2 text-xs opacity-50" />
@@ -224,15 +276,30 @@ function Navbar() {
                       </a>
                       <a
                         href={`/${locale}/orders`}
-                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        className={`flex items-center justify-between px-4 py-2 text-sm transition-colors ${
+                          isDarkNav
+                            ? "text-neutral-300 hover:bg-white/5 hover:text-white"
+                            : "text-neutral-700 hover:bg-neutral-50"
+                        }`}
                         onClick={() => setUserDropdownOpen(false)}
                       >
-                        <i className="fa-solid fa-box-open mr-2 text-xs opacity-50" />
-                        {locale === "th" ? "คำสั่งซื้อของฉัน" : "My Orders"}
+                        <span>
+                          <i className="fa-solid fa-box-open mr-2 text-xs opacity-50" />
+                          {locale === "th" ? "คำสั่งซื้อของฉัน" : "My Orders"}
+                        </span>
+                        {pendingCount > 0 && (
+                          <span className="flex h-5 min-w-5 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full px-1.5">
+                            {pendingCount}
+                          </span>
+                        )}
                       </a>
                       <button
                         onClick={() => { setUserDropdownOpen(false); signOut({ callbackUrl: "/" }); }}
-                        className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          isDarkNav
+                            ? "text-neutral-300 hover:bg-white/5 hover:text-white"
+                            : "text-neutral-700 hover:bg-neutral-50"
+                        }`}
                       >
                         <i className="fa-solid fa-right-from-bracket mr-2 text-xs opacity-50" />
                         {locale === "th" ? "ออกจากระบบ" : "Sign Out"}
@@ -244,7 +311,11 @@ function Navbar() {
 
               <button
                 onClick={() => setCartOpen((open) => !open)}
-                className="relative p-2 text-neutral-600 hover:text-black hover:bg-black/5 transition-colors"
+                className={`relative p-2 transition-colors ${
+                  isDarkNav
+                    ? "text-neutral-400 hover:text-white hover:bg-white/10"
+                    : "text-neutral-600 hover:text-black hover:bg-black/5"
+                }`}
                 aria-label={tHeader("cart")}
               >
                 <ShoppingCartIcon className="w-5 h-5" strokeWidth={1.5} />
@@ -265,18 +336,26 @@ function Navbar() {
               </button>
 
               <div
-                className="relative flex items-center bg-neutral-100 rounded-full p-0.5 ml-1"
+                className={`relative flex items-center rounded-full p-0.5 ml-1 ${
+                  isDarkNav ? "bg-white/10" : "bg-neutral-100"
+                }`}
                 role="radiogroup"
                 aria-label={tCommon("language") || "Change language"}
               >
                 <motion.div
-                  className="absolute top-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-white rounded-full shadow-sm"
+                  className={`absolute top-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] rounded-full ${
+                    isDarkNav ? "bg-white/20" : "bg-white shadow-sm"
+                  }`}
                   animate={{ x: locale === "en" ? 0 : "100%" }}
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 />
                 <button
                   onClick={() => changeLocale("en")}
-                  className={`relative z-[1] px-2.5 py-1 text-[11px] font-semibold tracking-wide rounded-full transition-colors ${locale === "en" ? "text-neutral-900" : "text-neutral-400"}`}
+                  className={`relative z-[1] px-2.5 py-1 text-[11px] font-semibold tracking-wide rounded-full transition-colors ${
+                    isDarkNav
+                      ? locale === "en" ? "text-white" : "text-white/40"
+                      : locale === "en" ? "text-neutral-900" : "text-neutral-400"
+                  }`}
                   role="radio"
                   aria-checked={locale === "en"}
                 >
@@ -284,7 +363,11 @@ function Navbar() {
                 </button>
                 <button
                   onClick={() => changeLocale("th")}
-                  className={`relative z-[1] px-2.5 py-1 text-[11px] font-semibold tracking-wide rounded-full transition-colors ${locale === "th" ? "text-neutral-900" : "text-neutral-400"}`}
+                  className={`relative z-[1] px-2.5 py-1 text-[11px] font-semibold tracking-wide rounded-full transition-colors ${
+                    isDarkNav
+                      ? locale === "th" ? "text-white" : "text-white/40"
+                      : locale === "th" ? "text-neutral-900" : "text-neutral-400"
+                  }`}
                   role="radio"
                   aria-checked={locale === "th"}
                 >
@@ -298,7 +381,11 @@ function Navbar() {
           <div className="flex items-center gap-3 lg:hidden">
             <button
               onClick={() => setCartOpen((open) => !open)}
-              className="relative p-2 text-white/70 hover:text-white transition-colors"
+              className={`relative p-2 transition-colors ${
+                isDarkNav
+                  ? "text-neutral-400 hover:text-white"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
               aria-label={tHeader("cart")}
             >
               <ShoppingCartIcon className="w-5 h-5" />
@@ -320,7 +407,11 @@ function Navbar() {
 
             <button
               onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-white/80 hover:text-white transition-colors"
+              className={`p-2 transition-colors ${
+                isDarkNav
+                  ? "text-neutral-400 hover:text-white"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
@@ -360,12 +451,12 @@ function Navbar() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-[76px] right-0 bottom-0 z-40 w-full max-w-sm bg-[#0f0f23]/95 backdrop-blur-xl border-l border-white/10 lg:hidden"
+              className="fixed top-[76px] right-0 bottom-0 z-40 w-full max-w-sm bg-neutral-950/98 backdrop-blur-xl border-l border-neutral-800 lg:hidden"
             >
               <div className="flex flex-col h-full p-6">
                 {/* Nav Links */}
-                <nav className="flex-1 py-8">
-                  <ul className="space-y-2">
+                <nav className="flex-1 py-6">
+                  <ul className="space-y-1">
                     {navLinks.map((link, i) => (
                       <motion.li
                         key={link.hash}
@@ -376,7 +467,7 @@ function Navbar() {
                         <a
                           href={getNavHref(link.hash)}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-4 px-4 py-4 text-lg font-medium text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                          className="flex items-center gap-4 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all"
                         >
                           {link.label}
                         </a>
@@ -389,7 +480,7 @@ function Navbar() {
                     >
                       <button
                         onClick={() => { setMobileMenuOpen(false); setContactOpen(true); }}
-                        className="flex items-center gap-4 px-4 py-4 text-lg font-medium text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
+                        className="flex items-center gap-4 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
                       >
                         {contactLabel}
                       </button>
@@ -401,7 +492,7 @@ function Navbar() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0, transition: { delay: 0.4 } }}
-                  className="pt-6 border-t border-white/10 space-y-4"
+                  className="pt-6 border-t border-neutral-800 space-y-3"
                 >
                   {isAuthenticated ? (
                     <>
@@ -410,75 +501,83 @@ function Navbar() {
                           <Image
                             src={session.user.image}
                             alt={session.user.name ?? "User"}
-                            width={36}
-                            height={36}
+                            width={32}
+                            height={32}
                             className="rounded-full"
                           />
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{session.user.name}</p>
-                          <p className="text-xs text-white/50 truncate">{session.user.email}</p>
+                          <p className="text-xs font-medium text-white truncate">{session.user.name}</p>
+                          <p className="text-[11px] text-white/50 truncate">{session.user.email}</p>
                         </div>
                       </div>
                       <a
                         href={`/${locale}/profile`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all"
                       >
-                        <UserIcon className="w-5 h-5" />
+                        <UserIcon className="w-4 h-4" />
                         <span>{locale === "th" ? "โปรไฟล์" : "Profile"}</span>
                       </a>
                       <a
                         href={`/${locale}/orders`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all"
                       >
-                        <i className="fa-solid fa-box-open w-5 text-center" />
-                        <span>{locale === "th" ? "คำสั่งซื้อของฉัน" : "My Orders"}</span>
+                        <i className="fa-solid fa-box-open w-4 text-xs text-center" />
+                        <span className="flex-1">{locale === "th" ? "คำสั่งซื้อของฉัน" : "My Orders"}</span>
+                        {pendingCount > 0 && (
+                          <span className="flex h-5 min-w-5 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full px-1.5">
+                            {pendingCount}
+                          </span>
+                        )}
                       </a>
                       <button
                         onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }); }}
-                        className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
                       >
-                        <i className="fa-solid fa-right-from-bracket w-5 text-center" />
+                        <i className="fa-solid fa-right-from-bracket w-4 text-xs text-center" />
                         <span>{locale === "th" ? "ออกจากระบบ" : "Sign Out"}</span>
                       </button>
                     </>
                   ) : (
                     <button
                       onClick={() => { setMobileMenuOpen(false); setLoginOpen(true); }}
-                      className="flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
                     >
-                      <UserIcon className="w-5 h-5" />
+                      <UserIcon className="w-4 h-4" />
                       <span>{locale === "th" ? "เข้าสู่ระบบ" : "Sign In"}</span>
                     </button>
                   )}
 
                   <div
-                    className="relative flex items-center justify-center bg-white/10 rounded-full p-0.5 mx-auto w-fit"
+                    className="flex items-center gap-2 px-4 mt-2"
                     role="radiogroup"
                     aria-label={tCommon("language") || "Change language"}
                   >
-                    <motion.div
-                      className="absolute top-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] bg-white/20 rounded-full"
-                      animate={{ x: locale === "en" ? 0 : "100%" }}
-                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                    />
                     <button
                       onClick={() => changeLocale("en")}
-                      className={`relative z-[1] px-5 py-2 text-sm font-semibold tracking-wide rounded-full transition-colors ${locale === "en" ? "text-white" : "text-white/40"}`}
+                      className={`flex-1 py-2 text-xs font-semibold tracking-wider text-center transition-all ${
+                        locale === "en"
+                          ? "bg-white text-neutral-900"
+                          : "bg-neutral-800 text-neutral-500 hover:text-neutral-300"
+                      }`}
                       role="radio"
                       aria-checked={locale === "en"}
                     >
-                      EN
+                      English
                     </button>
                     <button
                       onClick={() => changeLocale("th")}
-                      className={`relative z-[1] px-5 py-2 text-sm font-semibold tracking-wide rounded-full transition-colors ${locale === "th" ? "text-white" : "text-white/40"}`}
+                      className={`flex-1 py-2 text-xs font-semibold tracking-wider text-center transition-all ${
+                        locale === "th"
+                          ? "bg-white text-neutral-900"
+                          : "bg-neutral-800 text-neutral-500 hover:text-neutral-300"
+                      }`}
                       role="radio"
                       aria-checked={locale === "th"}
                     >
-                      TH
+                      ไทย
                     </button>
                   </div>
                 </motion.div>

@@ -162,6 +162,7 @@
     "placeOrder": "Place Order",
     "orderSummary": "Order Summary",
     "shippingFee": "Shipping Fee",
+    "remoteAreaFee": "Remote area surcharge",
     "freeShipping": "Free",
     "note": "Additional Notes",
     "notePh": "Note to seller (optional)",
@@ -191,6 +192,7 @@
     "priceSummary": "Price Summary",
     "subtotal": "Subtotal",
     "shippingFee": "Shipping",
+    "remoteAreaFee": "Remote area surcharge",
     "discount": "Discount",
     "tracking": "Tracking",
     "empty": "No orders yet",
@@ -205,19 +207,29 @@
     "promptpay": "PromptPay",
     "paidAt": "Paid at",
     "status": {
-      "pending": "Pending",
-      "confirmed": "Confirmed",
-      "paid": "Paid",
+      "pending_payment": "Pending Payment",
+      "confirm_payment": "Payment Confirmed",
       "shipped": "Shipped",
       "delivered": "Delivered",
-      "cancelled": "Cancelled",
-      "refunded": "Refunded"
+      "cancel_order": "Cancelled",
+      "expire": "Expired"
     },
     "paymentStatus": {
       "pending": "Pending",
       "confirmed": "Confirmed",
       "rejected": "Rejected"
-    }
+    },
+    "notifyPayment": "Notify Payment",
+    "cancelOrder": "Cancel Order",
+    "trackDelivery": "Track Delivery",
+    "cancelConfirmTitle": "Cancel Order",
+    "cancelConfirmMessage": "Are you sure you want to cancel order {orderNumber}?",
+    "cancelConfirmBtn": "Confirm Cancel",
+    "cancelCancelBtn": "Keep Order",
+    "paymentModalTitle": "Notify Payment",
+    "uploadSlipHere": "Upload payment slip",
+    "submitPayment": "Submit Payment",
+    "orderCancelled": "Order cancelled"
   },
   "language": "Language",
   "title": "Welcome to SOQ Store"

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
@@ -16,57 +17,49 @@ export type CartItem = {
 
 type Store = {
   items: CartItem[]
-  _hydrated: boolean
-  // derived
-  count: number
-  total: number
+  updatedAt: number
   // actions
   add: (item: CartItem) => void
   updateQty: (id: string, qty: number) => void
   remove: (id: string) => void
   clear: () => void
+  refreshTimestamp: () => void
 }
 
 export const useCart = create<Store>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: [],
-      _hydrated: false,
+      updatedAt: Date.now(),
 
-      // derived
-      get count() {
-        return get().items.reduce((sum, it) => sum + it.qty, 0)
-      },
-      get total() {
-        return get().items.reduce((sum, it) => sum + it.price * it.qty, 0)
-      },
-
-      // actions
       add: (item) =>
         set((s) => {
           const idx = s.items.findIndex((i) => i.id === item.id)
           if (idx >= 0) {
             const next = [...s.items]
             next[idx] = { ...next[idx], qty: next[idx].qty + Math.max(1, item.qty) }
-            return { items: next }
+            return { items: next, updatedAt: Date.now() }
           }
-          return { items: [...s.items, { ...item, qty: Math.max(1, item.qty) }] }
+          return { items: [...s.items, { ...item, qty: Math.max(1, item.qty) }], updatedAt: Date.now() }
         }),
 
       updateQty: (id, qty) =>
         set((s) => ({
           items: s.items
             .map((i) => (i.id === id ? { ...i, qty: Math.max(0, Math.floor(qty)) } : i))
-            .filter((i) => i.qty > 0)
+            .filter((i) => i.qty > 0),
+          updatedAt: Date.now(),
         })),
 
-      remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
+      remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id), updatedAt: Date.now() })),
 
-      clear: () => set({ items: [] })
+      clear: () => set({ items: [], updatedAt: Date.now() }),
+
+      refreshTimestamp: () => set({ updatedAt: Date.now() }),
     }),
     {
       name: 'soq_cart',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() =>
         typeof window !== 'undefined'
           ? localStorage
@@ -76,26 +69,31 @@ export const useCart = create<Store>()(
               removeItem: () => {},
             } as unknown as Storage),
       ),
-      partialize: (s) => ({ items: s.items }),
+      partialize: (s) => ({ items: s.items, updatedAt: s.updatedAt }),
       migrate: (persisted: any, version: number) => {
-        // เฉพาะ version เก่า (< 2) ที่ไม่มี size fields → ต้อง clear
         if (version < 2) {
-          return { items: [] }
+          return { items: [], updatedAt: Date.now() }
         }
-        // version 2+ → เก็บ items เดิมไว้
-        return persisted as { items: CartItem[] }
-      },
-      merge: (persisted, current) => ({
-        ...current,
-        ...(persisted as Partial<Store>),
-      }),
-      onRehydrateStorage: () => {
-        return (_state, error) => {
-          if (!error) {
-            useCart.setState({ _hydrated: true })
-          }
+        if (version < 3) {
+          return { ...persisted, updatedAt: persisted.updatedAt ?? Date.now() }
         }
+        return persisted as { items: CartItem[]; updatedAt: number }
       },
     }
   )
 )
+
+/**
+ * Hook รอ hydration จาก localStorage เสร็จก่อน render
+ * ใช้ zustand persist API ตรง — ไม่พึ่ง onRehydrateStorage
+ */
+export function useCartHydrated() {
+  const [hydrated, setHydrated] = useState(useCart.persist.hasHydrated())
+
+  useEffect(() => {
+    const unsub = useCart.persist.onFinishHydration(() => setHydrated(true))
+    return unsub
+  }, [])
+
+  return hydrated
+}

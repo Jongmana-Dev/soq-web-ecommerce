@@ -119,69 +119,88 @@ export default function AlertToast() {
 
       {/* Confirm Modal */}
       <AnimatePresence>
-        {confirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-            onClick={() => { if (!confirming) hideConfirm() }}
-          >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-
+        {confirm && (() => {
+          const isDanger = (confirm.variant ?? 'danger') === 'danger'
+          return (
             <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 30, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+              onClick={() => { if (!confirming) { confirm.onCancel?.(); hideConfirm() } }}
             >
-              {/* Red accent bar */}
-              <div className="h-[2px] bg-gradient-to-r from-red-400 via-red-500 to-red-400" />
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-              <div className="p-6">
-                {/* Icon */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.1 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center"
-                >
-                  <i className="fa-solid fa-triangle-exclamation text-red-400 text-lg" />
-                </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 30, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-sm bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden"
+              >
+                {/* Accent bar */}
+                <div className={`h-[2px] bg-gradient-to-r ${
+                  isDanger
+                    ? 'from-red-400 via-red-500 to-red-400'
+                    : 'from-neutral-400 via-neutral-500 to-neutral-400'
+                }`} />
 
-                <h3 className="text-center text-lg font-semibold text-neutral-100 mb-2">
-                  {confirm.title}
-                </h3>
-                <p className="text-center text-sm text-neutral-400 mb-6">
-                  {confirm.message}
-                </p>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={hideConfirm}
-                    disabled={confirming}
-                    className="flex-1 px-4 py-2.5 border border-neutral-700 text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                <div className="p-6">
+                  {/* Icon */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.1 }}
+                    className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                      isDanger
+                        ? 'bg-red-500/10 border border-red-500/20'
+                        : 'bg-neutral-500/10 border border-neutral-500/20'
+                    }`}
                   >
-                    {confirm.cancelText ?? 'Cancel'}
-                  </button>
-                  <button
-                    onClick={handleConfirm}
-                    disabled={confirming}
-                    className="flex-1 px-4 py-2.5 bg-red-600 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-                  >
-                    {confirming ? (
-                      <i className="fa-solid fa-spinner fa-spin" />
-                    ) : (
-                      confirm.confirmText ?? 'Confirm'
-                    )}
-                  </button>
+                    <i className={`text-lg ${
+                      isDanger
+                        ? 'fa-solid fa-triangle-exclamation text-red-400'
+                        : 'fa-solid fa-floppy-disk text-neutral-300'
+                    }`} />
+                  </motion.div>
+
+                  <h3 className="text-center text-lg font-semibold text-neutral-100 mb-2">
+                    {confirm.title}
+                  </h3>
+                  <p className="text-center text-sm text-neutral-400 mb-6">
+                    {confirm.message}
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { confirm.onCancel?.(); hideConfirm() }}
+                      disabled={confirming}
+                      className="flex-1 px-4 py-2.5 border border-neutral-700 text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                    >
+                      {confirm.cancelText ?? 'Cancel'}
+                    </button>
+                    <button
+                      onClick={handleConfirm}
+                      disabled={confirming}
+                      className={`flex-1 px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
+                        isDanger
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : 'bg-neutral-700 hover:bg-neutral-600'
+                      }`}
+                    >
+                      {confirming ? (
+                        <i className="fa-solid fa-spinner fa-spin" />
+                      ) : (
+                        confirm.confirmText ?? 'Confirm'
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )
+        })()}
       </AnimatePresence>
     </>
   )

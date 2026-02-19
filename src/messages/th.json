@@ -201,6 +201,7 @@
     "placeOrder": "สั่งซื้อ",
     "orderSummary": "สรุปคำสั่งซื้อ",
     "shippingFee": "ค่าจัดส่ง",
+    "remoteAreaFee": "ค่าพื้นที่ห่างไกล",
     "freeShipping": "ฟรี",
     "note": "หมายเหตุเพิ่มเติม",
     "notePh": "หมายเหตุถึงร้านค้า (ถ้ามี)",
@@ -230,6 +231,7 @@
     "priceSummary": "สรุปราคา",
     "subtotal": "ราคาสินค้า",
     "shippingFee": "ค่าจัดส่ง",
+    "remoteAreaFee": "ค่าพื้นที่ห่างไกล",
     "discount": "ส่วนลด",
     "tracking": "ติดตามสถานะ",
     "empty": "ยังไม่มีคำสั่งซื้อ",
@@ -244,19 +246,29 @@
     "promptpay": "พร้อมเพย์",
     "paidAt": "ชำระเมื่อ",
     "status": {
-      "pending": "รอดำเนินการ",
-      "confirmed": "ยืนยันแล้ว",
-      "paid": "ชำระเงินแล้ว",
+      "pending_payment": "รอชำระเงิน",
+      "confirm_payment": "ชำระเงินเรียบร้อย",
       "shipped": "จัดส่งแล้ว",
       "delivered": "ได้รับสินค้าแล้ว",
-      "cancelled": "ยกเลิก",
-      "refunded": "คืนเงินแล้ว"
+      "cancel_order": "ยกเลิก",
+      "expire": "หมดเวลาชำระเงิน"
     },
     "paymentStatus": {
       "pending": "รอตรวจสอบ",
       "confirmed": "ยืนยันแล้ว",
       "rejected": "ถูกปฏิเสธ"
-    }
+    },
+    "notifyPayment": "แจ้งชำระเงิน",
+    "cancelOrder": "ยกเลิกคำสั่งซื้อ",
+    "trackDelivery": "ติดตามสถานะการจัดส่ง",
+    "cancelConfirmTitle": "ยกเลิกคำสั่งซื้อ",
+    "cancelConfirmMessage": "คุณต้องการยกเลิกคำสั่งซื้อ {orderNumber} ใช่หรือไม่?",
+    "cancelConfirmBtn": "ยืนยันยกเลิก",
+    "cancelCancelBtn": "ไม่ยกเลิก",
+    "paymentModalTitle": "แจ้งชำระเงิน",
+    "uploadSlipHere": "อัปโหลดสลิปการโอนเงิน",
+    "submitPayment": "แจ้งชำระเงิน",
+    "orderCancelled": "ยกเลิกคำสั่งซื้อแล้ว"
   },
   "language": "ภาษา",
   "title": "ยินดีต้อนรับสู่ร้าน SOQ"

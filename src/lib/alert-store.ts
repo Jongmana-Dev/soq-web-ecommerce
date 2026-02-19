@@ -16,7 +16,9 @@ type ConfirmOptions = {
   message: string
   confirmText?: string
   cancelText?: string
+  variant?: 'danger' | 'info'
   onConfirm: () => void | Promise<void>
+  onCancel?: () => void
 }
 
 type AlertStore = {
