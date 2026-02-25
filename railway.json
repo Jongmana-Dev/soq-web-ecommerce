@@ -4,8 +4,7 @@
         "builder": "NIXPACKS"
     },
     "deploy": {
-        "healthcheckPath": "/th",
-        "healthcheckTimeout": 60,
+        "startCommand": "next start -p $PORT",
         "restartPolicyType": "ON_FAILURE",
         "restartPolicyMaxRetries": 10
     }
