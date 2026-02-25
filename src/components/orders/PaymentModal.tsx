@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState, useRef, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAlertStore } from '@/lib/alert-store'
 import PromptPayQR from '@/components/checkout/PromptPayQR'
 import type { Order } from '@/types/order'
 
@@ -12,14 +13,42 @@ interface PaymentModalProps {
   onSuccess: () => void
 }
 
+interface PaymentAccount {
+  type: 'promptpay' | 'bank_transfer'
+  account_number: string
+  account_name: string
+  bank_name?: string | null
+  bank_branch?: string | null
+}
+
 export default function PaymentModal({ order, onClose, onSuccess }: PaymentModalProps) {
   const t = useTranslations('orders')
   const tc = useTranslations('checkout')
+  const locale = useLocale()
   const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [slipBase64, setSlipBase64] = useState<string>('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([])
+  const [activeTab, setActiveTab] = useState<'promptpay' | 'bank_transfer'>('promptpay')
+
+  useEffect(() => {
+    fetch('/api/settings-proxy/payment-accounts')
+      .then((res) => res.json())
+      .then((json) => {
+        const accounts: PaymentAccount[] = json.data ?? []
+        setPaymentAccounts(accounts)
+        if (accounts.length > 0) {
+          setActiveTab(accounts[0].type)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const promptpay = paymentAccounts.find((a) => a.type === 'promptpay')
+  const bankTransfer = paymentAccounts.find((a) => a.type === 'bank_transfer')
+  const hasBoth = !!promptpay && !!bankTransfer
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -40,24 +69,46 @@ export default function PaymentModal({ order, onClose, onSuccess }: PaymentModal
     setError(null)
 
     try {
-      const res = await fetch(`/api/orders-proxy/${order.id}/payment`, {
+      const res = await fetch('/api/verify-slip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          method: 'promptpay',
           slip_image: slipBase64,
+          order_id: order.id,
+          amount: order.total,
+          locale,
         }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message || 'Failed to upload payment')
+        throw new Error(data.error || 'Failed to verify slip')
       }
 
-      onSuccess()
+      useAlertStore.getState().showResultAlert({
+        type: 'success',
+        title: locale === 'th' ? 'ตรวจสอบสลิปสำเร็จ' : 'Slip Verified',
+        message: locale === 'th' ? 'สลิปถูกต้อง ยืนยันคำสั่งซื้อเรียบร้อย' : 'Slip is valid. Order confirmed.',
+        buttonText: locale === 'th' ? 'ตกลง' : 'OK',
+        onClose: onSuccess,
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      const message = err instanceof Error ? err.message : 'Something went wrong'
+      setError(message)
       setSubmitting(false)
+
+      // Clear slip so user can re-upload
+      setPreview(null)
+      setSlipBase64('')
+      if (fileRef.current) fileRef.current.value = ''
+
+      useAlertStore.getState().showResultAlert({
+        type: 'error',
+        title: locale === 'th' ? 'ตรวจสอบสลิปไม่ผ่าน' : 'Slip Verification Failed',
+        message,
+        buttonText: locale === 'th' ? 'ตกลง' : 'OK',
+      })
     }
   }
 
@@ -142,15 +193,90 @@ export default function PaymentModal({ order, onClose, onSuccess }: PaymentModal
               </div>
             </div>
 
-            {/* QR Code */}
-            <div className="text-center space-y-3">
-              <PromptPayQR amount={order.total} />
-              <div className="text-xl font-bold text-neutral-900">฿{order.total.toLocaleString()}</div>
-            </div>
+            {/* Payment Method Tabs */}
+            {hasBoth && (
+              <div className="flex border border-neutral-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('promptpay')}
+                  className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                    activeTab === 'promptpay'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-neutral-500 hover:bg-neutral-50'
+                  }`}
+                >
+                  <i className="fa-solid fa-qrcode mr-1.5" />
+                  {locale === 'th' ? 'พร้อมเพย์' : 'PromptPay'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('bank_transfer')}
+                  className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                    activeTab === 'bank_transfer'
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-neutral-500 hover:bg-neutral-50'
+                  }`}
+                >
+                  <i className="fa-solid fa-building-columns mr-1.5" />
+                  {locale === 'th' ? 'โอนเงิน' : 'Bank Transfer'}
+                </button>
+              </div>
+            )}
+
+            {/* PromptPay Content */}
+            {activeTab === 'promptpay' && promptpay && (
+              <div className="text-center space-y-3">
+                <PromptPayQR amount={order.total} promptpayId={promptpay.account_number} />
+                <p className="text-sm text-neutral-600 font-medium">{promptpay.account_name}</p>
+                <div className="text-xl font-bold text-neutral-900">฿{order.total.toLocaleString()}</div>
+              </div>
+            )}
+
+            {/* Bank Transfer Content */}
+            {activeTab === 'bank_transfer' && bankTransfer && (
+              <div className="space-y-3">
+                <div className="bg-neutral-50 border border-neutral-200 p-4 space-y-2.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'ธนาคาร' : 'Bank'}</span>
+                    <span className="font-medium text-neutral-900">{bankTransfer.bank_name}</span>
+                  </div>
+                  {bankTransfer.bank_branch && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'สาขา' : 'Branch'}</span>
+                      <span className="text-neutral-700">{bankTransfer.bank_branch}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'เลขบัญชี' : 'Account'}</span>
+                    <span className="font-mono font-semibold text-neutral-900 tracking-wide">{bankTransfer.account_number}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'ชื่อบัญชี' : 'Name'}</span>
+                    <span className="text-neutral-700">{bankTransfer.account_name}</span>
+                  </div>
+                </div>
+                <div className="text-center text-xl font-bold text-neutral-900">฿{order.total.toLocaleString()}</div>
+              </div>
+            )}
 
             {/* Upload Slip */}
             <div className="space-y-3">
               <p className="text-sm font-medium text-neutral-700">{t('uploadSlipHere')}</p>
+
+              {/* Slip verification warning */}
+              <div className="flex gap-2.5 bg-blue-50 border border-blue-200 px-3 py-2.5">
+                <i className="fa-solid fa-shield-halved text-blue-600 mt-0.5 shrink-0 text-sm" />
+                <div className="text-xs text-blue-800 space-y-1">
+                  <p className="font-medium">
+                    {locale === 'th' ? 'สลิปจะถูกตรวจสอบอัตโนมัติ' : 'Slip will be verified automatically'}
+                  </p>
+                  <ul className="list-disc list-inside text-blue-700 space-y-0.5">
+                    <li>{locale === 'th' ? 'ยอดเงินต้องตรงกับคำสั่งซื้อ' : 'Amount must match the order total'}</li>
+                    <li>{locale === 'th' ? 'สลิปแต่ละใบใช้ได้เพียงครั้งเดียว' : 'Each slip can only be used once'}</li>
+                    <li>{locale === 'th' ? 'กรุณาใช้สลิปที่ชัดเจนและไม่ถูกครอบตัด' : 'Please use a clear and uncropped slip'}</li>
+                  </ul>
+                </div>
+              </div>
 
               <input
                 ref={fileRef}
@@ -197,7 +323,18 @@ export default function PaymentModal({ order, onClose, onSuccess }: PaymentModal
             <button
               type="button"
               disabled={!slipBase64 || submitting}
-              onClick={handleSubmit}
+              onClick={() => {
+                useAlertStore.getState().showConfirm({
+                  title: locale === 'th' ? 'ยืนยันการชำระเงิน' : 'Confirm Payment',
+                  message: locale === 'th'
+                    ? `ยืนยันส่งหลักฐานการชำระเงิน ฿${order.total.toLocaleString()} ใช่หรือไม่?\n\nสลิปจะถูกตรวจสอบอัตโนมัติก่อนยืนยันคำสั่งซื้อ`
+                    : `Confirm payment of ฿${order.total.toLocaleString()}?\n\nThe slip will be verified automatically before confirming your order.`,
+                  confirmText: locale === 'th' ? 'ยืนยัน' : 'Confirm',
+                  cancelText: locale === 'th' ? 'ยกเลิก' : 'Cancel',
+                  variant: 'info',
+                  onConfirm: handleSubmit,
+                })
+              }}
               className="w-full bg-neutral-900 text-white py-3 font-semibold hover:bg-black transition-colors disabled:opacity-50"
             >
               {submitting ? (

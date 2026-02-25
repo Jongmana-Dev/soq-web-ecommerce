@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { z } from 'zod'
 import { useAlertStore } from '@/lib/alert-store'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-type Props = { locale: string }
+type Props = { locale: string; onDirtyChange?: (dirty: boolean) => void }
 
 const taxSchema = z.object({
   name: z.string().min(1).max(255),
@@ -13,7 +14,7 @@ const taxSchema = z.object({
   note: z.string().max(500).optional().or(z.literal('')),
 })
 
-export default function TaxInfoForm({ locale }: Props) {
+export default function TaxInfoForm({ locale, onDirtyChange }: Props) {
   const [name, setName] = useState('')
   const [taxId, setTaxId] = useState('')
   const [address, setAddress] = useState('')
@@ -24,6 +25,19 @@ export default function TaxInfoForm({ locale }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [originals, setOriginals] = useState({ name: '', tax_id: '', address: '', note: '' })
   const [hasData, setHasData] = useState(false)
+
+  const isDirty = useMemo(
+    () =>
+      isEditing &&
+      (name !== originals.name ||
+        taxId !== originals.tax_id ||
+        address !== originals.address ||
+        note !== originals.note),
+    [isEditing, name, taxId, address, note, originals],
+  )
+  useUnsavedChanges(isDirty)
+
+  useEffect(() => { onDirtyChange?.(isDirty) }, [isDirty, onDirtyChange])
 
   useEffect(() => {
     fetch('/api/auth-proxy/tax-info')

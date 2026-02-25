@@ -41,6 +41,7 @@ interface ShippingFormProps {
 }
 
 const REFERRAL_OPTIONS = ['search', 'facebook', 'line', 'friend', 'ig', 'event', 'other'] as const;
+const FEATURE_TAX_INFO = process.env.NEXT_PUBLIC_FEATURE_TAX_INFO === 'true';
 
 export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFormProps) {
   const t = useTranslations();
@@ -67,6 +68,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [savedTaxInfo, setSavedTaxInfo] = useState<{ name: string; tax_id: string; address: string; note?: string } | null>(null);
+  const [isReturning, setIsReturning] = useState(false);
 
   // "other" = กรอกที่อยู่ใหม่ (กรณีมีที่อยู่อยู่แล้วแต่ต้องการส่งที่อื่น)
   const isOtherMode = selectedAddressId === '__other__';
@@ -83,13 +85,19 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
       return res.json();
     };
     const fetchTax = async () => {
+      if (!FEATURE_TAX_INFO) return { data: null };
       const res = await fetch('/api/auth-proxy/tax-info');
       if (!res.ok) return { data: null };
       return res.json();
     };
+    const fetchReturning = async () => {
+      const res = await fetch('/api/orders-proxy/is-returning');
+      if (!res.ok) return { data: { returning: false } };
+      return res.json();
+    };
 
-    Promise.all([fetchAddr(), fetchTax()])
-      .then(([addrRes, taxRes]) => {
+    Promise.all([fetchAddr(), fetchTax(), fetchReturning()])
+      .then(([addrRes, taxRes, returningRes]) => {
         const addresses = addrRes.data ?? [];
         setSavedAddresses(addresses);
         if (addresses.length > 0) {
@@ -100,6 +108,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
         if (taxRes.data) {
           setSavedTaxInfo(taxRes.data);
         }
+        setIsReturning(returningRes.data?.returning ?? false);
       })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
@@ -388,73 +397,77 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
         )}
       </div>
 
-      {/* Referral Source */}
-      <div>
-        <label className={labelClass}>{t('checkout.referralSource')}</label>
-        <select
-          className={inputClass}
-          value={referralSource}
-          onChange={(e) => setReferralSource(e.target.value)}
-        >
-          <option value="">—</option>
-          {REFERRAL_OPTIONS.map((key) => (
-            <option key={key} value={key}>
-              {t(`checkout.referralOptions.${key}`)}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Referral Source — only for new customers */}
+      {!isReturning && (
+        <div>
+          <label className={labelClass}>{t('checkout.referralSource')}</label>
+          <select
+            className={inputClass}
+            value={referralSource}
+            onChange={(e) => setReferralSource(e.target.value)}
+          >
+            <option value="">—</option>
+            {REFERRAL_OPTIONS.map((key) => (
+              <option key={key} value={key}>
+                {t(`checkout.referralOptions.${key}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Tax Invoice */}
-      <div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={taxInvoice}
-            onChange={(e) => {
-              const checked = e.target.checked;
-              setTaxInvoice(checked);
-              if (checked && savedTaxInfo && !taxName && !taxId && !taxAddress) {
-                setTaxName(savedTaxInfo.name);
-                setTaxId(savedTaxInfo.tax_id);
-                setTaxAddress(savedTaxInfo.address);
-                setTaxNote(savedTaxInfo.note ?? '');
-              }
-            }}
-            className="accent-[var(--accent)]"
-          />
-          <span className="text-sm font-medium text-neutral-700">{t('checkout.taxInvoice')}</span>
-        </label>
+      {FEATURE_TAX_INFO && (
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={taxInvoice}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setTaxInvoice(checked);
+                if (checked && savedTaxInfo && !taxName && !taxId && !taxAddress) {
+                  setTaxName(savedTaxInfo.name);
+                  setTaxId(savedTaxInfo.tax_id);
+                  setTaxAddress(savedTaxInfo.address);
+                  setTaxNote(savedTaxInfo.note ?? '');
+                }
+              }}
+              className="accent-[var(--accent)]"
+            />
+            <span className="text-sm font-medium text-neutral-700">{t('checkout.taxInvoice')}</span>
+          </label>
 
-        {taxInvoice && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pl-6">
-            <div>
-              <label className={labelClass}>{t('checkout.taxName')}</label>
-              <input className={inputClass} value={taxName} onChange={(e) => setTaxName(e.target.value)} />
-              {errors.taxName && <p className={errorClass}>{errors.taxName}</p>}
+          {taxInvoice && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pl-6">
+              <div>
+                <label className={labelClass}>{t('checkout.taxName')}</label>
+                <input className={inputClass} value={taxName} onChange={(e) => setTaxName(e.target.value)} />
+                {errors.taxName && <p className={errorClass}>{errors.taxName}</p>}
+              </div>
+              <div>
+                <label className={labelClass}>{t('checkout.taxId')}</label>
+                <input className={inputClass} value={taxId} onChange={(e) => setTaxId(e.target.value)} />
+                {errors.taxId && <p className={errorClass}>{errors.taxId}</p>}
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelClass}>{t('checkout.taxAddress')}</label>
+                <input className={inputClass} value={taxAddress} onChange={(e) => setTaxAddress(e.target.value)} />
+                {errors.taxAddress && <p className={errorClass}>{errors.taxAddress}</p>}
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelClass}>{locale === 'th' ? 'หมายเหตุเพิ่มเติม' : 'Additional Notes'}</label>
+                <textarea
+                  className={`${inputClass} min-h-[60px] resize-y`}
+                  value={taxNote}
+                  onChange={(e) => setTaxNote(e.target.value)}
+                  placeholder={locale === 'th' ? 'ระบุรายละเอียดเพิ่มเติม (ถ้ามี)' : 'Additional details (if any)'}
+                />
+              </div>
             </div>
-            <div>
-              <label className={labelClass}>{t('checkout.taxId')}</label>
-              <input className={inputClass} value={taxId} onChange={(e) => setTaxId(e.target.value)} />
-              {errors.taxId && <p className={errorClass}>{errors.taxId}</p>}
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{t('checkout.taxAddress')}</label>
-              <input className={inputClass} value={taxAddress} onChange={(e) => setTaxAddress(e.target.value)} />
-              {errors.taxAddress && <p className={errorClass}>{errors.taxAddress}</p>}
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{locale === 'th' ? 'หมายเหตุเพิ่มเติม' : 'Additional Notes'}</label>
-              <textarea
-                className={`${inputClass} min-h-[60px] resize-y`}
-                value={taxNote}
-                onChange={(e) => setTaxNote(e.target.value)}
-                placeholder={locale === 'th' ? 'ระบุรายละเอียดเพิ่มเติม (ถ้ามี)' : 'Additional details (if any)'}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Note */}
       <div>

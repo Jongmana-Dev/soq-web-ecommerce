@@ -1,15 +1,19 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { z } from 'zod'
-import type { SiteSetting } from '@/lib/cms'
-
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 type ContactModalProps = {
   onClose: () => void
 }
+
+const FACEBOOK_CHAT_URL = process.env.NEXT_PUBLIC_FACEBOOK_CHAT_URL ?? ''
+const LINE_ID = process.env.NEXT_PUBLIC_LINE_ID ?? ''
+const LINE_URL = LINE_ID ? `https://line.me/R/ti/p/${LINE_ID}` : ''
+const PHONE = process.env.NEXT_PUBLIC_PHONE ?? ''
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Required').max(120),
@@ -26,8 +30,6 @@ type View = 'channels' | 'form'
 export default function ContactModal({ onClose }: ContactModalProps) {
   const locale = useLocale()
   const [view, setView] = useState<View>('channels')
-  const [settings, setSettings] = useState<SiteSetting[]>([])
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({})
@@ -39,14 +41,11 @@ export default function ContactModal({ onClose }: ContactModalProps) {
     message: '',
   })
 
-  // Fetch settings on mount
-  useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => r.json())
-      .then((res) => setSettings(res.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  const isDirty = useMemo(
+    () => view === 'form' && !submitted && (form.name !== '' || form.email !== '' || form.subject !== '' || form.message !== ''),
+    [view, submitted, form.name, form.email, form.subject, form.message],
+  )
+  useUnsavedChanges(isDirty)
 
   // Lock body scroll
   useEffect(() => {
@@ -63,9 +62,6 @@ export default function ContactModal({ onClose }: ContactModalProps) {
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
   }, [handleEsc])
-
-  const getSetting = (key: string) =>
-    settings.find((s) => s.key === key)?.value ?? ''
 
   const handleChange = (field: keyof ContactForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -103,27 +99,33 @@ export default function ContactModal({ onClose }: ContactModalProps) {
   }
 
   const channels = [
-    {
-      key: 'facebook',
-      icon: 'fa-brands fa-facebook-f',
-      label: 'Facebook',
-      color: 'hover:border-[#1877F2] hover:text-[#1877F2]',
-      href: getSetting('facebook_url'),
-    },
-    {
-      key: 'line',
-      icon: 'fa-brands fa-line',
-      label: 'LINE Official',
-      color: 'hover:border-[#06C755] hover:text-[#06C755]',
-      href: getSetting('line_official_url'),
-    },
-    {
-      key: 'phone',
-      icon: 'fa-solid fa-phone',
-      label: getSetting('company_phone') || (locale === 'th' ? 'โทรศัพท์' : 'Phone'),
-      color: 'hover:border-emerald-500 hover:text-emerald-500',
-      href: getSetting('company_phone') ? `tel:${getSetting('company_phone')}` : '',
-    },
+    ...(FACEBOOK_CHAT_URL
+      ? [{
+          key: 'facebook',
+          icon: 'fa-brands fa-facebook-f',
+          label: 'Facebook Messenger',
+          color: 'hover:border-[#1877F2] hover:text-[#1877F2]',
+          href: FACEBOOK_CHAT_URL,
+        }]
+      : []),
+    ...(LINE_URL
+      ? [{
+          key: 'line',
+          icon: 'fa-brands fa-line',
+          label: 'LINE Official',
+          color: 'hover:border-[#06C755] hover:text-[#06C755]',
+          href: LINE_URL,
+        }]
+      : []),
+    ...(PHONE
+      ? [{
+          key: 'phone',
+          icon: 'fa-solid fa-phone',
+          label: PHONE,
+          color: 'hover:border-emerald-500 hover:text-emerald-500',
+          href: `tel:${PHONE.replace(/-/g, '')}`,
+        }]
+      : []),
     {
       key: 'email',
       icon: 'fa-solid fa-envelope',
@@ -196,43 +198,37 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       : 'Choose your preferred channel'}
                   </p>
 
-                  {loading ? (
-                    <div className="flex justify-center py-8">
-                      <i className="fa-solid fa-spinner fa-spin text-neutral-300 text-2xl" />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {channels.map((ch) => {
-                        if (ch.onClick) {
-                          return (
-                            <button
-                              key={ch.key}
-                              onClick={ch.onClick}
-                              className={`w-full flex items-center gap-4 px-5 py-4 border border-neutral-200 text-neutral-600 transition-all ${ch.color}`}
-                            >
-                              <i className={`${ch.icon} text-xl w-6 text-center`} />
-                              <span className="font-medium">{ch.label}</span>
-                              <i className="fa-solid fa-arrow-right ml-auto text-sm opacity-40" />
-                            </button>
-                          )
-                        }
-                        if (!ch.href) return null
+                  <div className="space-y-3">
+                    {channels.map((ch) => {
+                      if (ch.onClick) {
                         return (
-                          <a
+                          <button
                             key={ch.key}
-                            href={ch.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex items-center gap-4 px-5 py-4 border border-neutral-200 text-neutral-600 transition-all ${ch.color}`}
+                            onClick={ch.onClick}
+                            className={`w-full flex items-center gap-4 px-5 py-4 border border-neutral-200 text-neutral-600 transition-all ${ch.color}`}
                           >
                             <i className={`${ch.icon} text-xl w-6 text-center`} />
                             <span className="font-medium">{ch.label}</span>
-                            <i className="fa-solid fa-arrow-up-right-from-square ml-auto text-sm opacity-40" />
-                          </a>
+                            <i className="fa-solid fa-arrow-right ml-auto text-sm opacity-40" />
+                          </button>
                         )
-                      })}
-                    </div>
-                  )}
+                      }
+                      if (!ch.href) return null
+                      return (
+                        <a
+                          key={ch.key}
+                          href={ch.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex items-center gap-4 px-5 py-4 border border-neutral-200 text-neutral-600 transition-all ${ch.color}`}
+                        >
+                          <i className={`${ch.icon} text-xl w-6 text-center`} />
+                          <span className="font-medium">{ch.label}</span>
+                          <i className="fa-solid fa-arrow-up-right-from-square ml-auto text-sm opacity-40" />
+                        </a>
+                      )
+                    })}
+                  </div>
                 </motion.div>
               )}
 

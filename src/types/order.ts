@@ -1,3 +1,14 @@
+export interface SlipOkVerification {
+  transRef: string
+  amount: number
+  sendingBank: string
+  receivingBank: string
+  transDate: string
+  transTime: string
+  sender: { displayName: string; name: string }
+  receiver: { displayName: string; name: string }
+}
+
 export type OrderStatus = 'pending_payment' | 'confirm_payment' | 'shipped' | 'delivered' | 'cancel_order' | 'expire'
 export type PaymentStatus = 'pending' | 'confirmed' | 'rejected'
 

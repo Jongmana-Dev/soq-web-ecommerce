@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
@@ -15,66 +15,25 @@ type FAQItem = {
   icon: string
 }
 
-const FAQ_ITEMS: FAQItem[] = [
-  {
-    id: '1',
-    icon: 'fa-solid fa-box',
-    question_th: 'สินค้าแตกต่างจากที่อื่นอย่างไร?',
-    question_en: 'How is the product different?',
-    answer_th: 'Star San เป็นน้ำยาฆ่าเชื้อที่ไม่ต้องล้างน้ำซ้ำ (No-Rinse) ผลิตภัณฑ์ของเราได้รับการรับรองคุณภาพจากหน่วยงานมาตรฐานและใช้ในอุตสาหกรรมการต้มเบียร์ทั่วโลก',
-    answer_en: 'Star San is a no-rinse sanitizer. Our products are certified by quality standards agencies and used in brewing industries worldwide.',
-  },
-  {
-    id: '2',
-    icon: 'fa-solid fa-flask',
-    question_th: 'สินค้าผลิตที่ไหน?',
-    question_en: 'Where are the products made?',
-    answer_th: 'ผลิตภัณฑ์ของเรานำเข้าจากโรงงานที่ได้รับมาตรฐาน FDA และผ่านการตรวจสอบคุณภาพก่อนจำหน่ายทุกล็อต',
-    answer_en: 'Our products are imported from FDA-certified factories and undergo quality inspection before every batch is sold.',
-  },
-  {
-    id: '3',
-    icon: 'fa-solid fa-truck-fast',
-    question_th: 'มีการจัดส่งต่างประเทศไหม?',
-    question_en: 'Is international shipping available?',
-    answer_th: 'ขณะนี้เราจัดส่งเฉพาะในประเทศไทย แต่กำลังเตรียมการจัดส่งไปยังประเทศในภูมิภาคอาเซียนเร็วๆ นี้',
-    answer_en: 'Currently we only ship within Thailand, but we are preparing to ship to ASEAN countries soon.',
-  },
-  {
-    id: '4',
-    icon: 'fa-solid fa-rotate',
-    question_th: 'นโยบายการคืน/เปลี่ยนสินค้า?',
-    question_en: 'Return/exchange policy?',
-    answer_th: 'สามารถคืนหรือเปลี่ยนสินค้าได้ภายใน 7 วันหลังได้รับสินค้า หากสินค้าชำรุดหรือไม่ตรงตามคำสั่งซื้อ',
-    answer_en: 'You can return or exchange within 7 days of receiving the product if it is damaged or does not match your order.',
-  },
-  {
-    id: '5',
-    icon: 'fa-solid fa-clock',
-    question_th: 'ใช้เวลาจัดส่งนานแค่ไหน?',
-    question_en: 'How long does shipping take?',
-    answer_th: 'จัดส่งภายใน 1-3 วันทำการในเขตกรุงเทพฯ และ 3-5 วันทำการในต่างจังหวัด',
-    answer_en: 'Delivery within 1-3 business days in Bangkok and 3-5 business days for other provinces.',
-  },
-  {
-    id: '6',
-    icon: 'fa-solid fa-headset',
-    question_th: 'ติดต่อฝ่ายบริการลูกค้าได้อย่างไร?',
-    question_en: 'How to contact customer service?',
-    answer_th: 'ติดต่อเราได้ทาง Line Official, Facebook Messenger หรือ Email ตลอด 24 ชั่วโมง',
-    answer_en: 'Contact us via Line Official, Facebook Messenger or Email 24/7.',
-  },
-]
-
 export default function FAQ() {
   const locale = useLocale()
   const [openId, setOpenId] = useState<string | null>(null)
   const [showContact, setShowContact] = useState(false)
+  const [faqs, setFaqs] = useState<FAQItem[]>([])
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+
+  useEffect(() => {
+    fetch('/api/faqs')
+      .then((res) => res.json())
+      .then((json) => setFaqs(json.data ?? []))
+      .catch(() => setFaqs([]))
+  }, [])
 
   const toggleFAQ = (id: string) => {
     setOpenId(openId === id ? null : id)
   }
+
+  if (faqs.length === 0) return null
 
   return (
     <section
@@ -99,9 +58,9 @@ export default function FAQ() {
           </h2>
         </motion.div>
 
-        {/* FAQ Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {FAQ_ITEMS.map((item, index) => (
+        {/* FAQ Stack */}
+        <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+          {faqs.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -129,7 +88,7 @@ export default function FAQ() {
                   >
                     <i className={`${item.icon} text-sm`} />
                   </span>
-                  
+
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
                        <span className="font-prompt text-lg font-medium text-neutral-900">

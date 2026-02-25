@@ -113,6 +113,13 @@ function TermsModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+/* ─── Social config from env ─── */
+const LINE_ID = process.env.NEXT_PUBLIC_LINE_ID ?? ''
+const LINE_URL = LINE_ID ? `https://line.me/R/ti/p/${LINE_ID}` : ''
+const FACEBOOK_URL = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? ''
+const PHONE = process.env.NEXT_PUBLIC_PHONE ?? ''
+const EMAIL = process.env.NEXT_PUBLIC_EMAIL ?? ''
+
 /* ─── Footer ─── */
 export default function Footer() {
   const t = useTranslations('footer')
@@ -191,39 +198,70 @@ export default function Footer() {
               className="lg:col-span-4 lg:col-start-9 flex flex-col items-center lg:items-end gap-6"
             >
               {/* LINE QR Code */}
-              <div className="bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
-                <div className="w-40 h-40 flex items-center justify-center">
-                  <div className="w-full h-full border-2 border-dashed border-neutral-300 rounded-lg flex items-center justify-center text-neutral-400">
+              {LINE_URL ? (
+                <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="block">
+                  <div className="bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
+                    <img
+                      src="/line_oa.webp"
+                      alt="LINE Official Account QR Code"
+                      width={160}
+                      height={160}
+                      className="w-40 h-40 object-contain rounded-lg"
+                    />
+                  </div>
+                </a>
+              ) : (
+                <div className="bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
+                  <div className="w-40 h-40 border-2 border-dashed border-neutral-300 rounded-lg flex items-center justify-center text-neutral-400">
                     <span className="text-xs">LINE QR</span>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <p className="text-neutral-500 text-sm">{t('addLine')}</p>
+              {/* <p className="text-neutral-500 text-sm">{t('addLine')}</p> */}
 
               {/* Social icons */}
               <div className="flex gap-3">
-                <a
-                  href="#"
-                  aria-label="Facebook"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
-                >
-                  <i className="fa-brands fa-facebook-f text-sm" />
-                </a>
-                <a
-                  href="#"
-                  aria-label="LINE"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#06C755] hover:text-[#06C755] transition-colors"
-                >
-                  <i className="fa-brands fa-line text-sm" />
-                </a>
-                <a
-                  href="mailto:contact@soq.co.th"
-                  aria-label="Email"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
-                >
-                  <i className="fa-solid fa-envelope text-sm" />
-                </a>
+                {FACEBOOK_URL && (
+                  <a
+                    href={FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
+                  >
+                    <i className="fa-brands fa-facebook-f text-sm" />
+                  </a>
+                )}
+                {LINE_URL && (
+                  <a
+                    href={LINE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LINE"
+                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#06C755] hover:text-[#06C755] transition-colors"
+                  >
+                    <i className="fa-brands fa-line text-sm" />
+                  </a>
+                )}
+                {PHONE && (
+                  <a
+                    href={`tel:${PHONE.replace(/-/g, '')}`}
+                    aria-label="Phone"
+                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-emerald-500 hover:text-emerald-500 transition-colors"
+                  >
+                    <i className="fa-solid fa-phone text-sm" />
+                  </a>
+                )}
+                {EMAIL && (
+                  <button
+                    onClick={() => setShowContact(true)}
+                    aria-label="Email"
+                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
+                  >
+                    <i className="fa-solid fa-envelope text-sm" />
+                  </button>
+                )}
               </div>
 
               {/* Nav — mobile */}

@@ -1,29 +1,56 @@
 "use client";
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useAlertStore } from '@/lib/alert-store';
 import PromptPayQR from './PromptPayQR';
+
+export interface PaymentAccount {
+  type: 'promptpay' | 'bank_transfer';
+  account_number: string;
+  account_name: string;
+  bank_name?: string | null;
+  bank_branch?: string | null;
+}
 
 interface PaymentStepProps {
   total: number;
   orderNumber?: string;
-  createdAt?: string;
+  expiredAt?: string;
   onSubmit: (slipBase64: string) => void;
   onBack: () => void;
   submitting: boolean;
+  paymentAccounts: PaymentAccount[];
+  error?: string | null;
 }
 
-export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, onBack, submitting }: PaymentStepProps) {
+export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, onBack, submitting, paymentAccounts, error }: PaymentStepProps) {
   const t = useTranslations();
   const locale = useLocale();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [slipBase64, setSlipBase64] = useState<string>('');
 
+  // Auto-clear slip when verification fails so user can re-upload
+  useEffect(() => {
+    if (error) {
+      setPreview(null);
+      setSlipBase64('');
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }, [error]);
+
+  const promptpay = paymentAccounts.find((a) => a.type === 'promptpay');
+  const bankTransfer = paymentAccounts.find((a) => a.type === 'bank_transfer');
+  const hasBoth = !!promptpay && !!bankTransfer;
+
+  const [activeTab, setActiveTab] = useState<'promptpay' | 'bank_transfer'>(
+    promptpay ? 'promptpay' : 'bank_transfer',
+  );
+
   const deadline = useMemo(() => {
-    if (!createdAt) return null;
-    const d = new Date(new Date(createdAt).getTime() + 6 * 60 * 60 * 1000);
-    return d.toLocaleString('th-TH', {
+    if (!expiredAt) return null;
+    return new Date(expiredAt).toLocaleString('th-TH', {
       timeZone: 'Asia/Bangkok',
       day: 'numeric',
       month: 'long',
@@ -31,7 +58,7 @@ export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, o
       hour: '2-digit',
       minute: '2-digit',
     });
-  }, [createdAt]);
+  }, [expiredAt]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,7 +95,7 @@ export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, o
         </button>
       </div>
 
-      {/* PromptPay Section */}
+      {/* Payment Method Section */}
       <div className="border border-emerald-200 bg-emerald-50/30 p-6 space-y-5">
         <div className="flex items-center gap-2 justify-center">
           <i className="fa-solid fa-building-columns text-emerald-600" />
@@ -76,9 +103,69 @@ export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, o
         </div>
         <p className="text-sm text-neutral-500 text-center">{t('checkout.promptpayDesc')}</p>
 
-        <div className="flex justify-center">
-          <PromptPayQR amount={total} />
-        </div>
+        {/* Tabs */}
+        {hasBoth && (
+          <div className="flex border border-neutral-200 bg-white overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setActiveTab('promptpay')}
+              className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'promptpay'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-neutral-500 hover:bg-neutral-50'
+              }`}
+            >
+              <i className="fa-solid fa-qrcode mr-1.5" />
+              {locale === 'th' ? 'พร้อมเพย์' : 'PromptPay'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('bank_transfer')}
+              className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'bank_transfer'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-neutral-500 hover:bg-neutral-50'
+              }`}
+            >
+              <i className="fa-solid fa-building-columns mr-1.5" />
+              {locale === 'th' ? 'โอนเงิน' : 'Bank Transfer'}
+            </button>
+          </div>
+        )}
+
+        {/* PromptPay Content */}
+        {activeTab === 'promptpay' && promptpay && (
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <PromptPayQR amount={total} promptpayId={promptpay.account_number} />
+            </div>
+            <p className="text-sm text-neutral-600 text-center font-medium">{promptpay.account_name}</p>
+          </div>
+        )}
+
+        {/* Bank Transfer Content */}
+        {activeTab === 'bank_transfer' && bankTransfer && (
+          <div className="bg-white border border-neutral-200 p-5 space-y-3">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'ธนาคาร' : 'Bank'}</span>
+              <span className="font-medium text-neutral-900">{bankTransfer.bank_name}</span>
+            </div>
+            {bankTransfer.bank_branch && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'สาขา' : 'Branch'}</span>
+                <span className="text-neutral-700">{bankTransfer.bank_branch}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'เลขบัญชี' : 'Account'}</span>
+              <span className="font-mono font-semibold text-neutral-900 tracking-wide">{bankTransfer.account_number}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-neutral-400 w-20 shrink-0">{locale === 'th' ? 'ชื่อบัญชี' : 'Name'}</span>
+              <span className="text-neutral-700">{bankTransfer.account_name}</span>
+            </div>
+          </div>
+        )}
 
         <div className="text-center">
           <div className="text-2xl font-bold text-neutral-900">฿{total.toLocaleString()}</div>
@@ -103,6 +190,21 @@ export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, o
           <h4 className="font-semibold">{t('checkout.uploadSlip')}</h4>
         </div>
         <p className="text-sm text-neutral-500">{t('checkout.uploadSlipDesc')}</p>
+
+        {/* Slip verification warning */}
+        <div className="flex gap-3 bg-blue-50 border border-blue-200 px-4 py-3">
+          <i className="fa-solid fa-shield-halved text-blue-600 mt-0.5 shrink-0" />
+          <div className="text-sm text-blue-800 space-y-1">
+            <p className="font-medium">
+              {locale === 'th' ? 'สลิปจะถูกตรวจสอบอัตโนมัติ' : 'Slip will be verified automatically'}
+            </p>
+            <ul className="list-disc list-inside text-blue-700 text-xs space-y-0.5">
+              <li>{locale === 'th' ? 'ยอดเงินต้องตรงกับคำสั่งซื้อ' : 'Amount must match the order total'}</li>
+              <li>{locale === 'th' ? 'สลิปแต่ละใบใช้ได้เพียงครั้งเดียว' : 'Each slip can only be used once'}</li>
+              <li>{locale === 'th' ? 'กรุณาใช้สลิปที่ชัดเจนและไม่ถูกครอบตัด' : 'Please use a clear and uncropped slip'}</li>
+            </ul>
+          </div>
+        </div>
 
         <input
           ref={fileRef}
@@ -144,7 +246,18 @@ export default function PaymentStep({ total, orderNumber, createdAt, onSubmit, o
       <button
         type="button"
         disabled={!slipBase64 || submitting}
-        onClick={() => onSubmit(slipBase64)}
+        onClick={() => {
+          useAlertStore.getState().showConfirm({
+            title: locale === 'th' ? 'ยืนยันการชำระเงิน' : 'Confirm Payment',
+            message: locale === 'th'
+              ? `ยืนยันส่งหลักฐานการชำระเงิน ฿${total.toLocaleString()} ใช่หรือไม่?\n\nสลิปจะถูกตรวจสอบอัตโนมัติก่อนยืนยันคำสั่งซื้อ`
+              : `Confirm payment of ฿${total.toLocaleString()}?\n\nThe slip will be verified automatically before confirming your order.`,
+            confirmText: locale === 'th' ? 'ยืนยัน' : 'Confirm',
+            cancelText: locale === 'th' ? 'ยกเลิก' : 'Cancel',
+            variant: 'info',
+            onConfirm: () => onSubmit(slipBase64),
+          });
+        }}
         className="w-full bg-neutral-900 text-white py-3.5 font-semibold hover:bg-black transition-colors disabled:opacity-50"
       >
         {submitting ? (

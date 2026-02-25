@@ -21,13 +21,24 @@ type ConfirmOptions = {
   onCancel?: () => void
 }
 
+type ResultAlertOptions = {
+  type: AlertType
+  title: string
+  message?: string
+  buttonText?: string
+  onClose?: () => void
+}
+
 type AlertStore = {
   alerts: AlertItem[]
   confirm: ConfirmOptions | null
+  resultAlert: ResultAlertOptions | null
   showAlert: (type: AlertType, title: string, message?: string) => void
   hideAlert: (id: string) => void
   showConfirm: (options: ConfirmOptions) => void
   hideConfirm: () => void
+  showResultAlert: (options: ResultAlertOptions) => void
+  hideResultAlert: () => void
 }
 
 let alertCounter = 0
@@ -35,6 +46,7 @@ let alertCounter = 0
 export const useAlertStore = create<AlertStore>((set) => ({
   alerts: [],
   confirm: null,
+  resultAlert: null,
   showAlert: (type, title, message) => {
     const id = `alert-${++alertCounter}`
     set((s) => ({ alerts: [...s.alerts, { id, type, title, message }] }))
@@ -46,4 +58,6 @@ export const useAlertStore = create<AlertStore>((set) => ({
     set((s) => ({ alerts: s.alerts.filter((a) => a.id !== id) })),
   showConfirm: (options) => set({ confirm: options }),
   hideConfirm: () => set({ confirm: null }),
+  showResultAlert: (options) => set({ resultAlert: options }),
+  hideResultAlert: () => set({ resultAlert: null }),
 }))

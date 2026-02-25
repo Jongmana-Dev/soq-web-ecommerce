@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { z } from 'zod'
 import { useAlertStore } from '@/lib/alert-store'
 import { useThaiGeography, useGeoSelections } from '@/hooks/useThaiGeography'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
 type Address = {
   id: string
@@ -18,7 +19,7 @@ type Address = {
   is_default: boolean
 }
 
-type Props = { locale: string }
+type Props = { locale: string; onDirtyChange?: (dirty: boolean) => void }
 
 const addressSchema = z.object({
   recipient_name: z.string().min(1, 'required').max(100, 'name_too_long'),
@@ -44,7 +45,7 @@ const emptyForm: AddressForm = {
   is_default: false,
 }
 
-export default function AddressList({ locale }: Props) {
+export default function AddressList({ locale, onDirtyChange }: Props) {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -52,6 +53,14 @@ export default function AddressList({ locale }: Props) {
   const [form, setForm] = useState<AddressForm>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof AddressForm, string>>>({})
+
+  const isDirty = useMemo(
+    () => showForm && (form.recipient_name !== '' || form.phone !== '' || form.address_line !== ''),
+    [showForm, form.recipient_name, form.phone, form.address_line],
+  )
+  useUnsavedChanges(isDirty)
+
+  useEffect(() => { onDirtyChange?.(isDirty) }, [isDirty, onDirtyChange])
 
   // Thai geography
   const { data: geoData } = useThaiGeography()

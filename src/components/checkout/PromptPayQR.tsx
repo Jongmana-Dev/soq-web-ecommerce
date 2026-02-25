@@ -5,12 +5,21 @@ import { QRCodeSVG } from 'qrcode.react'
 
 interface PromptPayQRProps {
   amount: number
+  promptpayId: string
 }
 
-const PROMPTPAY_ID = '0612344899'
+export default function PromptPayQR({ amount, promptpayId }: PromptPayQRProps) {
+  if (!promptpayId) {
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-[256px] h-[256px] border border-neutral-200 p-1 flex items-center justify-center">
+          <i className="fa-solid fa-spinner fa-spin text-2xl text-neutral-300" />
+        </div>
+      </div>
+    )
+  }
 
-export default function PromptPayQR({ amount }: PromptPayQRProps) {
-  const payload = generatePayload(PROMPTPAY_ID, { amount })
+  const payload = generatePayload(promptpayId, { amount })
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -21,7 +30,7 @@ export default function PromptPayQR({ amount }: PromptPayQRProps) {
         includeMargin
         className="border border-neutral-200 p-1"
       />
-      <p className="text-xs text-neutral-400">PromptPay: {PROMPTPAY_ID}</p>
+      <p className="text-xs text-neutral-400">PromptPay: {promptpayId}</p>
     </div>
   )
 }

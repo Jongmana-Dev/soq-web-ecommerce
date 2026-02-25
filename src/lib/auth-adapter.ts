@@ -4,6 +4,8 @@ import type {
   AdapterAccount,
   AdapterSession,
 } from 'next-auth/adapters'
+import { sendWelcomeEmail } from '@/lib/notifications/email'
+import { notifyNewMember } from '@/lib/notifications/telegram'
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3001'
 const ADAPTER_SECRET = process.env.ADAPTER_API_SECRET ?? ''
@@ -19,6 +21,7 @@ async function adapterFetch<T>(
       'X-Adapter-Secret': ADAPTER_SECRET,
     },
     body: JSON.stringify(body),
+    cache: 'no-store',
   })
 
   if (!res.ok) {
@@ -51,6 +54,13 @@ export function soqAdapter(): Adapter {
           image: user.image,
         },
       )
+
+      // Fire welcome notifications (non-blocking)
+      if (data.email) {
+        sendWelcomeEmail(data.name ?? null, data.email).catch(() => {})
+        notifyNewMember(data.name ?? null, data.email).catch(() => {})
+      }
+
       return fixUserDates(data)
     },
 

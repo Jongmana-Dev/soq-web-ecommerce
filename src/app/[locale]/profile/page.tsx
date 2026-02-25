@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
@@ -12,10 +12,15 @@ import FullscreenLoading from '@/components/ui/FullscreenLoading'
 import AddressList from '@/components/profile/AddressList'
 import TaxInfoForm from '@/components/profile/TaxInfoForm'
 import Footer from '@/components/sections/Footer'
+import { confirmUnsaved } from '@/hooks/useUnsavedChanges'
 
 type Tab = 'personal' | 'addresses' | 'tax-info'
 
-const validTabs: Tab[] = ['personal', 'addresses', 'tax-info']
+const FEATURE_TAX_INFO = process.env.NEXT_PUBLIC_FEATURE_TAX_INFO === 'true'
+
+const validTabs: Tab[] = FEATURE_TAX_INFO
+  ? ['personal', 'addresses', 'tax-info']
+  : ['personal', 'addresses']
 
 export default function ProfilePage() {
   const locale = useLocale()
@@ -27,6 +32,23 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<Tab>(
     tabParam && validTabs.includes(tabParam) ? tabParam : 'personal'
   )
+
+  // Track dirty state from child forms
+  const dirtyRef = useRef(false)
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    dirtyRef.current = dirty
+  }, [])
+
+  const handleTabChange = useCallback(async (tab: Tab) => {
+    if (tab === activeTab) return
+
+    if (dirtyRef.current) {
+      const discard = await confirmUnsaved()
+      if (!discard) return
+    }
+
+    setActiveTab(tab)
+  }, [activeTab])
 
   useEffect(() => {
     if (tabParam && validTabs.includes(tabParam)) {
@@ -55,7 +77,7 @@ export default function ProfilePage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'personal', label: t.personal },
     { key: 'addresses', label: t.addresses },
-    { key: 'tax-info', label: t.taxInfo },
+    ...(FEATURE_TAX_INFO ? [{ key: 'tax-info' as Tab, label: t.taxInfo }] : []),
   ]
 
   return (
@@ -86,7 +108,7 @@ export default function ProfilePage() {
             {tabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`relative px-5 py-3 text-sm font-medium transition-colors ${
                   activeTab === tab.key
                     ? 'text-neutral-900'
@@ -108,13 +130,18 @@ export default function ProfilePage() {
           {/* Content */}
           <div className="bg-white border border-neutral-200 p-6 sm:p-8">
             {activeTab === 'personal' && (
-              <ProfileForm session={session} onUpdate={update} locale={locale} />
+              <ProfileForm
+                session={session}
+                onUpdate={update}
+                locale={locale}
+                onDirtyChange={handleDirtyChange}
+              />
             )}
             {activeTab === 'addresses' && (
-              <AddressList locale={locale} />
+              <AddressList locale={locale} onDirtyChange={handleDirtyChange} />
             )}
-            {activeTab === 'tax-info' && (
-              <TaxInfoForm locale={locale} />
+            {FEATURE_TAX_INFO && activeTab === 'tax-info' && (
+              <TaxInfoForm locale={locale} onDirtyChange={handleDirtyChange} />
             )}
           </div>
         </div>

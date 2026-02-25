@@ -22,6 +22,14 @@ interface RemoteProvince {
   surcharge: number;
 }
 
+interface PaymentAccount {
+  type: 'promptpay' | 'bank_transfer';
+  account_number: string;
+  account_name: string;
+  bank_name?: string | null;
+  bank_branch?: string | null;
+}
+
 type Step = 'shipping' | 'payment';
 
 export default function CheckoutPage() {
@@ -40,7 +48,7 @@ export default function CheckoutPage() {
   // Order state (created before showing QR)
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
-  const [orderCreatedAt, setOrderCreatedAt] = useState<string | null>(null);
+  const [orderExpiredAt, setOrderExpiredAt] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number>(0);
 
   // Shipping config from API
@@ -48,13 +56,23 @@ export default function CheckoutPage() {
   const [remoteProvinces, setRemoteProvinces] = useState<RemoteProvince[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
 
-  // Fetch shipping config on mount
+  // Payment accounts from API
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
+
+  // Fetch shipping config + payment accounts on mount
   useEffect(() => {
     fetch('/api/settings-proxy/shipping')
       .then((res) => res.json())
       .then((data) => {
         setShippingRates(data.rates ?? []);
         setRemoteProvinces(data.remote_provinces ?? []);
+      })
+      .catch(() => {});
+
+    fetch('/api/settings-proxy/payment-accounts')
+      .then((res) => res.json())
+      .then((json) => {
+        setPaymentAccounts(json.data ?? []);
       })
       .catch(() => {});
   }, []);
@@ -225,7 +243,7 @@ export default function CheckoutPage() {
 
       setOrderId(order.id);
       setOrderNumber(order.order_number);
-      setOrderCreatedAt(order.created_at);
+      setOrderExpiredAt(order.expired_at);
       setOrderTotal(order.total);
       prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
       setStep('payment');
@@ -238,32 +256,51 @@ export default function CheckoutPage() {
     }
   };
 
-  // --- Upload slip (order already exists) ---
+  // --- Upload slip → verify with SlipOk → forward to backend ---
   const handleUploadSlip = async (slipBase64: string) => {
     if (!orderId) return;
     setSubmitting(true);
     setError(null);
 
     try {
-      const paymentRes = await fetch(`/api/orders-proxy/${orderId}/payment`, {
+      const res = await fetch('/api/verify-slip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          method: 'promptpay',
           slip_image: slipBase64,
+          order_id: orderId,
+          amount: orderTotal,
+          locale,
         }),
       });
 
-      if (!paymentRes.ok) {
-        const errData = await paymentRes.json();
-        throw new Error(errData.message || 'Failed to upload payment');
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to verify slip');
       }
 
-      clear();
-      router.push({ pathname: '/checkout/confirmation', query: { order: orderNumber ?? '' } });
+      useAlertStore.getState().showResultAlert({
+        type: 'success',
+        title: locale === 'th' ? 'ตรวจสอบสลิปสำเร็จ' : 'Slip Verified',
+        message: locale === 'th' ? 'สลิปถูกต้อง กำลังยืนยันคำสั่งซื้อ...' : 'Slip is valid. Confirming your order...',
+        buttonText: locale === 'th' ? 'ตกลง' : 'OK',
+        onClose: () => {
+          clear();
+          router.push({ pathname: '/checkout/confirmation', query: { order: orderNumber ?? '' } });
+        },
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setError(message);
       setSubmitting(false);
+
+      useAlertStore.getState().showResultAlert({
+        type: 'error',
+        title: locale === 'th' ? 'ตรวจสอบสลิปไม่ผ่าน' : 'Slip Verification Failed',
+        message,
+        buttonText: locale === 'th' ? 'ตกลง' : 'OK',
+      });
     }
   };
 
@@ -277,7 +314,7 @@ export default function CheckoutPage() {
       }
       setOrderId(null);
       setOrderNumber(null);
-      setOrderCreatedAt(null);
+      setOrderExpiredAt(null);
       setOrderTotal(0);
     }
     setStep('shipping');
@@ -309,10 +346,12 @@ export default function CheckoutPage() {
               <PaymentStep
                 total={orderTotal}
                 orderNumber={orderNumber ?? undefined}
-                createdAt={orderCreatedAt ?? undefined}
+                expiredAt={orderExpiredAt ?? undefined}
                 onSubmit={handleUploadSlip}
                 onBack={handleBack}
                 submitting={submitting}
+                paymentAccounts={paymentAccounts}
+                error={error}
               />
             )}
           </div>

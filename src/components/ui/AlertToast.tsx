@@ -25,18 +25,43 @@ const iconBgMap: Record<AlertType, string> = {
   info: 'bg-blue-500',
 }
 
+const resultIconMap: Record<AlertType, { icon: string; bg: string; border: string }> = {
+  success: { icon: 'fa-solid fa-circle-check text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  error: { icon: 'fa-solid fa-circle-xmark text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+  warning: { icon: 'fa-solid fa-triangle-exclamation text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  info: { icon: 'fa-solid fa-circle-info text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+}
+
+const resultAccentMap: Record<AlertType, string> = {
+  success: 'from-emerald-400 via-emerald-500 to-emerald-400',
+  error: 'from-red-400 via-red-500 to-red-400',
+  warning: 'from-amber-400 via-amber-500 to-amber-400',
+  info: 'from-blue-400 via-blue-500 to-blue-400',
+}
+
+const resultButtonMap: Record<AlertType, string> = {
+  success: 'bg-emerald-600 hover:bg-emerald-700',
+  error: 'bg-red-600 hover:bg-red-700',
+  warning: 'bg-amber-600 hover:bg-amber-700',
+  info: 'bg-blue-600 hover:bg-blue-700',
+}
+
 export default function AlertToast() {
-  const { alerts, hideAlert, confirm, hideConfirm } = useAlertStore()
+  const { alerts, hideAlert, confirm, hideConfirm, resultAlert, hideResultAlert } = useAlertStore()
   const [confirming, setConfirming] = useState(false)
 
   const handleConfirm = async () => {
     if (!confirm) return
+    const current = confirm
     setConfirming(true)
     try {
-      await confirm.onConfirm()
+      await current.onConfirm()
     } finally {
       setConfirming(false)
-      hideConfirm()
+      // Only hide if no new confirm was shown during onConfirm callback
+      if (useAlertStore.getState().confirm === current) {
+        hideConfirm()
+      }
     }
   }
 
@@ -196,6 +221,78 @@ export default function AlertToast() {
                       )}
                     </button>
                   </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+
+      {/* Result Alert Modal — centered with single OK button */}
+      <AnimatePresence>
+        {resultAlert && (() => {
+          const style = resultIconMap[resultAlert.type]
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[310] flex items-center justify-center p-4"
+              onClick={() => { resultAlert.onClose?.(); hideResultAlert() }}
+            >
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 30, scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-sm bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden"
+              >
+                {/* Accent bar */}
+                <div className={`h-[3px] bg-gradient-to-r ${resultAccentMap[resultAlert.type]}`} />
+
+                <div className="p-6">
+                  {/* Icon */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.1 }}
+                    className={`w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center ${style.bg} border ${style.border}`}
+                  >
+                    <i className={`text-2xl ${style.icon}`} />
+                  </motion.div>
+
+                  <motion.h3
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="text-center text-lg font-semibold text-neutral-100 mb-2"
+                  >
+                    {resultAlert.title}
+                  </motion.h3>
+
+                  {resultAlert.message && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-center text-sm text-neutral-400 mb-6 whitespace-pre-line"
+                    >
+                      {resultAlert.message}
+                    </motion.p>
+                  )}
+
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.25 }}
+                    onClick={() => { resultAlert.onClose?.(); hideResultAlert() }}
+                    className={`w-full px-4 py-2.5 text-sm font-medium text-white transition-colors ${resultButtonMap[resultAlert.type]}`}
+                  >
+                    {resultAlert.buttonText ?? 'OK'}
+                  </motion.button>
                 </div>
               </motion.div>
             </motion.div>
