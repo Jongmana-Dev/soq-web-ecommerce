@@ -108,6 +108,7 @@ export default function ProductShowcase({ products }: Props) {
                            src={feature.image}
                            alt={feature.title_en}
                            fill
+                           sizes="(max-width: 768px) 100vw, 33vw"
                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                          />
                          <div className="absolute top-4 left-4 text-6xl font-black text-white/80 z-10 drop-shadow-md">

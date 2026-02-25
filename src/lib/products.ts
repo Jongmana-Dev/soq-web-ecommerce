@@ -30,7 +30,7 @@ interface ApiResponse<T> {
 
 export async function getProducts(): Promise<ProductData[]> {
   const res = await apiFetch<ApiResponse<ProductData[]>>('/api/products', {
-    next: { revalidate: 60 },
+    next: { revalidate: 300 },
   })
   return res.data
 }
@@ -38,7 +38,7 @@ export async function getProducts(): Promise<ProductData[]> {
 export async function getProductBySlug(slug: string): Promise<ProductData | undefined> {
   try {
     const res = await apiFetch<ApiResponse<ProductData>>(`/api/products/${slug}`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 300 },
     })
     return res.data
   } catch {

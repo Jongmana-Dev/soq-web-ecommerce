@@ -130,6 +130,7 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
                 src={product.image}
                 alt={locale === 'th' ? product.name_th : product.name_en}
                 fill
+                sizes="(max-width: 768px) 80vw, 40vw"
                 className="object-contain drop-shadow-2xl mix-blend-multiply"
               />
               {/* Decorative Elements on Image */}

@@ -40,7 +40,7 @@ interface ApiResponse<T> {
 export async function getReviews(): Promise<Review[]> {
   try {
     const res = await apiFetch<ApiResponse<Review[]>>('/api/cms/reviews', {
-      next: { revalidate: 60 },
+      next: { revalidate: 300 },
     })
     return res.data
   } catch {
@@ -52,7 +52,7 @@ export async function getCertifications(): Promise<Certification[]> {
   try {
     const res = await apiFetch<ApiResponse<Certification[]>>(
       '/api/cms/certifications',
-      { next: { revalidate: 60 } },
+      { next: { revalidate: 300 } },
     )
     return res.data
   } catch {

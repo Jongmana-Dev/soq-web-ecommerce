@@ -5,8 +5,10 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig = {
+  output: 'standalone' as const,
   reactStrictMode: true,
   typedRoutes: true,
+  compress: true,
   async redirects() {
     return [
       // Redirect bare paths (without locale) to default locale
@@ -18,6 +20,8 @@ const nextConfig = {
     ]
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 3600,
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
       { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
@@ -34,7 +38,23 @@ const nextConfig = {
       { protocol: 'https', hostname: 'lh3.googleusercontent.com', pathname: '/**' },
       { protocol: 'https', hostname: 'profile.line-scdn.net', pathname: '/**' },
     ]
-  }
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ]
+  },
 } satisfies NextConfig
 
 export default withNextIntl(nextConfig)

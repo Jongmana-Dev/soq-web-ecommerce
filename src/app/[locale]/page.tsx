@@ -7,7 +7,7 @@ import Footer from '@/components/sections/Footer'
 import { getProducts } from '@/lib/products'
 import { getReviews, getCertifications } from '@/lib/cms'
 
-export const revalidate = 60
+export const revalidate = 300
 
 export default async function IndexPage() {
   const [products, reviews, certifications] = await Promise.all([

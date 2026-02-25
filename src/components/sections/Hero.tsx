@@ -82,6 +82,7 @@ export default function Hero() {
                 src="/images/hero-mockup-bottles.png"
                 alt="Star San Sanitizer Products"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-contain drop-shadow-2xl scale-125 lg:scale-150 origin-center lg:origin-right"
                 priority
               />

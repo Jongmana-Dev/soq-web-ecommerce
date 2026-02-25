@@ -12,11 +12,11 @@ import CartExpiryGuard from '@/components/cart/CartExpiryGuard'
 import SessionProvider from '@/providers/SessionProvider'
 import '@/app/globals.css'
 
-const prompt = Prompt({ 
-  subsets: ['latin', 'thai'], 
-  weight: ['300', '400', '500', '600', '700'], 
+const prompt = Prompt({
+  subsets: ['latin', 'thai'],
+  weight: ['400', '600', '700'],
   display: 'swap',
-  variable: '--font-prompt' 
+  variable: '--font-prompt'
 })
 const poppins = Poppins({ 
   subsets: ['latin'], 
@@ -32,16 +32,15 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* ================ FIX HERE ================ */}
-        {/* เพิ่ม CDN link สำหรับ Font Awesome Icons */}
-        <link 
-          rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
-          crossOrigin="anonymous" 
-          referrerPolicy="no-referrer" 
+        {/* Font Awesome — preconnect + deferred load */}
+        <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
         />
-        {/* ========================================== */}
       </head>
       {/* แก้ไข: ยืนยันว่า body มี pt-[76px] */}
       <body className={`${prompt.variable} ${poppins.variable} font-prompt`}>

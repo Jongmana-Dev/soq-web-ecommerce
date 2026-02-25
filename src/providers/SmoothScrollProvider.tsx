@@ -1,29 +1,38 @@
 'use client'
-import {useEffect} from 'react'
-import Lenis from '@studio-freight/lenis'
+import { useEffect } from 'react'
 
 type Props = { children: React.ReactNode }
 
-export default function SmoothScrollProvider({children}: Props) {
+/**
+ * Lightweight replacement for Lenis smooth-scroll.
+ * Uses native CSS scroll-behavior: smooth (set in globals.css).
+ * Keeps: IntersectionObserver section tracking, anchor click handling,
+ *        sectionchange / navjumpstart / navjumpend custom events.
+ */
+export default function SmoothScrollProvider({ children }: Props) {
   useEffect(() => {
-    const lenis = new Lenis({ duration: 0.8, smoothWheel: true, lerp: 0.12, wheelMultiplier: 1.2 })
-
-    let rafId = 0
-    const raf = (t: number) => {  lenis.raf(t); rafId = requestAnimationFrame(raf) }
-    rafId = requestAnimationFrame(raf)
-
+    // --- Section tracking via IntersectionObserver ---
     const updateActive = (id: string) => {
       document.body.dataset.activeSection = id
       window.dispatchEvent(new CustomEvent('sectionchange', { detail: id }))
     }
-    const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-section="true"]'))
-    const io = new IntersectionObserver((entries) => {
-      const top = entries.filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRect.height - a.intersectionRect.height)[0]
-      if (top?.target?.id) updateActive(top.target.id)
-    }, { threshold: [0.25, 0.5, 0.75], rootMargin: '-10% 0px -30% 0px' })
-    sections.forEach(s => io.observe(s))
 
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-section="true"]'),
+    )
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const top = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRect.height - a.intersectionRect.height)[0]
+        if (top?.target?.id) updateActive(top.target.id)
+      },
+      { threshold: [0.25, 0.5], rootMargin: '-10% 0px -30% 0px' },
+    )
+    sections.forEach((s) => io.observe(s))
+
+    // --- Anchor click → native smooth scroll + events ---
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a') as HTMLAnchorElement | null
       if (!a) return
@@ -34,21 +43,25 @@ export default function SmoothScrollProvider({children}: Props) {
       e.preventDefault()
 
       window.dispatchEvent(new CustomEvent('navjumpstart', { detail: href.slice(1) }))
-      lenis.scrollTo(el, { offset: -80 })
-      el.classList.add('section-flash')
-      setTimeout(() => el.classList.remove('section-flash'), 650)
-      setTimeout(() => window.dispatchEvent(new CustomEvent('navjumpend', { detail: href.slice(1) })), 900)
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+      // Fire navjumpend after scroll animation (~600ms)
+      setTimeout(
+        () => window.dispatchEvent(new CustomEvent('navjumpend', { detail: href.slice(1) })),
+        700,
+      )
     }
     document.addEventListener('click', onClick, true)
 
     return () => {
       document.removeEventListener('click', onClick, true)
-      sections.forEach(s => io.unobserve(s)); io.disconnect()
-      cancelAnimationFrame(rafId)
-      lenis.destroy?.()
+      sections.forEach((s) => io.unobserve(s))
+      io.disconnect()
     }
   }, [])
 
   return <>{children}</>
 }
+
 export { SmoothScrollProvider as LenisProvider }

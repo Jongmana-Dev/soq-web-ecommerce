@@ -32,6 +32,7 @@ export default async function ProductPage({
             src={product.image}
             alt={name}
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-contain p-8"
           />
         </div>
