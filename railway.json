@@ -4,7 +4,6 @@
         "builder": "NIXPACKS"
     },
     "deploy": {
-        "startCommand": "pnpm start",
         "healthcheckPath": "/th",
         "healthcheckTimeout": 60,
         "restartPolicyType": "ON_FAILURE",
