@@ -25,6 +25,15 @@ export interface Review {
   sort_order: number
 }
 
+export interface FAQItem {
+  id: string
+  question_th: string
+  question_en: string
+  answer_th: string
+  answer_en: string
+  icon: string
+}
+
 export interface SiteSetting {
   key: string
   value: string
@@ -40,7 +49,7 @@ interface ApiResponse<T> {
 export async function getReviews(): Promise<Review[]> {
   try {
     const res = await apiFetch<ApiResponse<Review[]>>('/api/cms/reviews', {
-      next: { revalidate: 300 },
+      next: { revalidate: 3600, tags: ['landing'] },
     })
     return res.data
   } catch {
@@ -52,7 +61,7 @@ export async function getCertifications(): Promise<Certification[]> {
   try {
     const res = await apiFetch<ApiResponse<Certification[]>>(
       '/api/cms/certifications',
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 3600, tags: ['landing'] } },
     )
     return res.data
   } catch {
@@ -63,7 +72,18 @@ export async function getCertifications(): Promise<Certification[]> {
 export async function getSettings(): Promise<SiteSetting[]> {
   try {
     const res = await apiFetch<ApiResponse<SiteSetting[]>>('/api/settings', {
-      next: { revalidate: 300 },
+      next: { revalidate: 3600, tags: ['landing'] },
+    })
+    return res.data
+  } catch {
+    return []
+  }
+}
+
+export async function getFAQs(): Promise<FAQItem[]> {
+  try {
+    const res = await apiFetch<ApiResponse<FAQItem[]>>('/api/cms/faqs', {
+      next: { revalidate: 3600, tags: ['landing'] },
     })
     return res.data
   } catch {

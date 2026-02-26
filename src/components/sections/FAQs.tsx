@@ -1,33 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import ContactModal from '@/components/modals/ContactModal'
+import type { FAQItem } from '@/lib/cms'
 
-type FAQItem = {
-  id: string
-  question_th: string
-  question_en: string
-  answer_th: string
-  answer_en: string
-  icon: string
+interface FAQsProps {
+  faqs: FAQItem[]
 }
 
-export default function FAQ() {
+export default function FAQ({ faqs }: FAQsProps) {
   const locale = useLocale()
   const [openId, setOpenId] = useState<string | null>(null)
   const [showContact, setShowContact] = useState(false)
-  const [faqs, setFaqs] = useState<FAQItem[]>([])
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
-
-  useEffect(() => {
-    fetch('/api/faqs')
-      .then((res) => res.json())
-      .then((json) => setFaqs(json.data ?? []))
-      .catch(() => setFaqs([]))
-  }, [])
 
   const toggleFAQ = (id: string) => {
     setOpenId(openId === id ? null : id)

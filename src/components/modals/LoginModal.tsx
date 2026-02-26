@@ -69,7 +69,7 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
             {!isLoading && (
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-neutral-400 hover:text-white rounded-full"
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-white rounded-full"
                 aria-label="Close"
               >
                 <i className="fa-solid fa-xmark text-lg" />

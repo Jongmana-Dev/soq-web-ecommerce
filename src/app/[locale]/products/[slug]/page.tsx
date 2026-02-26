@@ -1,10 +1,46 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { getProductBySlug, getProducts } from '@/lib/products'
 
+const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://soqthailand.com'
+
 export async function generateStaticParams() {
   const products = await getProducts()
   return products.map((p) => ({ slug: p.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale, slug } = await params
+  const product = await getProductBySlug(slug)
+  if (!product) return {}
+
+  const name = locale === 'th' ? product.name_th : product.name_en
+  const desc = locale === 'th' ? product.short_desc_th : product.short_desc_en
+
+  return {
+    title: name,
+    description: desc,
+    alternates: {
+      canonical: `${base}/${locale}/products/${slug}`,
+      languages: {
+        th: `${base}/th/products/${slug}`,
+        en: `${base}/en/products/${slug}`,
+      },
+    },
+    openGraph: {
+      title: name,
+      description: desc,
+      url: `${base}/${locale}/products/${slug}`,
+      images: product.image ? [product.image] : undefined,
+      locale: locale === 'th' ? 'th_TH' : 'en_US',
+      alternateLocale: locale === 'th' ? 'en_US' : 'th_TH',
+    },
+  }
 }
 
 export default async function ProductPage({
