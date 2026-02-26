@@ -38,6 +38,7 @@ export default function FAQ() {
   return (
     <section
       id="faq"
+      data-section="true"
       ref={ref}
       className="relative bg-[#F5F5F7] py-20 lg:py-28"
     >

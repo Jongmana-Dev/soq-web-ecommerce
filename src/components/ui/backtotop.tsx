@@ -43,7 +43,7 @@ export default function BackToTop() {
               exit={{ opacity: 0, scale: 0.8, y: 10 }}
               transition={{ duration: 0.2 }}
               onClick={scrollToTop}
-              className="pointer-events-auto flex h-12 w-12 items-center justify-center bg-white border border-gray-200 text-neutral-900 shadow-lg hover:bg-gray-50 transition-all hover:scale-105"
+              className="pointer-events-auto flex h-14 w-14 items-center justify-center bg-white border border-gray-200 text-neutral-900 shadow-lg hover:bg-gray-50 transition-all hover:scale-105"
               aria-label="Scroll to top"
             >
               <i className="fa-solid fa-arrow-up text-sm" />

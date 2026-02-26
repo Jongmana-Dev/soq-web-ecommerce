@@ -10,6 +10,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
+      data-section="true"
       className="relative min-h-screen w-full overflow-hidden bg-[#EFEFEF]"
     >
       {/* Background pattern */}

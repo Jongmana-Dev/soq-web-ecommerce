@@ -11,7 +11,8 @@ import { MiniCart } from "@/components/MiniCart";
 import { useCart } from "@/lib/store";
 import ContactModal from "@/components/modals/ContactModal";
 import LoginModal from "@/components/modals/LoginModal";
-import { useSession, signOut } from "next-auth/react";
+import LogoutConfirmModal from "@/components/modals/LogoutConfirmModal";
+import { useSession } from "next-auth/react";
 import { usePendingOrders } from "@/lib/pending-orders-store";
 
 function Navbar() {
@@ -43,6 +44,7 @@ function Navbar() {
   const [isContactOpen, setContactOpen] = React.useState(false);
   const [isLoginOpen, setLoginOpen] = React.useState(false);
   const [isUserDropdownOpen, setUserDropdownOpen] = React.useState(false);
+  const [isLogoutModalOpen, setLogoutModalOpen] = React.useState(false);
 
   const itemCount = useCart((state) =>
     state.items.reduce((total, item) => total + item.qty, 0)
@@ -305,7 +307,7 @@ function Navbar() {
                         )}
                       </a>
                       <button
-                        onClick={() => { setUserDropdownOpen(false); signOut({ callbackUrl: "/" }); }}
+                        onClick={() => { setUserDropdownOpen(false); setLogoutModalOpen(true); }}
                         className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                           isDarkNav
                             ? "text-neutral-300 hover:bg-white/5 hover:text-white"
@@ -544,7 +546,7 @@ function Navbar() {
                         )}
                       </a>
                       <button
-                        onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }); }}
+                        onClick={() => { setMobileMenuOpen(false); setLogoutModalOpen(true); }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-all w-full text-left"
                       >
                         <i className="fa-solid fa-right-from-bracket w-4 text-xs text-center" />
@@ -600,6 +602,7 @@ function Navbar() {
 
       {isContactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
       {isLoginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
+      {isLogoutModalOpen && <LogoutConfirmModal onClose={() => setLogoutModalOpen(false)} />}
     </>
   );
 }

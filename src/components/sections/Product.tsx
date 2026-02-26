@@ -55,6 +55,7 @@ export default function ProductShowcase({ products }: Props) {
   return (
     <section
       id="products"
+      data-section="true"
       ref={ref}
       className="relative bg-[#F5F5F7] py-20 lg:py-32 overflow-hidden"
     >

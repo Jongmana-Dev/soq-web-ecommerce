@@ -19,6 +19,7 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
   return (
     <section
       id="industrial-standards"
+      data-section="true"
       ref={ref}
       className="relative overflow-hidden bg-white py-20 lg:py-28"
     >

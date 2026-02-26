@@ -51,6 +51,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
   return (
     <section
       id="testimonials"
+      data-section="true"
       ref={ref}
       className="relative overflow-hidden bg-[#EAEAEA] py-16 sm:py-20 lg:py-28"
     >

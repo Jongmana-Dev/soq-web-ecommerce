@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,6 +13,7 @@ type LoginModalProps = {
 
 export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
   const locale = useLocale()
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -20,8 +21,8 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
   }, [])
 
   const handleEsc = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') onClose()
-  }, [onClose])
+    if (!loadingProvider && e.key === 'Escape') onClose()
+  }, [onClose, loadingProvider])
 
   useEffect(() => {
     window.addEventListener('keydown', handleEsc)
@@ -29,6 +30,7 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
   }, [handleEsc])
 
   const handleOAuth = (provider: string) => {
+    setLoadingProvider(provider)
     signIn(provider, { callbackUrl: callbackUrl ?? `/${locale}/profile` })
   }
 
@@ -37,7 +39,10 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
     desc: locale === 'th' ? 'เลือกช่องทางเข้าสู่ระบบ' : 'Choose a sign in method',
     google: locale === 'th' ? 'เข้าสู่ระบบด้วย Google' : 'Continue with Google',
     line: locale === 'th' ? 'เข้าสู่ระบบด้วย LINE' : 'Continue with LINE',
+    signing_in: locale === 'th' ? 'กำลังเข้าสู่ระบบ...' : 'Signing in...',
   }
+
+  const isLoading = loadingProvider !== null
 
   return createPortal(
     <AnimatePresence>
@@ -46,7 +51,7 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-        onClick={onClose}
+        onClick={isLoading ? undefined : onClose}
       >
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
@@ -61,13 +66,15 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 bg-neutral-900">
             <h2 className="text-lg font-semibold text-white">{t.title}</h2>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-neutral-400 hover:text-white rounded-full"
-              aria-label="Close"
-            >
-              <i className="fa-solid fa-xmark text-lg" />
-            </button>
+            {!isLoading && (
+              <button
+                onClick={onClose}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/10 transition-colors text-neutral-400 hover:text-white rounded-full"
+                aria-label="Close"
+              >
+                <i className="fa-solid fa-xmark text-lg" />
+              </button>
+            )}
           </div>
 
           {/* Content */}
@@ -77,17 +84,39 @@ export default function LoginModal({ onClose, callbackUrl }: LoginModalProps) {
             <div className="space-y-3">
               <button
                 onClick={() => handleOAuth('google')}
-                className="w-full flex items-center gap-4 px-5 py-3.5 border border-neutral-200 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all"
+                disabled={isLoading}
+                className={`w-full flex items-center gap-4 px-5 py-3.5 border border-neutral-200 transition-all ${
+                  isLoading
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50'
+                }`}
               >
-                <i className="fa-brands fa-google text-lg w-5 text-center text-[#4285F4]" />
-                <span className="font-medium text-sm">{t.google}</span>
+                {loadingProvider === 'google' ? (
+                  <i className="fa-solid fa-spinner fa-spin text-lg w-5 text-center text-[#4285F4]" />
+                ) : (
+                  <i className="fa-brands fa-google text-lg w-5 text-center text-[#4285F4]" />
+                )}
+                <span className="font-medium text-sm">
+                  {loadingProvider === 'google' ? t.signing_in : t.google}
+                </span>
               </button>
               <button
                 onClick={() => handleOAuth('line')}
-                className="w-full flex items-center gap-4 px-5 py-3.5 border border-neutral-200 text-neutral-700 hover:border-[#06C755] hover:bg-[#06C755]/5 transition-all"
+                disabled={isLoading}
+                className={`w-full flex items-center gap-4 px-5 py-3.5 border border-neutral-200 transition-all ${
+                  isLoading
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'text-neutral-700 hover:border-[#06C755] hover:bg-[#06C755]/5'
+                }`}
               >
-                <i className="fa-brands fa-line text-lg w-5 text-center text-[#06C755]" />
-                <span className="font-medium text-sm">{t.line}</span>
+                {loadingProvider === 'line' ? (
+                  <i className="fa-solid fa-spinner fa-spin text-lg w-5 text-center text-[#06C755]" />
+                ) : (
+                  <i className="fa-brands fa-line text-lg w-5 text-center text-[#06C755]" />
+                )}
+                <span className="font-medium text-sm">
+                  {loadingProvider === 'line' ? t.signing_in : t.line}
+                </span>
               </button>
             </div>
           </div>

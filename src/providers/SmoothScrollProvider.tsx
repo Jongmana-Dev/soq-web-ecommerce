@@ -15,6 +15,7 @@ export default function SmoothScrollProvider({ children }: Props) {
     const updateActive = (id: string) => {
       document.body.dataset.activeSection = id
       window.dispatchEvent(new CustomEvent('sectionchange', { detail: id }))
+      window.history.replaceState(null, '', '#' + id)
     }
 
     const sections = Array.from(
@@ -41,6 +42,7 @@ export default function SmoothScrollProvider({ children }: Props) {
       const el = document.querySelector<HTMLElement>(href)
       if (!el) return
       e.preventDefault()
+      window.history.replaceState(null, '', href)
 
       window.dispatchEvent(new CustomEvent('navjumpstart', { detail: href.slice(1) }))
 
