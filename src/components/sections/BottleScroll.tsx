@@ -14,7 +14,7 @@ const LERP = 0.18
 export default function BottleScroll({ progress }: { progress: MotionValue<number> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
-  const bitmapsRef = useRef<(ImageBitmap | null)[]>([])
+  const imagesRef = useRef<HTMLImageElement[]>([])
   const [loaded, setLoaded] = useState(false)
   const targetRef = useRef(0)
   const currentRef = useRef(0)
@@ -25,42 +25,24 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
   const drawParamsRef = useRef<{ x: number; y: number; w: number; h: number }[]>([])
   const canvasSizeRef = useRef({ w: 0, h: 0 })
 
-  // Preload all frames as ImageBitmap for faster GPU-backed drawing
+  // Preload all frames via HTMLImageElement (correct alpha handling)
   useEffect(() => {
     let mounted = true
+    const images: HTMLImageElement[] = []
+    let count = 0
 
-    const loadAll = async () => {
-      const promises = FRAMES.map(async (src) => {
-        const res = await fetch(src)
-        const blob = await res.blob()
-        return createImageBitmap(blob)
-      })
-
-      const bitmaps = await Promise.all(promises)
-      if (mounted) {
-        bitmapsRef.current = bitmaps
-        setLoaded(true)
-      }
-    }
-
-    loadAll().catch(() => {
-      // Fallback: load as regular images if createImageBitmap fails
-      const images: HTMLImageElement[] = []
-      let count = 0
-      FRAMES.forEach((src, i) => {
-        const img = new Image()
-        img.decoding = 'async'
-        img.src = src
-        img.onload = () => {
-          count++
-          if (count === FRAME_COUNT && mounted) {
-            // Store as any — drawImage accepts both
-            bitmapsRef.current = images as unknown as ImageBitmap[]
-            setLoaded(true)
-          }
+    FRAMES.forEach((src, i) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = src
+      img.onload = () => {
+        count++
+        if (count === FRAME_COUNT && mounted) {
+          imagesRef.current = images
+          setLoaded(true)
         }
-        images[i] = img
-      })
+      }
+      images[i] = img
     })
 
     return () => { mounted = false }
@@ -68,16 +50,18 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
 
   // Recompute draw params for all frames when canvas size changes
   const recomputeDrawParams = useCallback((cssW: number, cssH: number) => {
-    const bitmaps = bitmapsRef.current
-    if (!bitmaps.length) return
+    const images = imagesRef.current
+    if (!images.length) return
 
     const params: { x: number; y: number; w: number; h: number }[] = []
-    for (let i = 0; i < bitmaps.length; i++) {
-      const bm = bitmaps[i]
-      if (!bm) { params.push({ x: 0, y: 0, w: 0, h: 0 }); continue }
-      const fitScale = Math.min(cssW / bm.width, cssH / bm.height) * 1.15
-      const iw = bm.width * fitScale
-      const ih = bm.height * fitScale
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i]
+      if (!img) { params.push({ x: 0, y: 0, w: 0, h: 0 }); continue }
+      const natW = img.naturalWidth || img.width
+      const natH = img.naturalHeight || img.height
+      const fitScale = Math.min(cssW / natW, cssH / natH) * 1.15
+      const iw = natW * fitScale
+      const ih = natH * fitScale
       params.push({
         x: (cssW - iw) / 2,
         y: (cssH - ih) / 2,
@@ -128,12 +112,12 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     const { w, h } = canvasSizeRef.current
     if (!ctx || w === 0) return
 
-    const bm = bitmapsRef.current[frameIndex]
+    const img = imagesRef.current[frameIndex]
     const p = drawParamsRef.current[frameIndex]
-    if (!bm || !p) return
+    if (!img || !p) return
 
     ctx.clearRect(0, 0, w, h)
-    ctx.drawImage(bm, p.x, p.y, p.w, p.h)
+    ctx.drawImage(img, p.x, p.y, p.w, p.h)
   }, [])
 
   // Animation loop
