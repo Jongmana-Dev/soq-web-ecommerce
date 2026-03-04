@@ -123,7 +123,7 @@ export default function Hero({ products }: HeroProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: bottleY }}
-            className="relative w-full lg:flex-1 flex-1 min-h-[300px] sm:min-h-[350px] lg:h-[calc(85vh-76px)] -mt-4 lg:mt-0"
+            className="relative w-full lg:flex-1 flex-1 h-[300px] sm:h-[350px] lg:h-[calc(85vh-76px)] -mt-4 lg:mt-0"
           >
             {/* Geometric overlay — parallax, behind bottle canvas */}
             <motion.div

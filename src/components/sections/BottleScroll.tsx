@@ -9,41 +9,83 @@ const FRAMES = Array.from(
   (_, i) => `/images/soq-hero/frame-${String(i + 1).padStart(4, '0')}.webp`,
 )
 
-// Snappier lerp — responsive but still smooth
-const LERP = 0.12
+const LERP = 0.18
 
 export default function BottleScroll({ progress }: { progress: MotionValue<number> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
-  const imagesRef = useRef<HTMLImageElement[]>([])
+  const bitmapsRef = useRef<(ImageBitmap | null)[]>([])
   const [loaded, setLoaded] = useState(false)
   const targetRef = useRef(0)
   const currentRef = useRef(0)
   const rafRef = useRef(0)
   const lastFrameRef = useRef(-1)
-  const sizeRef = useRef({ w: 0, h: 0 })
+  const dprRef = useRef(1)
+  // Pre-computed draw params per frame (recalculated on resize)
+  const drawParamsRef = useRef<{ x: number; y: number; w: number; h: number }[]>([])
+  const canvasSizeRef = useRef({ w: 0, h: 0 })
 
-  // Preload all frames
+  // Preload all frames as ImageBitmap for faster GPU-backed drawing
   useEffect(() => {
     let mounted = true
-    const images: HTMLImageElement[] = []
-    let count = 0
 
-    FRAMES.forEach((src, i) => {
-      const img = new Image()
-      img.decoding = 'async'
-      img.src = src
-      img.onload = () => {
-        count++
-        if (count === FRAME_COUNT && mounted) {
-          imagesRef.current = images
-          setLoaded(true)
-        }
+    const loadAll = async () => {
+      const promises = FRAMES.map(async (src) => {
+        const res = await fetch(src)
+        const blob = await res.blob()
+        return createImageBitmap(blob)
+      })
+
+      const bitmaps = await Promise.all(promises)
+      if (mounted) {
+        bitmapsRef.current = bitmaps
+        setLoaded(true)
       }
-      images[i] = img
+    }
+
+    loadAll().catch(() => {
+      // Fallback: load as regular images if createImageBitmap fails
+      const images: HTMLImageElement[] = []
+      let count = 0
+      FRAMES.forEach((src, i) => {
+        const img = new Image()
+        img.decoding = 'async'
+        img.src = src
+        img.onload = () => {
+          count++
+          if (count === FRAME_COUNT && mounted) {
+            // Store as any — drawImage accepts both
+            bitmapsRef.current = images as unknown as ImageBitmap[]
+            setLoaded(true)
+          }
+        }
+        images[i] = img
+      })
     })
 
     return () => { mounted = false }
+  }, [])
+
+  // Recompute draw params for all frames when canvas size changes
+  const recomputeDrawParams = useCallback((cssW: number, cssH: number) => {
+    const bitmaps = bitmapsRef.current
+    if (!bitmaps.length) return
+
+    const params: { x: number; y: number; w: number; h: number }[] = []
+    for (let i = 0; i < bitmaps.length; i++) {
+      const bm = bitmaps[i]
+      if (!bm) { params.push({ x: 0, y: 0, w: 0, h: 0 }); continue }
+      const fitScale = Math.min(cssW / bm.width, cssH / bm.height) * 1.15
+      const iw = bm.width * fitScale
+      const ih = bm.height * fitScale
+      params.push({
+        x: (cssW - iw) / 2,
+        y: (cssH - ih) / 2,
+        w: iw,
+        h: ih,
+      })
+    }
+    drawParamsRef.current = params
   }, [])
 
   // Cache context + track size via ResizeObserver
@@ -51,57 +93,56 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     const canvas = canvasRef.current
     if (!canvas) return
 
-    ctxRef.current = canvas.getContext('2d', { desynchronized: true, alpha: true })
+    ctxRef.current = canvas.getContext('2d', { alpha: true })
+    dprRef.current = window.devicePixelRatio || 1
 
-    const dpr = window.devicePixelRatio || 1
     const resize = (w: number, h: number) => {
+      const dpr = dprRef.current
       const cw = Math.round(w * dpr)
       const ch = Math.round(h * dpr)
       if (canvas.width !== cw || canvas.height !== ch) {
         canvas.width = cw
         canvas.height = ch
+        // Set transform once on resize instead of every frame
+        ctxRef.current?.setTransform(dpr, 0, 0, dpr, 0, 0)
       }
-      sizeRef.current = { w, h }
+      canvasSizeRef.current = { w, h }
+      recomputeDrawParams(w, h)
+      lastFrameRef.current = -1
     }
 
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect
         resize(width, height)
-        // Redraw current frame after resize
-        lastFrameRef.current = -1
       }
     })
     ro.observe(canvas)
 
     return () => { ro.disconnect() }
-  }, [])
+  }, [recomputeDrawParams])
 
-  // Draw a specific frame
+  // Draw a specific frame — hot path, keep minimal
   const drawFrame = useCallback((frameIndex: number) => {
     const ctx = ctxRef.current
-    const { w, h } = sizeRef.current
+    const { w, h } = canvasSizeRef.current
     if (!ctx || w === 0) return
 
-    const img = imagesRef.current[frameIndex]
-    if (!img) return
+    const bm = bitmapsRef.current[frameIndex]
+    const p = drawParamsRef.current[frameIndex]
+    if (!bm || !p) return
 
-    const dpr = window.devicePixelRatio || 1
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, w, h)
-
-    const fitScale = Math.min(w / img.width, h / img.height) * 1.15
-    const iw = img.width * fitScale
-    const ih = img.height * fitScale
-    const x = (w - iw) / 2
-    const y = (h - ih) / 2
-
-    ctx.drawImage(img, x, y, iw, ih)
+    ctx.drawImage(bm, p.x, p.y, p.w, p.h)
   }, [])
 
   // Animation loop
   useEffect(() => {
     if (!loaded) return
+
+    // Recompute draw params now that bitmaps are loaded
+    const { w, h } = canvasSizeRef.current
+    if (w > 0) recomputeDrawParams(w, h)
 
     const unsubscribe = progress.on('change', (v) => {
       targetRef.current = Math.min(1, Math.max(0, v))
@@ -109,9 +150,8 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     targetRef.current = Math.min(1, Math.max(0, progress.get()))
 
     const tick = () => {
-      // Lerp toward target
       const diff = targetRef.current - currentRef.current
-      if (Math.abs(diff) > 0.0005) {
+      if (Math.abs(diff) > 0.001) {
         currentRef.current += diff * LERP
       } else {
         currentRef.current = targetRef.current
@@ -136,7 +176,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
       unsubscribe()
       cancelAnimationFrame(rafRef.current)
     }
-  }, [progress, loaded, drawFrame])
+  }, [progress, loaded, drawFrame, recomputeDrawParams])
 
   return (
     <motion.div

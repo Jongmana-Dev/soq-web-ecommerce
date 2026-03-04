@@ -34,21 +34,6 @@ function GeometricOverlayInner({ progress, triangleScale }: GeometricOverlayProp
         />
       </div>
 
-      {/* ── Black Rectangular Frame — larger than bottle ── */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible"
-        style={{ willChange: 'transform' }}
-      >
-        <div
-          style={{
-            width: '75%',
-            height: '90%',
-            transform: `translateY(${fastY}px)`,
-            border: `3.5px solid ${DARK}`,
-            willChange: 'transform',
-          }}
-        />
-      </div>
     </>
   )
 }
