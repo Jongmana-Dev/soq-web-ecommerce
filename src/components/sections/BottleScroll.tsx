@@ -29,38 +29,21 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
   useEffect(() => {
     let mounted = true
 
-    const loadAll = async () => {
-      const promises = FRAMES.map(async (src) => {
-        const res = await fetch(src)
-        const blob = await res.blob()
-        return createImageBitmap(blob)
-      })
+    const images: HTMLImageElement[] = []
+    let count = 0
 
-      const bitmaps = await Promise.all(promises)
-      if (mounted) {
-        bitmapsRef.current = bitmaps
-        setLoaded(true)
-      }
-    }
-
-    loadAll().catch(() => {
-      // Fallback: load as regular images if createImageBitmap fails
-      const images: HTMLImageElement[] = []
-      let count = 0
-      FRAMES.forEach((src, i) => {
-        const img = new Image()
-        img.decoding = 'async'
-        img.src = src
-        img.onload = () => {
-          count++
-          if (count === FRAME_COUNT && mounted) {
-            // Store as any — drawImage accepts both
-            bitmapsRef.current = images as unknown as ImageBitmap[]
-            setLoaded(true)
-          }
+    FRAMES.forEach((src, i) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = src
+      img.onload = () => {
+        count++
+        if (count === FRAME_COUNT && mounted) {
+          bitmapsRef.current = images as unknown as (ImageBitmap | null)[]
+          setLoaded(true)
         }
-        images[i] = img
-      })
+      }
+      images[i] = img
     })
 
     return () => { mounted = false }
@@ -132,8 +115,10 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     const p = drawParamsRef.current[frameIndex]
     if (!bm || !p) return
 
-    ctx.clearRect(0, 0, w, h)
+    // 'copy' replaces destination atomically — prevents ghosting/alpha artifacts
+    ctx.globalCompositeOperation = 'copy'
     ctx.drawImage(bm, p.x, p.y, p.w, p.h)
+    ctx.globalCompositeOperation = 'source-over'
   }, [])
 
   // Animation loop
@@ -188,7 +173,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
       <canvas
         ref={canvasRef}
         className="w-full h-full"
-        style={{ willChange: 'contents' }}
+        style={{ willChange: 'transform' }}
       />
     </motion.div>
   )
