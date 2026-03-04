@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, type MotionValue } from 'framer-motion'
 
 const FRAME_COUNT = 61
@@ -9,17 +9,19 @@ const FRAMES = Array.from(
   (_, i) => `/images/soq-hero/frame-${String(i + 1).padStart(4, '0')}.webp`,
 )
 
-// Very gentle — always smooth regardless of scroll speed
-const LERP = 0.04
+// Snappier lerp — responsive but still smooth
+const LERP = 0.12
 
 export default function BottleScroll({ progress }: { progress: MotionValue<number> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
   const imagesRef = useRef<HTMLImageElement[]>([])
   const [loaded, setLoaded] = useState(false)
   const targetRef = useRef(0)
   const currentRef = useRef(0)
   const rafRef = useRef(0)
   const lastFrameRef = useRef(-1)
+  const sizeRef = useRef({ w: 0, h: 0 })
 
   // Preload all frames
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
 
     FRAMES.forEach((src, i) => {
       const img = new Image()
+      img.decoding = 'async'
       img.src = src
       img.onload = () => {
         count++
@@ -43,6 +46,60 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     return () => { mounted = false }
   }, [])
 
+  // Cache context + track size via ResizeObserver
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    ctxRef.current = canvas.getContext('2d', { desynchronized: true, alpha: true })
+
+    const dpr = window.devicePixelRatio || 1
+    const resize = (w: number, h: number) => {
+      const cw = Math.round(w * dpr)
+      const ch = Math.round(h * dpr)
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw
+        canvas.height = ch
+      }
+      sizeRef.current = { w, h }
+    }
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect
+        resize(width, height)
+        // Redraw current frame after resize
+        lastFrameRef.current = -1
+      }
+    })
+    ro.observe(canvas)
+
+    return () => { ro.disconnect() }
+  }, [])
+
+  // Draw a specific frame
+  const drawFrame = useCallback((frameIndex: number) => {
+    const ctx = ctxRef.current
+    const { w, h } = sizeRef.current
+    if (!ctx || w === 0) return
+
+    const img = imagesRef.current[frameIndex]
+    if (!img) return
+
+    const dpr = window.devicePixelRatio || 1
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, w, h)
+
+    const fitScale = Math.min(w / img.width, h / img.height) * 1.15
+    const iw = img.width * fitScale
+    const ih = img.height * fitScale
+    const x = (w - iw) / 2
+    const y = (h - ih) / 2
+
+    ctx.drawImage(img, x, y, iw, ih)
+  }, [])
+
+  // Animation loop
   useEffect(() => {
     if (!loaded) return
 
@@ -52,21 +109,9 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     targetRef.current = Math.min(1, Math.max(0, progress.get()))
 
     const tick = () => {
-      const canvas = canvasRef.current
-      if (!canvas) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
-      }
-
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
-      }
-
       // Lerp toward target
       const diff = targetRef.current - currentRef.current
-      if (Math.abs(diff) > 0.0001) {
+      if (Math.abs(diff) > 0.0005) {
         currentRef.current += diff * LERP
       } else {
         currentRef.current = targetRef.current
@@ -77,38 +122,10 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
         Math.max(0, Math.round(currentRef.current * (FRAME_COUNT - 1))),
       )
 
-      // Skip if same frame
-      if (frameIndex === lastFrameRef.current) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
+      if (frameIndex !== lastFrameRef.current) {
+        drawFrame(frameIndex)
+        lastFrameRef.current = frameIndex
       }
-      lastFrameRef.current = frameIndex
-
-      const img = imagesRef.current[frameIndex]
-      if (!img) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
-      }
-
-      const dpr = window.devicePixelRatio || 1
-      const rect = canvas.getBoundingClientRect()
-
-      if (canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
-        canvas.width = Math.round(rect.width * dpr)
-        canvas.height = Math.round(rect.height * dpr)
-      }
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctx.clearRect(0, 0, rect.width, rect.height)
-
-      // Contain-fit, centered
-      const fitScale = Math.min(rect.width / img.width, rect.height / img.height) * 1.15
-      const w = img.width * fitScale
-      const h = img.height * fitScale
-      const x = (rect.width - w) / 2
-      const y = (rect.height - h) / 2
-
-      ctx.drawImage(img, x, y, w, h)
 
       rafRef.current = requestAnimationFrame(tick)
     }
@@ -119,7 +136,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
       unsubscribe()
       cancelAnimationFrame(rafRef.current)
     }
-  }, [progress, loaded])
+  }, [progress, loaded, drawFrame])
 
   return (
     <motion.div
@@ -131,6 +148,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
       <canvas
         ref={canvasRef}
         className="w-full h-full"
+        style={{ willChange: 'contents' }}
       />
     </motion.div>
   )
