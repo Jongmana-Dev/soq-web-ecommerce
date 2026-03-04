@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import type { Review } from '@/lib/cms'
-import { Float, useParallax } from '@/components/motion'
+import { useParallax } from '@/components/motion'
 
 type TestimonialsProps = {
   reviews: Review[]
@@ -67,18 +67,16 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
           {/* Left: Video / Intro */}
           <motion.div
             ref={leftRef}
-            initial={{ opacity: 0, x: -50 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 60 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: leftY }}
             className="relative"
           >
             {/* Header Text */}
             <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
               <h2 className="font-prompt text-4xl font-bold leading-tight text-neutral-800 lg:text-5xl">
-                <Float amplitude={5} duration={5} className="inline-block">
-                  <span className="text-[var(--accent)] text-6xl block mb-2">&#10077;</span>
-                </Float>
+                <span className="text-[var(--accent)] text-6xl block mb-2">&#10077;</span>
                 {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
               </h2>
@@ -137,9 +135,9 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
           {/* Right: Review Card */}
           <motion.div
              ref={rightRef}
-             initial={{ opacity: 0, x: 50 }}
-             animate={inView ? { opacity: 1, x: 0 } : {}}
-             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+             initial={{ opacity: 0, y: 60 }}
+             animate={inView ? { opacity: 1, y: 0 } : {}}
+             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
              style={{ y: rightY }}
              className="relative"
           >

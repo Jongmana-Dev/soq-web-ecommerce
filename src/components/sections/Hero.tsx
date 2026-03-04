@@ -12,7 +12,7 @@ import BottleScroll from './BottleScroll'
 import ProductModal from '@/components/modals/ProductModal'
 import GeometricOverlay from '@/components/HeroSection/GeometricOverlay'
 import type { ProductData } from '@/lib/products'
-import { Float, useParallax } from '@/components/motion'
+import { useParallax } from '@/components/motion'
 
 interface HeroProps {
   products: ProductData[]
@@ -77,11 +77,9 @@ export default function Hero({ products }: HeroProps) {
             className="w-full lg:flex-1 min-w-0 text-center lg:text-left pt-4 lg:pt-0 shrink-0"
           >
             <div className="space-y-2 sm:space-y-3">
-              <Float amplitude={4} duration={5} className="inline-block">
-                <h1 className="font-prompt text-4xl font-light leading-tight sm:text-5xl lg:text-7xl xl:text-8xl text-[var(--accent)] tracking-tighter">
-                  SOQ.
-                </h1>
-              </Float>
+              <h1 className="font-prompt text-5xl font-light leading-tight sm:text-6xl lg:text-8xl xl:text-9xl text-[var(--accent)] tracking-tighter">
+                SOQ.
+              </h1>
               <h2 className="font-prompt text-2xl font-light leading-tight text-neutral-900 sm:text-3xl lg:text-5xl xl:text-6xl uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>

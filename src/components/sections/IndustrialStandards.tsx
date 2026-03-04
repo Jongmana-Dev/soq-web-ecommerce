@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import StandardsModal from '@/components/modals/StandardsModal'
 import type { Certification } from '@/lib/cms'
-import { Float, useParallax } from '@/components/motion'
+import { useParallax } from '@/components/motion'
 
 type IndustrialStandardsProps = {
   certifications: Certification[]
@@ -34,9 +34,9 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
           {/* Left Content */}
           <motion.div
             ref={leftRef}
-            initial={{ opacity: 0, x: -50 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 60 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: leftY }}
             className="flex flex-col justify-center"
           >
@@ -68,9 +68,9 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
           {/* Right: Logo Cloud */}
           <motion.div
             ref={rightRef}
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 60 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: rightY }}
             className="relative overflow-hidden"
           >
@@ -91,13 +91,6 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
                  </motion.div>
                ))}
 
-               {/* Decorative floating blurs */}
-               <Float amplitude={8} duration={6} className="absolute -top-10 -right-10 -z-10">
-                 <div className="w-32 h-32 bg-[var(--accent)]/5 blur-3xl" />
-               </Float>
-               <Float amplitude={6} duration={8} delay={2} className="absolute -bottom-10 -left-10 -z-10">
-                 <div className="w-40 h-40 bg-neutral-200/50 blur-3xl" />
-               </Float>
              </div>
           </motion.div>
 

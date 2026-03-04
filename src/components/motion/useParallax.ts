@@ -43,13 +43,13 @@ export function useParallax({ speed = 0.05 }: UseParallaxOptions = {}): {
     offset: ['start end', 'end start'],
   })
 
-  const range = 100 * speed
+  const range = 400 * speed
   const rawY = useTransform(
     scrollYProgress,
     [0, 1],
     enabled ? [-range, range] : [0, 0],
   )
-  const y = useSpring(rawY, { stiffness: 100, damping: 30, mass: 0.5 })
+  const y = useSpring(rawY, { stiffness: 120, damping: 40, mass: 0.5 })
 
   return { ref, y }
 }

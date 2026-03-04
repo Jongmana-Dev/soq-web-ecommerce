@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import ProductModal from '@/components/modals/ProductModal'
 import type { ProductData } from '@/lib/products'
-import { Float, HoverLift, useParallax } from '@/components/motion'
+import { useParallax } from '@/components/motion'
 
 const FEATURES = [
   {
@@ -71,9 +71,9 @@ export default function ProductShowcase({ products }: Props) {
           {/* Left Column: Intro */}
           <motion.div
             ref={leftRef}
-            initial={{ opacity: 0, x: -50 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 60 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             style={{ y: leftY }}
             className="lg:w-1/3 pt-10"
           >
@@ -109,12 +109,11 @@ export default function ProductShowcase({ products }: Props) {
              {FEATURES.map((feature, index) => (
                 <motion.div
                   key={feature.id}
-                  initial={{ opacity: 0, y: 60, scale: 0.97 }}
+                  initial={{ opacity: 0, y: 50, scale: 0.97 }}
                   animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                  transition={{ duration: 0.7, delay: 0.1 + (index * 0.12), ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.9, delay: 0.15 + (index * 0.15), ease: [0.16, 1, 0.3, 1] }}
                   className="group relative"
                 >
-                   <HoverLift lift={-6} scale={1.015}>
                    {/* Card */}
                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 h-full flex flex-col border border-gray-100">
                       {/* Image Area */}
@@ -127,11 +126,11 @@ export default function ProductShowcase({ products }: Props) {
                            sizes="(max-width: 768px) 100vw, 33vw"
                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                          />
-                         <Float amplitude={3} duration={4} delay={index * 0.8} className="absolute top-4 left-4 z-10">
+                         <div className="absolute top-4 left-4 z-10">
                            <div className="text-6xl font-black text-white/80 drop-shadow-md">
                              {feature.number}
                            </div>
-                         </Float>
+                         </div>
                       </div>
 
                       {/* Content */}
@@ -144,7 +143,6 @@ export default function ProductShowcase({ products }: Props) {
                          </p>
                       </div>
                    </div>
-                   </HoverLift>
                 </motion.div>
              ))}
           </motion.div>
