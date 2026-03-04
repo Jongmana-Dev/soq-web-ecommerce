@@ -48,7 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
             add(item);
             showToast({ ...item, size_label: item.size_label });
           }}
-          className="mt-auto px-3 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition"
+          className="mt-auto px-4 py-2.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition text-sm"
           aria-label={t('product.addToCart')}
         >
           {t('product.addToCart')}

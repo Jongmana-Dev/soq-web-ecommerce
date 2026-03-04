@@ -471,11 +471,11 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
                     {` ${addr.province} ${addr.postal_code}`}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   {!addr.is_default && (
                     <button
                       onClick={() => handleSetDefault(addr.id)}
-                      className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors"
+                      className="w-9 h-9 flex items-center justify-center text-sm text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors"
                       title={t.setDefault}
                     >
                       <i className="fa-solid fa-star" />
@@ -483,14 +483,14 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
                   )}
                   <button
                     onClick={() => openEdit(addr)}
-                    className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center text-sm text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors"
                     title={t.edit}
                   >
                     <i className="fa-solid fa-pen" />
                   </button>
                   <button
                     onClick={() => handleDelete(addr.id)}
-                    className="text-xs text-neutral-400 hover:text-red-500 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center text-sm text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
                     title={t.delete}
                   >
                     <i className="fa-solid fa-trash" />

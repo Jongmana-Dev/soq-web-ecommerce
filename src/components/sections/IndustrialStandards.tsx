@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import StandardsModal from '@/components/modals/StandardsModal'
 import type { Certification } from '@/lib/cms'
+import { Float, useParallax } from '@/components/motion'
 
 type IndustrialStandardsProps = {
   certifications: Certification[]
@@ -15,6 +16,10 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
   const locale = useLocale()
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Parallax for left/right columns
+  const { ref: leftRef, y: leftY } = useParallax({ speed: 0.03 })
+  const { ref: rightRef, y: rightY } = useParallax({ speed: -0.02 })
 
   return (
     <section
@@ -28,9 +33,11 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
 
           {/* Left Content */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            ref={leftRef}
+            initial={{ opacity: 0, x: -50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: leftY }}
             className="flex flex-col justify-center"
           >
             <h2 className="mb-6 font-prompt text-3xl font-light leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
@@ -45,30 +52,36 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row">
-              <button
+              <motion.button
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex h-12 items-center justify-center gap-2 bg-neutral-900 px-8 font-prompt text-sm font-semibold text-white transition-all hover:bg-black hover:scale-105 shadow-lg shadow-black/10"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="inline-flex h-12 items-center justify-center gap-2 bg-neutral-900 px-8 font-prompt text-sm font-semibold text-white shadow-lg shadow-black/10"
               >
                 {locale === 'th' ? 'รายละเอียด' : 'Details'}
                 <i className="fa-solid fa-arrow-right" />
-              </button>
+              </motion.button>
             </div>
           </motion.div>
 
           {/* Right: Logo Cloud */}
           <motion.div
+            ref={rightRef}
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: rightY }}
+            className="relative overflow-hidden"
           >
              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                {certifications.map((cert, index) => (
                  <motion.div
                    key={cert.id}
-                   initial={{ opacity: 0, scale: 0.8 }}
+                   initial={{ opacity: 0, scale: 0.85 }}
                    animate={inView ? { opacity: 1, scale: 1 } : {}}
-                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                   transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                   whileHover={{ scale: 1.04 }}
                    className="flex items-center gap-3 px-6 py-4 border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-100 transition-colors cursor-default"
                  >
                     <i className={`${cert.icon} text-xl opacity-60`} />
@@ -78,9 +91,13 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
                  </motion.div>
                ))}
 
-               {/* Decorative floating dots/elements */}
-               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--accent)]/5 blur-3xl -z-10" />
-               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-neutral-200/50 blur-3xl -z-10" />
+               {/* Decorative floating blurs */}
+               <Float amplitude={8} duration={6} className="absolute -top-10 -right-10 -z-10">
+                 <div className="w-32 h-32 bg-[var(--accent)]/5 blur-3xl" />
+               </Float>
+               <Float amplitude={6} duration={8} delay={2} className="absolute -bottom-10 -left-10 -z-10">
+                 <div className="w-40 h-40 bg-neutral-200/50 blur-3xl" />
+               </Float>
              </div>
           </motion.div>
 

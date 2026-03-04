@@ -49,7 +49,7 @@ export default function OrderSummary({ items, shippingFee, remoteAreaFee }: Orde
                   type="button"
                   disabled={item.qty <= 1}
                   onClick={() => updateQty(item.id, item.qty - 1)}
-                  className="w-6 h-6 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   −
                 </button>
@@ -57,7 +57,7 @@ export default function OrderSummary({ items, shippingFee, remoteAreaFee }: Orde
                 <button
                   type="button"
                   onClick={() => updateQty(item.id, item.qty + 1)}
-                  className="w-6 h-6 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs"
+                  className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs"
                 >
                   +
                 </button>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import type { Review } from '@/lib/cms'
+import { Float, useParallax } from '@/components/motion'
 
 type TestimonialsProps = {
   reviews: Review[]
@@ -16,6 +17,10 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
   const [direction, setDirection] = useState(0)
   const [playingVideo, setPlayingVideo] = useState(false)
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
+
+  // Parallax for left/right panels
+  const { ref: leftRef, y: leftY } = useParallax({ speed: 0.03 })
+  const { ref: rightRef, y: rightY } = useParallax({ speed: -0.03 })
 
   if (reviews.length === 0) return null
 
@@ -61,15 +66,19 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
 
           {/* Left: Video / Intro */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            ref={leftRef}
+            initial={{ opacity: 0, x: -50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: leftY }}
             className="relative"
           >
             {/* Header Text */}
             <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
               <h2 className="font-prompt text-4xl font-bold leading-tight text-neutral-800 lg:text-5xl">
-                <span className="text-[var(--accent)] text-6xl block mb-2">&#10077;</span>
+                <Float amplitude={5} duration={5} className="inline-block">
+                  <span className="text-[var(--accent)] text-6xl block mb-2">&#10077;</span>
+                </Float>
                 {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
               </h2>
@@ -100,17 +109,23 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-                  {/* Play Button */}
+                  {/* Play Button with pulse glow */}
                   {active.video_url ? (
                     <button
                       onClick={() => setPlayingVideo(true)}
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110"
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                     >
-                      <i className="fa-solid fa-play text-[var(--accent)] text-xl ml-1" />
+                      <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse-glow" />
+                      <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
+                        <i className="fa-solid fa-play text-[var(--accent)] text-xl ml-1" />
+                      </div>
                     </button>
                   ) : (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
-                      <i className="fa-solid fa-play text-[var(--accent)] text-xl ml-1" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse-glow" />
+                      <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
+                        <i className="fa-solid fa-play text-[var(--accent)] text-xl ml-1" />
+                      </div>
                     </div>
                   )}
                 </>
@@ -121,9 +136,11 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
 
           {/* Right: Review Card */}
           <motion.div
-             initial={{ opacity: 0, x: 30 }}
+             ref={rightRef}
+             initial={{ opacity: 0, x: 50 }}
              animate={inView ? { opacity: 1, x: 0 } : {}}
-             transition={{ duration: 0.6, delay: 0.2 }}
+             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+             style={{ y: rightY }}
              className="relative"
           >
              {/* Logo Type / Brand */}
@@ -155,7 +172,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                       initial="enter"
                       animate="center"
                       exit="exit"
-                      transition={{ opacity: { duration: 0.2 } }}
+                      transition={{ opacity: { duration: 0.2 }, x: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } }}
                     >
                       <span className="text-[var(--accent)] text-4xl leading-none font-serif">&ldquo;</span>
                       <p className="font-prompt text-lg text-neutral-600 leading-relaxed mb-6">
@@ -181,27 +198,33 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
 
                 {/* Navigation Controls */}
                 <div className="absolute -bottom-16 right-0 flex items-center gap-4">
-                  <button
+                  <motion.button
                     onClick={prevTestimonial}
-                    className="w-10 h-10 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-all text-neutral-500 hover:text-black"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-11 h-11 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-colors text-neutral-500 hover:text-black"
                   >
                     <i className="fa-solid fa-arrow-left" />
-                  </button>
+                  </motion.button>
                   <span className="font-mono text-sm text-neutral-500">
                     {activeIndex + 1} / {reviews.length}
                   </span>
-                  <button
+                  <motion.button
                     onClick={nextTestimonial}
-                    className="w-10 h-10 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-all text-neutral-500 hover:text-black"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-11 h-11 rounded-full border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-colors text-neutral-500 hover:text-black"
                   >
                      <i className="fa-solid fa-arrow-right" />
-                  </button>
+                  </motion.button>
                 </div>
 
              </div>
 
              {/* Second Card (Background Effect) */}
-             <div className="absolute top-4 left-4 w-full h-full bg-white rounded-xl shadow-sm border border-neutral-100 -z-10 opacity-50 scale-[0.98] origin-top-left" />
+             <div className="absolute top-4 left-4 right-0 bottom-0 bg-white rounded-xl shadow-sm border border-neutral-100 -z-10 opacity-50" />
 
           </motion.div>
 

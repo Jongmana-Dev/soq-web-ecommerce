@@ -163,7 +163,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
               {view === 'form' && (
                 <button
                   onClick={() => setView('channels')}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-900"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-neutral-100 rounded-full transition-colors text-neutral-400 hover:text-neutral-900"
                 >
                   <i className="fa-solid fa-arrow-left" />
                 </button>
@@ -174,7 +174,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-900"
+              className="w-10 h-10 flex items-center justify-center hover:bg-neutral-100 rounded-full transition-colors text-neutral-400 hover:text-neutral-900"
               aria-label="Close"
             >
               <i className="fa-solid fa-xmark text-lg" />
@@ -250,7 +250,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       type="text"
                       value={form.name}
                       onChange={(e) => handleChange('name', e.target.value)}
-                      className={`w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.name ? 'border-red-400' : 'border-neutral-200'}`}
+                      className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.name ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'กรอกชื่อ' : 'Your name'}
                     />
                     {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
@@ -264,7 +264,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       type="email"
                       value={form.email}
                       onChange={(e) => handleChange('email', e.target.value)}
-                      className={`w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.email ? 'border-red-400' : 'border-neutral-200'}`}
+                      className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.email ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'อีเมล' : 'Email'}
                     />
                     {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
@@ -278,7 +278,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       type="tel"
                       value={form.phone}
                       onChange={(e) => handleChange('phone', e.target.value)}
-                      className="w-full px-4 py-2.5 border border-neutral-200 text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors"
+                      className="w-full px-4 py-2.5 border border-neutral-200 text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors"
                       placeholder={locale === 'th' ? 'เบอร์โทร (ไม่บังคับ)' : 'Phone (optional)'}
                     />
                   </div>
@@ -291,7 +291,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       type="text"
                       value={form.subject}
                       onChange={(e) => handleChange('subject', e.target.value)}
-                      className={`w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.subject ? 'border-red-400' : 'border-neutral-200'}`}
+                      className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.subject ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'หัวข้อ' : 'Subject'}
                     />
                     {errors.subject && <p className="text-xs text-red-500 mt-1">{errors.subject}</p>}
@@ -305,7 +305,7 @@ export default function ContactModal({ onClose }: ContactModalProps) {
                       value={form.message}
                       onChange={(e) => handleChange('message', e.target.value)}
                       rows={4}
-                      className={`w-full px-4 py-2.5 border text-sm text-neutral-900 outline-none focus:border-neutral-900 transition-colors resize-none ${errors.message ? 'border-red-400' : 'border-neutral-200'}`}
+                      className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors resize-none ${errors.message ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'รายละเอียด' : 'Details'}
                     />
                     {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}

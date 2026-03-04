@@ -122,7 +122,7 @@ export default async function IndexPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
-      <Hero />
+      <Hero products={products} />
       <Testimonials reviews={reviews} />
       <Product products={products} />
       <Standards certifications={certifications} />

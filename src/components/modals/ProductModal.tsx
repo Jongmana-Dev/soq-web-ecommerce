@@ -53,6 +53,11 @@ export default function ProductModal({ product, onClose, locale }: ProductModalP
     return () => window.removeEventListener('keydown', handleEsc)
   }, [onClose])
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
   const ACCORDION_ITEMS = [
     {
       title_th: 'วิธีใช้',
@@ -118,13 +123,13 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-50 p-2 text-neutral-400 hover:text-black transition-colors"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-black hover:bg-black/5 rounded-full transition-colors"
           >
             <i className="fa-solid fa-xmark text-2xl" />
           </button>
 
           {/* Left: Image Container */}
-          <div className="lg:w-1/2 bg-[#EAEAEA] relative min-h-[400px] lg:min-h-full flex items-center justify-center p-12">
+          <div className="lg:w-1/2 bg-[#EAEAEA] relative min-h-[220px] sm:min-h-[300px] lg:min-h-full flex items-center justify-center p-6 sm:p-12">
             <div className="relative w-full h-full max-w-md aspect-[3/4]">
               <Image
                 src={product.image}
@@ -142,11 +147,11 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
 
 
           {/* Right: Details Container */}
-          <div className="lg:w-1/2 bg-[#F5F5F7] p-8 lg:p-12 overflow-y-auto overscroll-contain custom-scrollbar">
+          <div className="lg:w-1/2 bg-[#F5F5F7] p-5 sm:p-8 lg:p-12 overflow-y-auto overscroll-contain custom-scrollbar">
             
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-5xl font-light text-neutral-800 leading-tight mb-2">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-neutral-800 leading-tight mb-2">
                 {locale === 'th' ? product.name_th : product.name_en}
               </h2>
               
@@ -186,11 +191,11 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
             <div className="flex flex-wrap items-center gap-4 mb-10 pb-10 border-b border-neutral-200">
                {/* Quantity */}
                <div className="flex items-center bg-white border border-neutral-300 h-12">
-                  <button onClick={() => handleQuantityChange('decrease')} className="w-10 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
+                  <button onClick={() => handleQuantityChange('decrease')} className="w-11 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
                   <span className="w-10 text-center font-bold text-neutral-900">{quantity}</span>
-                  <button onClick={() => handleQuantityChange('increase')} className="w-10 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
+                  <button onClick={() => handleQuantityChange('increase')} className="w-11 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
                     <i className="fa-solid fa-plus text-xs" />
                   </button>
                </div>
@@ -265,12 +270,12 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
             {/* Footer Socials */}
             <div className="flex items-center gap-6">
                <span className="font-semibold text-sm">{locale === 'th' ? 'ติดตามเราได้ที่' : 'Follow Us'}</span>
-               <div className="flex gap-4 text-neutral-400">
-                  <a href="https://facebook.com/soqthailand" target="_blank" rel="noopener noreferrer">
-                    <i className="fa-brands fa-facebook hover:text-[#1877F2] transition-colors cursor-pointer text-lg" />
+               <div className="flex gap-2 text-neutral-400">
+                  <a href="https://facebook.com/soqthailand" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center hover:text-[#1877F2] transition-colors">
+                    <i className="fa-brands fa-facebook text-lg" />
                   </a>
-                  <a href="https://line.me/R/ti/p/@soq" target="_blank" rel="noopener noreferrer">
-                    <i className="fa-brands fa-line hover:text-[#06C755] transition-colors cursor-pointer text-lg" />
+                  <a href="https://line.me/R/ti/p/@soq" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center hover:text-[#06C755] transition-colors">
+                    <i className="fa-brands fa-line text-lg" />
                   </a>
                </div>
             </div>

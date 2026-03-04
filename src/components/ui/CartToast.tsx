@@ -93,7 +93,7 @@ export default function CartToast() {
               {/* Close */}
               <button
                 onClick={hide}
-                className="shrink-0 self-start p-1 text-neutral-600 hover:text-neutral-300 transition-colors"
+                className="shrink-0 self-start p-2 -mr-1 text-neutral-600 hover:text-neutral-300 transition-colors"
                 aria-label="close"
               >
                 <X className="w-4 h-4" />

@@ -9,7 +9,8 @@ const FRAMES = Array.from(
   (_, i) => `/images/soq-hero/frame-${String(i + 1).padStart(4, '0')}.webp`,
 )
 
-const LERP = 0.12
+// Very gentle — always smooth regardless of scroll speed
+const LERP = 0.04
 
 export default function BottleScroll({ progress }: { progress: MotionValue<number> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -124,7 +125,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: loaded ? 1 : 0 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
       className="absolute inset-0"
     >
       <canvas

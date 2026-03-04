@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
   motion,
   useScroll,
@@ -8,17 +8,30 @@ import {
 } from 'framer-motion'
 import { useLocale } from 'next-intl'
 import BottleScroll from './BottleScroll'
+import ProductModal from '@/components/modals/ProductModal'
+import type { ProductData } from '@/lib/products'
+import { Float, useParallax } from '@/components/motion'
 
-export default function Hero() {
+interface HeroProps {
+  products: ProductData[]
+}
+
+export default function Hero({ products }: HeroProps) {
   const locale = useLocale()
   const sectionRef = useRef<HTMLDivElement>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
   })
+  const progress = useTransform(scrollYProgress, [0, 1], [0, 0.15])
 
-  const progress = useTransform(scrollYProgress, [0, 1], [0, 1])
+  // Parallax for left/right columns
+  const { ref: textRef, y: textY } = useParallax({ speed: 0.03 })
+  const { ref: bottleRef, y: bottleY } = useParallax({ speed: -0.02 })
+
+  const product = products[0]
 
   return (
     <section
@@ -35,24 +48,28 @@ export default function Hero() {
 
           {/* Text — shrink to fit on mobile */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            ref={textRef}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: textY }}
             className="w-full lg:flex-1 min-w-0 text-center lg:text-left pt-4 lg:pt-0 shrink-0"
           >
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="font-prompt text-4xl font-light leading-tight sm:text-5xl lg:text-7xl xl:text-8xl text-[var(--accent)] tracking-tighter">
-                SOQ.
-              </h1>
+              <Float amplitude={4} duration={5} className="inline-block">
+                <h1 className="font-prompt text-4xl font-light leading-tight sm:text-5xl lg:text-7xl xl:text-8xl text-[var(--accent)] tracking-tighter">
+                  SOQ.
+                </h1>
+              </Float>
               <h2 className="font-prompt text-2xl font-light leading-tight text-neutral-900 sm:text-3xl lg:text-5xl xl:text-6xl uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="mt-4 lg:mt-6 max-w-md mx-auto lg:mx-0 font-poppins text-xs leading-relaxed text-neutral-500 sm:text-sm lg:text-base"
             >
               {locale === 'th'
@@ -61,33 +78,54 @@ export default function Hero() {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="mt-6 lg:mt-8"
             >
-              <a
-                href="#products"
-                className="group relative inline-flex h-12 lg:h-14 items-center justify-center overflow-hidden bg-[var(--accent)] px-8 lg:px-12 font-prompt text-base lg:text-lg font-bold text-black transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-[var(--accent)]/20 shadow-black/5"
+              <motion.button
+                onClick={() => setIsModalOpen(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative inline-flex h-12 lg:h-14 items-center justify-center overflow-hidden bg-[var(--accent)] px-8 lg:px-12 font-prompt text-base lg:text-lg font-bold text-black shadow-xl shadow-black/5"
               >
                 <span className="relative z-10">
                   {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
                 </span>
-              </a>
+              </motion.button>
             </motion.div>
           </motion.div>
 
           {/* Bottle — flex-grow fills remaining space on mobile */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            ref={bottleRef}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ y: bottleY }}
             className="relative w-full lg:flex-1 flex-1 min-h-[300px] sm:min-h-[350px] lg:h-[calc(85vh-76px)] -mt-4 lg:mt-0"
           >
             <BottleScroll progress={progress} />
           </motion.div>
         </div>
       </div>
+
+      {isModalOpen && product && (
+        <ProductModal
+          product={{
+            id: product.id,
+            name_th: product.name_th,
+            name_en: product.name_en,
+            long_desc_th: product.long_desc_th ?? product.short_desc_th,
+            long_desc_en: product.long_desc_en ?? product.short_desc_en,
+            image: product.image,
+            sizes: product.sizes,
+          }}
+          onClose={() => setIsModalOpen(false)}
+          locale={locale}
+        />
+      )}
     </section>
   )
 }

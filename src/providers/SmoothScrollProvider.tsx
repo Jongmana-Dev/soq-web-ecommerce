@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 type Props = { children: React.ReactNode }
 
 /**
- * Lightweight replacement for Lenis smooth-scroll.
+ * Lightweight smooth-scroll provider.
  * Uses native CSS scroll-behavior: smooth (set in globals.css).
  * Keeps: IntersectionObserver section tracking, anchor click handling,
  *        sectionchange / navjumpstart / navjumpend custom events.

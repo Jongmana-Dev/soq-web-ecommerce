@@ -77,52 +77,64 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="relative flex items-center gap-4 border border-neutral-200 p-4 pr-10">
+            <div key={item.id} className="relative border border-neutral-200 p-3 sm:p-4">
               {/* Remove button — top right */}
               <button
                 onClick={() => remove(item.id)}
-                className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-neutral-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-colors"
+                className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-7 h-7 flex items-center justify-center text-neutral-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-colors"
                 aria-label="remove item"
               >
                 <i className="fa-solid fa-xmark text-sm" />
               </button>
 
-              {item.image && (
-                <div className="w-20 h-20 relative shrink-0 bg-neutral-100">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    sizes="80px"
-                    className="object-contain"
-                  />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h2 className="font-medium truncate">{item.name}</h2>
-                {item.size_label && (
-                  <p className="text-xs text-neutral-400">{t('cart.sizeLabel')}: {item.size_label}</p>
+              <div className="flex gap-3 sm:gap-4">
+                {item.image && (
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 relative shrink-0 bg-neutral-100">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 640px) 56px, 80px"
+                      className="object-contain"
+                    />
+                  </div>
                 )}
-                <p className="text-sm text-neutral-500">฿{item.price.toLocaleString()}</p>
+
+                {/* Info + Qty + Price */}
+                <div className="flex-1 min-w-0 pr-6 sm:pr-8">
+                  <h2 className="font-medium text-sm sm:text-base leading-snug">{item.name}</h2>
+                  {item.size_label && (
+                    <p className="text-xs text-neutral-400 mt-0.5">{t('cart.sizeLabel')}: {item.size_label}</p>
+                  )}
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    ฿{item.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </p>
+
+                  {/* Qty controls + Total — same row below product info */}
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <button
+                        onClick={() => updateQty(item.id, item.qty - 1)}
+                        className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 transition-colors"
+                        aria-label="decrease quantity"
+                      >
+                        <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      </button>
+                      <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium">{item.qty}</span>
+                      <button
+                        onClick={() => updateQty(item.id, item.qty + 1)}
+                        className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 transition-colors"
+                        aria-label="increase quantity"
+                      >
+                        <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      </button>
+                    </div>
+                    <p className="font-semibold text-sm sm:text-base tabular-nums">
+                      ฿{(item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => updateQty(item.id, item.qty - 1)}
-                  className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 transition-colors"
-                  aria-label="decrease quantity"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
-                <button
-                  onClick={() => updateQty(item.id, item.qty + 1)}
-                  className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 transition-colors"
-                  aria-label="increase quantity"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-              <p className="font-semibold text-right min-w-[80px]">฿{(item.price * item.qty).toLocaleString()}</p>
             </div>
           ))}
         </div>
@@ -133,11 +145,11 @@ export default function CartPage() {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-neutral-500">{t('cart.subtotal')}</span>
-              <span>฿{subtotal.toLocaleString()}</span>
+              <span className="tabular-nums">฿{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="border-t border-neutral-200 pt-3 flex justify-between font-semibold text-base">
               <span>{t('cart.total')}</span>
-              <span>฿{subtotal.toLocaleString()}</span>
+              <span className="tabular-nums">฿{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
 

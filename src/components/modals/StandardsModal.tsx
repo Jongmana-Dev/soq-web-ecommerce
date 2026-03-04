@@ -100,13 +100,13 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
                   <>
                     <button
                       onClick={prev}
-                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white shadow-sm text-neutral-600 hover:text-black transition-all"
+                      className="absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white shadow-sm text-neutral-600 hover:text-black transition-all"
                     >
                       <i className="fa-solid fa-chevron-left" />
                     </button>
                     <button
                       onClick={next}
-                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white shadow-sm text-neutral-600 hover:text-black transition-all"
+                      className="absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white shadow-sm text-neutral-600 hover:text-black transition-all"
                     >
                       <i className="fa-solid fa-chevron-right" />
                     </button>
@@ -123,7 +123,7 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.25 }}
-                    className="flex flex-col items-center justify-center text-center px-12 sm:px-16 py-10 sm:py-14"
+                    className="flex flex-col items-center justify-center text-center px-6 sm:px-16 py-8 sm:py-14"
                   >
                     <div className="w-20 h-20 flex items-center justify-center bg-white text-[var(--accent)] shadow-sm mb-6">
                       <i className={`${cert.icon} text-3xl`} />
@@ -160,13 +160,15 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${
+                  className="relative p-2"
+                  aria-label={`Go to certification ${i + 1}`}
+                >
+                  <span className={`block h-2 rounded-full transition-all ${
                     i === activeIndex
                       ? 'bg-neutral-900 w-6'
-                      : 'bg-neutral-300 hover:bg-neutral-400'
-                  }`}
-                  aria-label={`Go to certification ${i + 1}`}
-                />
+                      : 'bg-neutral-300 hover:bg-neutral-400 w-2'
+                  }`} />
+                </button>
               ))}
             </div>
 

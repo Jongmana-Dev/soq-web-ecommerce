@@ -33,9 +33,9 @@ export default function FAQ({ faqs }: FAQsProps) {
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mb-12 text-center lg:mb-16"
         >
           <span className="mb-4 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-medium text-neutral-500 shadow-sm border border-neutral-100">
@@ -52,9 +52,10 @@ export default function FAQ({ faqs }: FAQsProps) {
           {faqs.map((item, index) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
+              transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ x: 2 }}
             >
               <div
                 className={`overflow-hidden bg-white shadow-sm transition-all duration-300 ${
@@ -83,13 +84,15 @@ export default function FAQ({ faqs }: FAQsProps) {
                        <span className="font-prompt text-lg font-medium text-neutral-900">
                          {locale === 'th' ? item.question_th : item.question_en}
                        </span>
-                       <span
-                        className={`ml-2 flex h-6 w-6 shrink-0 items-center justify-center transition-transform duration-300 ${
-                          openId === item.id ? 'rotate-180 text-black' : 'text-neutral-400'
+                       <motion.span
+                        animate={{ rotate: openId === item.id ? 180 : 0 }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className={`ml-2 flex h-6 w-6 shrink-0 items-center justify-center ${
+                          openId === item.id ? 'text-black' : 'text-neutral-400'
                         }`}
                       >
                         <i className="fa-solid fa-chevron-down text-xs" />
-                      </span>
+                      </motion.span>
                     </div>
 
                     <AnimatePresence>
@@ -115,21 +118,24 @@ export default function FAQ({ faqs }: FAQsProps) {
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="mt-16 text-center"
         >
           <p className="mb-4 text-neutral-500">
             {locale === 'th' ? 'ยังมีคำถามอื่นอีกไหม?' : 'Still have questions?'}
           </p>
-          <button
+          <motion.button
             onClick={() => setShowContact(true)}
-            className="inline-flex items-center gap-2 bg-neutral-900 px-6 py-3 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 transition-all hover:bg-black hover:scale-105"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-flex items-center gap-2 bg-neutral-900 px-6 py-3.5 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10"
           >
             <i className="fa-solid fa-message" />
             {locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
-          </button>
+          </motion.button>
         </motion.div>
       </div>
 

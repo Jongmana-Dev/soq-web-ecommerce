@@ -224,9 +224,9 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
     });
   };
 
-  const inputClass = 'w-full border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 transition-colors';
+  const inputClass = 'w-full border border-neutral-300 px-3 py-2.5 text-base text-neutral-900 focus:outline-none focus:border-neutral-500 transition-colors';
   const selectClass = (hasError?: boolean) =>
-    `w-full border px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-neutral-500 transition-colors bg-white ${
+    `w-full border px-3 py-2.5 text-base text-neutral-900 focus:outline-none focus:border-neutral-500 transition-colors bg-white ${
       hasError ? 'border-red-400' : 'border-neutral-300'
     }`;
   const labelClass = 'block text-sm font-medium text-neutral-700 mb-1';
@@ -483,7 +483,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
       {/* Submit */}
       <button
         type="submit"
-        className="w-full bg-[var(--accent)] text-neutral-900 py-3 font-semibold hover:scale-[1.02] transition-transform"
+        className="w-full bg-[var(--accent)] text-neutral-900 py-3 font-semibold transition-transform"
       >
         {t('checkout.continueToPayment')}
       </button>
