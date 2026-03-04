@@ -5,10 +5,12 @@ import {
   motion,
   useScroll,
   useTransform,
+  useMotionValueEvent,
 } from 'framer-motion'
 import { useLocale } from 'next-intl'
 import BottleScroll from './BottleScroll'
 import ProductModal from '@/components/modals/ProductModal'
+import GeometricOverlay from '@/components/HeroSection/GeometricOverlay'
 import type { ProductData } from '@/lib/products'
 import { Float, useParallax } from '@/components/motion'
 
@@ -21,15 +23,34 @@ export default function Hero({ products }: HeroProps) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  /* ── Geometric overlay (throttled ~30fps) ── */
+  const overlayState = useRef({ progress: 0, triangleScale: 0.8 })
+  const lastRender = useRef(0)
+  const [, forceRender] = useState(0)
+
+  /* ── Scroll — same offset as original ── */
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
   })
   const progress = useTransform(scrollYProgress, [0, 1], [0, 0.15])
 
-  // Parallax for left/right columns
+  // Parallax for columns + geometric shapes
   const { ref: textRef, y: textY } = useParallax({ speed: 0.03 })
   const { ref: bottleRef, y: bottleY } = useParallax({ speed: -0.02 })
+  const { ref: geoRef, y: geoY } = useParallax({ speed: 0.04 })
+
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    const p = Math.min(1, Math.max(0, v))
+    const triScale = p < 0.1 ? 0.85 : p < 0.5 ? 0.85 + 0.15 * ((p - 0.1) / 0.4) : 1
+
+    const now = performance.now()
+    if (now - lastRender.current > 33) {
+      overlayState.current = { progress: p, triangleScale: triScale }
+      forceRender((n) => n + 1)
+      lastRender.current = now
+    }
+  })
 
   const product = products[0]
 
@@ -38,15 +59,15 @@ export default function Hero({ products }: HeroProps) {
       ref={sectionRef}
       id="hero"
       data-section="true"
-      className="relative min-h-[85vh] w-full bg-[#EFEFEF]"
+      className="relative min-h-[85vh] w-full bg-[#EFEFEF] overflow-hidden"
     >
       {/* Same container width as Navbar */}
-      <div className="mx-auto flex min-h-[85vh] max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-[76px]">
+      <div className="relative mx-auto flex min-h-[85vh] max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-[76px]">
 
         {/* Mobile: stack vertically / Desktop: side by side */}
         <div className="flex w-full flex-col lg:flex-row items-center">
 
-          {/* Text — shrink to fit on mobile */}
+          {/* Text */}
           <motion.div
             ref={textRef}
             initial={{ opacity: 0, y: 40 }}
@@ -97,7 +118,7 @@ export default function Hero({ products }: HeroProps) {
             </motion.div>
           </motion.div>
 
-          {/* Bottle — flex-grow fills remaining space on mobile */}
+          {/* Bottle + Geometric shapes behind it */}
           <motion.div
             ref={bottleRef}
             initial={{ opacity: 0, scale: 0.97 }}
@@ -106,7 +127,22 @@ export default function Hero({ products }: HeroProps) {
             style={{ y: bottleY }}
             className="relative w-full lg:flex-1 flex-1 min-h-[300px] sm:min-h-[350px] lg:h-[calc(85vh-76px)] -mt-4 lg:mt-0"
           >
-            <BottleScroll progress={progress} />
+            {/* Geometric overlay — parallax, behind bottle canvas */}
+            <motion.div
+              ref={geoRef}
+              className="absolute inset-0 z-0 overflow-visible"
+              style={{ y: geoY }}
+            >
+              <GeometricOverlay
+                progress={overlayState.current.progress}
+                triangleScale={overlayState.current.triangleScale}
+              />
+            </motion.div>
+
+            {/* Bottle canvas — on top */}
+            <div className="relative z-10 h-full w-full">
+              <BottleScroll progress={progress} />
+            </div>
           </motion.div>
         </div>
       </div>
