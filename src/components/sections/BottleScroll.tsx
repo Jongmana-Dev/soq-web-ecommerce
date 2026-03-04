@@ -9,7 +9,6 @@ const FRAMES = Array.from(
   (_, i) => `/images/soq-hero/frame-${String(i + 1).padStart(4, '0')}.webp`,
 )
 
-// Lerp factor — gentle smoothing for comfortable feel
 const LERP = 0.12
 
 export default function BottleScroll({ progress }: { progress: MotionValue<number> }) {
@@ -19,6 +18,7 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
   const targetRef = useRef(0)
   const currentRef = useRef(0)
   const rafRef = useRef(0)
+  const lastFrameRef = useRef(-1)
 
   // Preload all frames
   useEffect(() => {
@@ -45,13 +45,11 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
   useEffect(() => {
     if (!loaded) return
 
-    // Track scroll target
     const unsubscribe = progress.on('change', (v) => {
       targetRef.current = Math.min(1, Math.max(0, v))
     })
     targetRef.current = Math.min(1, Math.max(0, progress.get()))
 
-    // Smooth rAF render loop with lerp + crossfade
     const tick = () => {
       const canvas = canvasRef.current
       if (!canvas) {
@@ -73,7 +71,23 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
         currentRef.current = targetRef.current
       }
 
-      const exactFrame = currentRef.current * (FRAME_COUNT - 1)
+      const frameIndex = Math.min(
+        FRAME_COUNT - 1,
+        Math.max(0, Math.round(currentRef.current * (FRAME_COUNT - 1))),
+      )
+
+      // Skip if same frame
+      if (frameIndex === lastFrameRef.current) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
+      lastFrameRef.current = frameIndex
+
+      const img = imagesRef.current[frameIndex]
+      if (!img) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
 
       const dpr = window.devicePixelRatio || 1
       const rect = canvas.getBoundingClientRect()
@@ -86,35 +100,14 @@ export default function BottleScroll({ progress }: { progress: MotionValue<numbe
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, rect.width, rect.height)
 
-      // Frame blending
-      const lower = Math.floor(exactFrame)
-      const upper = Math.min(FRAME_COUNT - 1, lower + 1)
-      const blend = exactFrame - lower
-
-      const imgA = imagesRef.current[lower]
-      const imgB = imagesRef.current[upper]
-      if (!imgA) {
-        rafRef.current = requestAnimationFrame(tick)
-        return
-      }
-
-      // Contain-fit, centered — larger on mobile
-      const scaleFactor = 1.15
-      const fitScale = Math.min(rect.width / imgA.width, rect.height / imgA.height) * scaleFactor
-      const w = imgA.width * fitScale
-      const h = imgA.height * fitScale
+      // Contain-fit, centered
+      const fitScale = Math.min(rect.width / img.width, rect.height / img.height) * 1.15
+      const w = img.width * fitScale
+      const h = img.height * fitScale
       const x = (rect.width - w) / 2
       const y = (rect.height - h) / 2
 
-      if (lower === upper || blend < 0.01 || !imgB) {
-        ctx.drawImage(imgA, x, y, w, h)
-      } else {
-        ctx.globalAlpha = 1 - blend
-        ctx.drawImage(imgA, x, y, w, h)
-        ctx.globalAlpha = blend
-        ctx.drawImage(imgB, x, y, w, h)
-        ctx.globalAlpha = 1
-      }
+      ctx.drawImage(img, x, y, w, h)
 
       rafRef.current = requestAnimationFrame(tick)
     }
