@@ -19,7 +19,7 @@ export function Brand() {
   const t = useTranslations('brand')
   
   return (
-    <section className="w-full bg-[#EAEAEA] py-10 overflow-hidden border-b border-white/50">
+    <section className="w-full bg-[#ECEDEA] py-10 overflow-hidden border-b border-white/50">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-center md:justify-between items-center gap-8 md:gap-12 opacity-80">
           {BRANDS.map((brand, i) => (

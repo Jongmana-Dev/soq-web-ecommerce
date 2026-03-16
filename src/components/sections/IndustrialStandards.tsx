@@ -26,7 +26,7 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
       id="industrial-standards"
       data-section="true"
       ref={ref}
-      className="relative overflow-hidden bg-white py-20 lg:py-28"
+      className="relative overflow-hidden bg-[#ECEDEA] py-20 lg:py-28"
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 items-center">

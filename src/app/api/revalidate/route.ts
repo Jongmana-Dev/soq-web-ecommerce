@@ -8,8 +8,15 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => ({}))
-  const tag = body.tag ?? 'landing'
 
-  revalidateTag(tag, { expire: 0 })
-  return NextResponse.json({ revalidated: true, tag })
+  // Support single tag (string) or multiple tags (string[])
+  const tags: string[] = Array.isArray(body.tags)
+    ? body.tags
+    : [body.tag ?? 'landing']
+
+  for (const tag of tags) {
+    revalidateTag(tag, { expire: 0 })
+  }
+
+  return NextResponse.json({ revalidated: true, tags })
 }

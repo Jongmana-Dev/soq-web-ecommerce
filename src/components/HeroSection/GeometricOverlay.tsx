@@ -23,11 +23,11 @@ function GeometricOverlayInner({ progress, triangleScale }: GeometricOverlayProp
       >
         <div
           style={{
-            width: '140%',
+            width: '200%',
             aspectRatio: '1',
             clipPath: 'polygon(8% 5%, 92% 0%, 100% 88%, 4% 95%)',
             backgroundColor: ACCENT,
-            opacity: 0.35,
+            opacity: 0.45,
             transform: `translateY(${slowY}px) rotate(-12deg) scale(${triangleScale})`,
             willChange: 'transform',
           }}

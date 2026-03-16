@@ -16,7 +16,7 @@ interface Props extends HeroSectionProps {
 export default function HeroSection({
   products,
   frames = 61,
-  framePath = '/images/soq-hero/frame-{index}.webp',
+  framePath = '/hero-section/v3/frame-{index}.webp',
   brandName = 'SOQ.',
   tagline,
 }: Props) {
@@ -85,7 +85,7 @@ export default function HeroSection({
     <>
       {/* Loading Screen */}
       {!loaded && (
-        <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[#F5F5F0]">
+        <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[#ECEDEA]">
           <h2 className="mb-6 font-prompt text-2xl font-bold text-[#1A1A1A] tracking-tight">
             {brandName}
           </h2>
@@ -113,7 +113,7 @@ export default function HeroSection({
         <div
           ref={stickyRef}
           className="sticky top-0 h-screen w-full overflow-hidden"
-          style={{ backgroundColor: '#F5F5F0', willChange: 'opacity' }}
+          style={{ backgroundColor: '#ECEDEA', willChange: 'opacity' }}
         >
           {/* Geometric overlays — behind canvas */}
           <div ref={geoRef} className="absolute inset-0 z-0">
@@ -203,6 +203,7 @@ export default function HeroSection({
             long_desc_th: product.long_desc_th ?? product.short_desc_th,
             long_desc_en: product.long_desc_en ?? product.short_desc_en,
             image: product.image,
+            images: product.images,
             sizes: product.sizes,
           }}
           onClose={() => setIsModalOpen(false)}

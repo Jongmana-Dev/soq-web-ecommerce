@@ -6,6 +6,7 @@ import {
   useTransform,
   useSpring,
   useReducedMotion,
+  useMotionValue,
   type MotionValue,
 } from 'framer-motion'
 
@@ -24,11 +25,14 @@ export function useParallax({ speed = 0.05 }: UseParallaxOptions = {}): {
   ref: React.RefObject<HTMLDivElement>
   y: MotionValue<number>
 } {
-  const ref = useRef<HTMLDivElement>(null!)
+  const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>
+  const [mounted, setMounted] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   const prefersReduced = useReducedMotion()
+  const fallback = useMotionValue(0)
 
   useEffect(() => {
+    setMounted(true)
     const mql = window.matchMedia('(min-width: 1024px)')
     setIsDesktop(mql.matches)
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
@@ -36,16 +40,17 @@ export function useParallax({ speed = 0.05 }: UseParallaxOptions = {}): {
     return () => mql.removeEventListener('change', handler)
   }, [])
 
-  const enabled = isDesktop && !prefersReduced
+  const enabled = mounted && isDesktop && !prefersReduced
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
+  const { scrollYProgress } = useScroll(
+    mounted && ref.current
+      ? { target: ref as React.RefObject<HTMLDivElement>, offset: ['start end', 'end start'] }
+      : undefined,
+  )
 
   const range = 400 * speed
   const rawY = useTransform(
-    scrollYProgress,
+    mounted ? scrollYProgress : fallback,
     [0, 1],
     enabled ? [-range, range] : [0, 0],
   )

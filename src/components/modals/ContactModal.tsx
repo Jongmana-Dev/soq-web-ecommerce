@@ -6,14 +6,13 @@ import { useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { z } from 'zod'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { useContactInfo } from '@/providers/ContactInfoProvider'
+import type { ContactInfo } from '@/lib/cms'
+
 type ContactModalProps = {
   onClose: () => void
+  contactInfo?: ContactInfo
 }
-
-const FACEBOOK_CHAT_URL = process.env.NEXT_PUBLIC_FACEBOOK_CHAT_URL ?? ''
-const LINE_ID = process.env.NEXT_PUBLIC_LINE_ID ?? ''
-const LINE_URL = LINE_ID ? `https://line.me/R/ti/p/${LINE_ID}` : ''
-const PHONE = process.env.NEXT_PUBLIC_PHONE ?? ''
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Required').max(120),
@@ -27,8 +26,13 @@ type ContactForm = z.infer<typeof contactSchema>
 
 type View = 'channels' | 'form'
 
-export default function ContactModal({ onClose }: ContactModalProps) {
+export default function ContactModal({ onClose, contactInfo: contactInfoProp }: ContactModalProps) {
   const locale = useLocale()
+  const contextInfo = useContactInfo()
+  const ci = contactInfoProp ?? contextInfo
+  const FACEBOOK_CHAT_URL = ci.facebook_chat_url
+  const LINE_URL = ci.line_url
+  const PHONE = ci.phone
   const [view, setView] = useState<View>('channels')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)

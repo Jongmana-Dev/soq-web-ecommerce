@@ -264,13 +264,13 @@ export default function PaymentModal({ order, onClose, onSuccess }: PaymentModal
               <p className="text-sm font-medium text-neutral-700">{t('uploadSlipHere')}</p>
 
               {/* Slip verification warning */}
-              <div className="flex gap-2.5 bg-blue-50 border border-blue-200 px-3 py-2.5">
-                <i className="fa-solid fa-shield-halved text-blue-600 mt-0.5 shrink-0 text-sm" />
-                <div className="text-xs text-blue-800 space-y-1">
+              <div className="flex gap-2.5 bg-neutral-100 border border-neutral-300 px-3 py-2.5">
+                <i className="fa-solid fa-shield-halved text-neutral-600 mt-0.5 shrink-0 text-sm" />
+                <div className="text-xs text-neutral-700 space-y-1">
                   <p className="font-medium">
                     {locale === 'th' ? 'สลิปจะถูกตรวจสอบอัตโนมัติ' : 'Slip will be verified automatically'}
                   </p>
-                  <ul className="list-disc list-inside text-blue-700 space-y-0.5">
+                  <ul className="list-disc list-inside text-neutral-600 space-y-0.5">
                     <li>{locale === 'th' ? 'ยอดเงินต้องตรงกับคำสั่งซื้อ' : 'Amount must match the order total'}</li>
                     <li>{locale === 'th' ? 'สลิปแต่ละใบใช้ได้เพียงครั้งเดียว' : 'Each slip can only be used once'}</li>
                     <li>{locale === 'th' ? 'กรุณาใช้สลิปที่ชัดเจนและไม่ถูกครอบตัด' : 'Please use a clear and uncropped slip'}</li>

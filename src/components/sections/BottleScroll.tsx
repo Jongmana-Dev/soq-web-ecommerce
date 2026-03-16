@@ -6,7 +6,7 @@ import { motion, type MotionValue } from 'framer-motion'
 const FRAME_COUNT = 61
 const FRAMES = Array.from(
   { length: FRAME_COUNT },
-  (_, i) => `/images/soq-hero/frame-${String(i + 1).padStart(4, '0')}.webp`,
+  (_, i) => `/hero-section/v3/frame-${String(i + 1).padStart(4, '0')}.webp`,
 )
 
 const LERP = 0.18

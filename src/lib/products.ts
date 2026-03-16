@@ -10,6 +10,14 @@ export interface ProductSize {
   sku?: string
 }
 
+export interface ProductImage {
+  id: string
+  url: string
+  alt_th: string | null
+  alt_en: string | null
+  sort_order: number
+}
+
 export interface ProductData {
   id: string
   slug: string
@@ -20,6 +28,7 @@ export interface ProductData {
   long_desc_th?: string | null
   long_desc_en?: string | null
   image: string
+  images?: ProductImage[]
   sizes: ProductSize[]
 }
 
@@ -30,7 +39,7 @@ interface ApiResponse<T> {
 
 export async function getProducts(): Promise<ProductData[]> {
   const res = await apiFetch<ApiResponse<ProductData[]>>('/api/products', {
-    next: { revalidate: 3600, tags: ['landing'] },
+    next: { revalidate: 3600, tags: ['landing', 'products'] },
   })
   return res.data
 }
@@ -38,7 +47,7 @@ export async function getProducts(): Promise<ProductData[]> {
 export async function getProductBySlug(slug: string): Promise<ProductData | undefined> {
   try {
     const res = await apiFetch<ApiResponse<ProductData>>(`/api/products/${slug}`, {
-      next: { revalidate: 3600, tags: ['landing'] },
+      next: { revalidate: 3600, tags: ['products', `product-${slug}`] },
     })
     return res.data
   } catch {

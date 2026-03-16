@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useLocale } from 'next-intl'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Certification } from '@/lib/cms'
 
@@ -14,6 +15,7 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
   const locale = useLocale()
   const [activeIndex, setActiveIndex] = useState(0)
   const [direction, setDirection] = useState(0)
+  const [viewingImage, setViewingImage] = useState<string | null>(null)
 
   const cert = certifications[activeIndex]
 
@@ -92,7 +94,7 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
           </div>
 
           {/* Carousel Content */}
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5F7]">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-[#ECEDEA]">
             {cert && (
               <div className="relative h-full">
                 {/* Navigation Arrows */}
@@ -125,15 +127,42 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
                     transition={{ duration: 0.25 }}
                     className="flex flex-col items-center justify-center text-center px-6 sm:px-16 py-8 sm:py-14"
                   >
-                    <div className="w-20 h-20 flex items-center justify-center bg-white text-[var(--accent)] shadow-sm mb-6">
-                      <i className={`${cert.icon} text-3xl`} />
+                    {/* Icon + Title */}
+                    <div className="w-16 h-16 flex items-center justify-center bg-white text-[var(--accent)] shadow-sm mb-5">
+                      <i className={`${cert.icon} text-2xl`} />
                     </div>
-                    <h3 className="font-bold text-xl sm:text-2xl text-neutral-900 mb-3">
+                    <h3 className="font-bold text-xl sm:text-2xl text-neutral-900 mb-2">
                       {locale === 'th' ? cert.label_th : cert.label_en}
                     </h3>
-                    <p className="text-neutral-500 leading-relaxed max-w-md">
+                    <p className="text-neutral-500 leading-relaxed max-w-md text-sm mb-6">
                       {locale === 'th' ? cert.description_th : cert.description_en}
                     </p>
+
+                    {/* Document images — centered below description */}
+                    {cert.document_images && cert.document_images.length > 0 && (
+                      <div className="flex flex-wrap items-center justify-center gap-3 w-full max-w-lg">
+                        {cert.document_images.map((img, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setViewingImage(img)}
+                            className="relative w-36 sm:w-44 aspect-[3/4] overflow-hidden border border-neutral-200 hover:border-[var(--accent)] transition-all group/img hover:shadow-lg"
+                          >
+                            <Image
+                              src={img}
+                              alt={`${locale === 'th' ? cert.label_th : cert.label_en} - ${i + 1}`}
+                              fill
+                              sizes="200px"
+                              className="object-cover group-hover/img:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors flex items-center justify-center">
+                              <div className="w-10 h-10 bg-white/90 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                <i className="fa-solid fa-magnifying-glass text-neutral-700" />
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {cert.pdf_url && (
                       <a
@@ -185,6 +214,41 @@ export default function StandardsModal({ onClose, certifications }: StandardsMod
             </div>
           </div>
         </motion.div>
+
+        {/* Image Lightbox */}
+        <AnimatePresence>
+          {viewingImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
+              onClick={() => setViewingImage(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative max-w-4xl max-h-[90vh] w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setViewingImage(null)}
+                  className="absolute -top-12 right-0 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark text-2xl" />
+                </button>
+                <Image
+                  src={viewingImage}
+                  alt="Certificate document"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   )

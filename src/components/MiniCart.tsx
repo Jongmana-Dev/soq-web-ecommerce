@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/lib/store';
 import { useRouter } from '@/i18n/navigation';
-import { XMarkIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
+import { X, Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 
@@ -45,7 +45,7 @@ export function MiniCart({ onClose }: MiniCartProps) {
             className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors"
             aria-label="close cart"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -94,7 +94,7 @@ export function MiniCart({ onClose }: MiniCartProps) {
                         className="w-8 h-8 flex items-center justify-center border border-neutral-200 text-neutral-500 hover:bg-neutral-100 transition-colors"
                         aria-label="decrease quantity"
                       >
-                        <MinusIcon className="w-3 h-3" />
+                        <Minus className="w-3 h-3" />
                       </button>
                       <span className="w-8 text-center text-sm font-medium text-neutral-900">{item.qty}</span>
                       <button
@@ -102,7 +102,7 @@ export function MiniCart({ onClose }: MiniCartProps) {
                         className="w-8 h-8 flex items-center justify-center border border-neutral-200 text-neutral-500 hover:bg-neutral-100 transition-colors"
                         aria-label="increase quantity"
                       >
-                        <PlusIcon className="w-3 h-3" />
+                        <Plus className="w-3 h-3" />
                       </button>
                       <span className="ml-auto text-sm font-semibold text-neutral-900">
                         ฿{(item.price * item.qty).toLocaleString()}

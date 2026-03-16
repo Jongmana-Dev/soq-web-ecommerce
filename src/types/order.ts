@@ -44,6 +44,8 @@ export interface Order {
   remote_area_fee: number
   discount: number
   total: number
+  tracking_number: string | null
+  shipping_provider: string | null
   note: string | null
   referral_source: string | null
   tax_invoice: boolean

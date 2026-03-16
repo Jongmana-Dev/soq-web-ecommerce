@@ -10,14 +10,13 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-// Contact info (server-side only — ไม่ใช้ NEXT_PUBLIC_ ได้ตรงๆ)
+// Contact info from env (server-side)
 const SITE_URL = process.env.NEXTAUTH_URL ?? 'https://soqthailand.com'
-const CONTACT_PHONE = '061-234-4899'
-const CONTACT_EMAIL = 'admin@soqthailand.com'
-const CONTACT_LINE = '@186oltim'
-const CONTACT_LINE_URL = 'https://line.me/R/ti/p/@186oltim'
-const CONTACT_FACEBOOK_URL =
-  'https://www.facebook.com/profile.php?id=61587773182648'
+const CONTACT_PHONE = process.env.NEXT_PUBLIC_PHONE ?? '061-234-4899'
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_EMAIL ?? 'admin@soqthailand.com'
+const CONTACT_LINE = process.env.NEXT_PUBLIC_LINE_ID ?? '@186oltim'
+const CONTACT_LINE_URL = CONTACT_LINE ? `https://line.me/R/ti/p/${CONTACT_LINE}` : ''
+const CONTACT_FACEBOOK_URL = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? 'https://www.facebook.com/profile.php?id=61587773182648'
 
 async function sendEmail(to: string, subject: string, html: string) {
   try {

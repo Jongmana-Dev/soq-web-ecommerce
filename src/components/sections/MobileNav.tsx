@@ -5,10 +5,11 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
 import { Menu } from 'lucide-react'
 
 const menu = [
+  { id: 'about',    labelTh: 'เกี่ยวกับเรา', labelEn: 'About Us' },
   { id: 'products', labelTh: 'สินค้า', labelEn: 'Products' },
   { id: 'reviews',  labelTh: 'รีวิว', labelEn: 'Reviews' },
   { id: 'standards',labelTh: 'มาตรฐานโรงงาน', labelEn: 'Standards' },
-  { id: 'faq',      labelTh: 'คำถามที่พบบ่อย', labelEn: 'FAQs' }, // <-- ใช้ 'faq' (ตรงกับ section id)
+  { id: 'faq',      labelTh: 'คำถามที่พบบ่อย', labelEn: 'FAQs' },
   { id: 'contact',  labelTh: 'ติดต่อ', labelEn: 'Contact' },
 ]
 

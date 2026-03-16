@@ -59,7 +59,7 @@ export default function Hero({ products }: HeroProps) {
       ref={sectionRef}
       id="hero"
       data-section="true"
-      className="relative min-h-[85vh] w-full bg-[#EFEFEF] overflow-hidden"
+      className="relative min-h-[85vh] w-full bg-[#ECEDEA] overflow-hidden"
     >
       {/* Same container width as Navbar */}
       <div className="relative mx-auto flex min-h-[85vh] max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-[76px]">
@@ -154,6 +154,7 @@ export default function Hero({ products }: HeroProps) {
             long_desc_th: product.long_desc_th ?? product.short_desc_th,
             long_desc_en: product.long_desc_en ?? product.short_desc_en,
             image: product.image,
+            images: product.images,
             sizes: product.sizes,
           }}
           onClose={() => setIsModalOpen(false)}

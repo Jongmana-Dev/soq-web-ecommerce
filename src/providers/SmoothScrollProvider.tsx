@@ -1,16 +1,26 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import Lenis from '@studio-freight/lenis'
 
 type Props = { children: React.ReactNode }
 
-/**
- * Lightweight smooth-scroll provider.
- * Uses native CSS scroll-behavior: smooth (set in globals.css).
- * Keeps: IntersectionObserver section tracking, anchor click handling,
- *        sectionchange / navjumpstart / navjumpend custom events.
- */
 export default function SmoothScrollProvider({ children }: Props) {
+  const lenisRef = useRef<Lenis | null>(null)
+
   useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    })
+    lenisRef.current = lenis
+
+    function raf(time: number) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+    requestAnimationFrame(raf)
+
     // --- Section tracking via IntersectionObserver ---
     const updateActive = (id: string) => {
       document.body.dataset.activeSection = id
@@ -33,7 +43,7 @@ export default function SmoothScrollProvider({ children }: Props) {
     )
     sections.forEach((s) => io.observe(s))
 
-    // --- Anchor click → native smooth scroll + events ---
+    // --- Anchor click → Lenis smooth scroll + events ---
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a') as HTMLAnchorElement | null
       if (!a) return
@@ -45,14 +55,13 @@ export default function SmoothScrollProvider({ children }: Props) {
       window.history.replaceState(null, '', href)
 
       window.dispatchEvent(new CustomEvent('navjumpstart', { detail: href.slice(1) }))
-
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-
-      // Fire navjumpend after scroll animation (~600ms)
-      setTimeout(
-        () => window.dispatchEvent(new CustomEvent('navjumpend', { detail: href.slice(1) })),
-        700,
-      )
+      lenis.scrollTo(el, {
+        offset: 0,
+        duration: 1.4,
+        onComplete: () => {
+          window.dispatchEvent(new CustomEvent('navjumpend', { detail: href.slice(1) }))
+        },
+      })
     }
     document.addEventListener('click', onClick, true)
 
@@ -60,6 +69,7 @@ export default function SmoothScrollProvider({ children }: Props) {
       document.removeEventListener('click', onClick, true)
       sections.forEach((s) => io.unobserve(s))
       io.disconnect()
+      lenis.destroy()
     }
   }, [])
 

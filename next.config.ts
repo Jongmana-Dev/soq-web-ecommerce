@@ -16,11 +16,13 @@ const nextConfig = {
       { source: '/profile', destination: '/th/profile', permanent: false },
       { source: '/checkout', destination: '/th/checkout', permanent: false },
       { source: '/checkout/confirmation', destination: '/th/checkout/confirmation', permanent: false },
+      { source: '/admin', destination: '/th/admin', permanent: false },
+      { source: '/admin/:path*', destination: '/th/admin/:path*', permanent: false },
     ]
   },
   images: {
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 3600,
+    minimumCacheTTL: 86400,
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
       { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
@@ -36,6 +38,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/**' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com', pathname: '/**' },
       { protocol: 'https', hostname: 'profile.line-scdn.net', pathname: '/**' },
+      { protocol: 'https', hostname: 'bucket-production-733b.up.railway.app', pathname: '/**' },
     ]
   },
   async headers() {

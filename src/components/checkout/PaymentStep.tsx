@@ -19,17 +19,20 @@ interface PaymentStepProps {
   expiredAt?: string;
   onSubmit: (slipBase64: string) => void;
   onBack: () => void;
+  onExpired?: () => void;
   submitting: boolean;
   paymentAccounts: PaymentAccount[];
   error?: string | null;
 }
 
-export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, onBack, submitting, paymentAccounts, error }: PaymentStepProps) {
+export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, onBack, onExpired, submitting, paymentAccounts, error }: PaymentStepProps) {
   const t = useTranslations();
   const locale = useLocale();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [slipBase64, setSlipBase64] = useState<string>('');
+  const [countdown, setCountdown] = useState('');
+  const [isExpired, setIsExpired] = useState(false);
 
   // Auto-clear slip when verification fails so user can re-upload
   useEffect(() => {
@@ -39,6 +42,33 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
       if (fileRef.current) fileRef.current.value = '';
     }
   }, [error]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!expiredAt) return;
+
+    const update = () => {
+      const diff = new Date(expiredAt).getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown('00:00');
+        setIsExpired(true);
+        onExpired?.();
+        return false;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      setCountdown(h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`);
+      return true;
+    };
+
+    update();
+    const interval = setInterval(() => {
+      if (!update()) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expiredAt, onExpired]);
 
   const promptpay = paymentAccounts.find((a) => a.type === 'promptpay');
   const bankTransfer = paymentAccounts.find((a) => a.type === 'bank_transfer');
@@ -171,14 +201,23 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
           <div className="text-2xl font-bold text-neutral-900">฿{total.toLocaleString()}</div>
         </div>
 
-        {/* Deadline */}
+        {/* Deadline + Countdown */}
         {deadline && (
-          <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2.5">
-            <i className="fa-solid fa-clock text-amber-600 text-sm" />
-            <p className="text-sm text-amber-800">
-              {locale === 'th' ? 'กรุณาชำระเงินก่อน' : 'Please pay before'}{' '}
-              <span className="font-semibold">{deadline}</span>
-            </p>
+          <div className={`text-center space-y-2 px-4 py-3 border ${isExpired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-center justify-center gap-2">
+              <i className={`fa-solid fa-clock text-sm ${isExpired ? 'text-red-500' : 'text-amber-600'}`} />
+              <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-amber-800'}`}>
+                {isExpired
+                  ? (locale === 'th' ? 'หมดเวลาชำระเงินแล้ว' : 'Payment deadline has passed')
+                  : (locale === 'th' ? 'กรุณาชำระเงินก่อน' : 'Please pay before')}{' '}
+                {!isExpired && <span className="font-semibold">{deadline}</span>}
+              </p>
+            </div>
+            {countdown && !isExpired && (
+              <div className="text-2xl font-bold tabular-nums tracking-wider text-amber-700">
+                {countdown}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -192,13 +231,13 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
         <p className="text-sm text-neutral-500">{t('checkout.uploadSlipDesc')}</p>
 
         {/* Slip verification warning */}
-        <div className="flex gap-3 bg-blue-50 border border-blue-200 px-4 py-3">
-          <i className="fa-solid fa-shield-halved text-blue-600 mt-0.5 shrink-0" />
-          <div className="text-sm text-blue-800 space-y-1">
+        <div className="flex gap-3 bg-neutral-100 border border-neutral-300 px-4 py-3">
+          <i className="fa-solid fa-shield-halved text-neutral-600 mt-0.5 shrink-0" />
+          <div className="text-sm text-neutral-700 space-y-1">
             <p className="font-medium">
               {locale === 'th' ? 'สลิปจะถูกตรวจสอบอัตโนมัติ' : 'Slip will be verified automatically'}
             </p>
-            <ul className="list-disc list-inside text-blue-700 text-xs space-y-0.5">
+            <ul className="list-disc list-inside text-neutral-600 text-xs space-y-0.5">
               <li>{locale === 'th' ? 'ยอดเงินต้องตรงกับคำสั่งซื้อ' : 'Amount must match the order total'}</li>
               <li>{locale === 'th' ? 'สลิปแต่ละใบใช้ได้เพียงครั้งเดียว' : 'Each slip can only be used once'}</li>
               <li>{locale === 'th' ? 'กรุณาใช้สลิปที่ชัดเจนและไม่ถูกครอบตัด' : 'Please use a clear and uncropped slip'}</li>

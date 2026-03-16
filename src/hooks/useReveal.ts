@@ -1,19 +1,36 @@
-// src/hooks/useReveal.ts
-import { useEffect, useRef, useState } from 'react'
+'use client'
 
-export function useReveal(threshold = 0.2) {
-  const ref = useRef<HTMLDivElement>(null)
+import { useCallback, useRef, useState } from 'react'
+
+/**
+ * Lightweight scroll-reveal using IntersectionObserver.
+ * Returns { ref, isVisible } for components that need conditional rendering,
+ * and automatically adds 'visible' CSS class on the element for CSS-only reveals.
+ */
+export function useReveal(threshold = 0.1) {
+  const observer = useRef<IntersectionObserver | null>(null)
   const [isVisible, setVisible] = useState(false)
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisible(true)
-    }, { threshold })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [threshold])
+  const ref = useCallback(
+    (node: HTMLElement | null) => {
+      if (observer.current) observer.current.disconnect()
+      if (!node) return
+
+      observer.current = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible(true)
+            node.classList.add('visible')
+            observer.current?.disconnect()
+          }
+        },
+        { threshold },
+      )
+
+      observer.current.observe(node)
+    },
+    [threshold],
+  )
 
   return { ref, isVisible }
 }

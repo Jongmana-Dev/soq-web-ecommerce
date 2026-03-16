@@ -2,13 +2,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { ThemeProvider } from 'next-themes'
 import { Prompt, Poppins } from 'next/font/google'
-import Navbar from '@/components/sections/Navbar'
-import { LenisProvider } from '@/providers/SmoothScrollProvider'
-import LuxuryCursor from '@/components/cursor/LuxuryCursor'
-import BackToTop from '@/components/ui/backtotop'
-import CartToast from '@/components/ui/CartToast'
-import AlertToast from '@/components/ui/AlertToast'
-import CartExpiryGuard from '@/components/cart/CartExpiryGuard'
+import Script from 'next/script'
 import SessionProvider from '@/providers/SessionProvider'
 import '@/app/globals.css'
 
@@ -18,11 +12,11 @@ const prompt = Prompt({
   display: 'swap',
   variable: '--font-prompt'
 })
-const poppins = Poppins({ 
-  subsets: ['latin'], 
-  weight: ['600'], 
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['600'],
   display: 'swap',
-  variable: '--font-poppins' 
+  variable: '--font-poppins'
 })
 
 export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
@@ -32,21 +26,23 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Font Awesome — preconnect + deferred load */}
         <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
       </head>
-      {/* แก้ไข: ยืนยันว่า body มี pt-[76px] */}
       <body className={`${prompt.variable} ${poppins.variable} font-prompt`}>
-
-        <LuxuryCursor />
-
+        <Script
+          id="font-awesome-loader"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var l=document.createElement('link');
+              l.rel='stylesheet';
+              l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+              l.crossOrigin='anonymous';
+              document.head.appendChild(l);
+            `,
+          }}
+        />
         <SessionProvider>
           <ThemeProvider
             attribute="class"
@@ -54,14 +50,7 @@ export default async function LocaleLayout(props: LayoutProps<'/[locale]'>) {
             enableSystem
           >
             <NextIntlClientProvider locale={locale}>
-              <LenisProvider>
-                <Navbar />
-                {props.children}
-                <BackToTop />
-                <CartToast />
-                <AlertToast />
-                <CartExpiryGuard />
-              </LenisProvider>
+              {props.children}
             </NextIntlClientProvider>
           </ThemeProvider>
         </SessionProvider>

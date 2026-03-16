@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCartIcon, UserIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ShoppingCart as ShoppingCartIcon, User as UserIcon, Menu as Bars3Icon, X as XMarkIcon } from "lucide-react";
 import { MiniCart } from "@/components/MiniCart";
 import { useCart } from "@/lib/store";
 import ContactModal from "@/components/modals/ContactModal";
@@ -116,6 +116,7 @@ function Navbar() {
     { hash: "testimonials", label: tHeader("reviews") },
     { hash: "products", label: tHeader("products") },
     { hash: "industrial-standards", label: tHeader("standards") },
+    { hash: "about", label: tHeader("about") },
     { hash: "faq", label: tHeader("faq") },
   ];
 
@@ -124,7 +125,10 @@ function Navbar() {
     isHomePage ? `#${hash}` : `/${locale}/#${hash}`;
 
   const contactLabel = tHeader("contact");
-  const isAuthenticated = status === "authenticated" && session?.user;
+  // Prevent hydration mismatch: treat as unauthenticated until client mounts
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const isAuthenticated = mounted && status === "authenticated" && session?.user;
 
   const handleUserClick = () => {
     if (isAuthenticated) {

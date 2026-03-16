@@ -79,11 +79,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return false
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.sub = user.id
         token.email = user.email
         token.role = (user as any).role ?? 'customer'
+        token.must_change_password = (user as any).must_change_password ?? false
+      }
+      // Re-fetch user when session is updated (e.g. after password change)
+      if (trigger === 'update' && token.sub) {
+        const adapter = soqAdapter()
+        const freshUser = await adapter.getUser!(token.sub)
+        if (freshUser) {
+          token.must_change_password = (freshUser as any).must_change_password ?? false
+        }
       }
       return token
     },
@@ -92,6 +101,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub!
         session.user.email = (token.email as string) ?? null
         ;(session.user as any).role = token.role ?? 'customer'
+        session.user.must_change_password = token.must_change_password ?? false
       }
       return session
     },

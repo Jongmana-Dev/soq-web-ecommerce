@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(lsof:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm add:*)",
+      "Bash(find /Users/nattawut.dev/_WORK_/_PROJECT/SOQ/soq-web-ecommerce -name \"ContactModal.tsx\" -o -name \"*ontact*\" -type f 2>/dev/null | head -20)",
+      "Bash(find /Users/nattawut.dev/_WORK_/_PROJECT/SOQ/soq-web-ecommerce -name \".env*\" -type f 2>/dev/null | head -5)",
+      "Bash(npx next:*)"
     ]
   }
 }

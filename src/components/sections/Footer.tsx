@@ -6,11 +6,22 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import Image from 'next/image'
 import ContactModal from '@/components/modals/ContactModal'
+import { useContactInfo } from '@/providers/ContactInfoProvider'
+import type { ContactInfo } from '@/lib/cms'
+
+interface TermsSectionData {
+  title_th: string
+  title_en: string
+  body_th: string
+  body_en: string
+}
 
 /* ─── Terms Modal (portalled to body → z-[300] above everything) ─── */
-function TermsModal({ onClose }: { onClose: () => void }) {
+function TermsModal({ onClose, termsSections }: { onClose: () => void; termsSections: TermsSectionData[] }) {
   const t = useTranslations('footer')
+  const locale = useLocale()
 
   // Lock body scroll while open
   useEffect(() => {
@@ -25,14 +36,11 @@ function TermsModal({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const sections = [
-    { title: t('termsGeneral'), body: t('termsGeneralDesc') },
-    { title: t('termsProduct'), body: t('termsProductDesc') },
-    { title: t('termsOrder'), body: t('termsOrderDesc') },
-    { title: t('termsShipping'), body: t('termsShippingDesc') },
-    { title: t('termsReturn'), body: t('termsReturnDesc') },
-    { title: t('termsPrivacy'), body: t('termsPrivacyDesc') },
-  ]
+  // Data from CMS API only
+  const sections = termsSections.map((s) => ({
+    title: locale === 'th' ? s.title_th : s.title_en,
+    body: locale === 'th' ? s.body_th : s.body_en,
+  }))
 
   return createPortal(
     <AnimatePresence>
@@ -113,15 +121,14 @@ function TermsModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-/* ─── Social config from env ─── */
-const LINE_ID = process.env.NEXT_PUBLIC_LINE_ID ?? ''
-const LINE_URL = LINE_ID ? `https://line.me/R/ti/p/${LINE_ID}` : ''
-const FACEBOOK_URL = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? ''
-const PHONE = process.env.NEXT_PUBLIC_PHONE ?? ''
-const EMAIL = process.env.NEXT_PUBLIC_EMAIL ?? ''
-
 /* ─── Footer ─── */
-export default function Footer() {
+export default function Footer({ termsSections = [], contactInfo: contactInfoProp }: { termsSections?: TermsSectionData[]; contactInfo?: ContactInfo }) {
+  const contextInfo = useContactInfo()
+  const ci = contactInfoProp ?? contextInfo
+  const LINE_URL = ci.line_url
+  const FACEBOOK_URL = ci.facebook_url
+  const PHONE = ci.phone
+  const EMAIL = ci.email
   const t = useTranslations('footer')
   const tHeader = useTranslations('Header')
   const locale = useLocale()
@@ -202,7 +209,7 @@ export default function Footer() {
                 <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="relative block">
                   <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse-glow" />
                   <div className="relative bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
-                    <img
+                    <Image
                       src="/line_oa.webp"
                       alt="LINE Official Account QR Code"
                       width={160}
@@ -311,13 +318,17 @@ export default function Footer() {
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-neutral-500 text-xs">
               <span>&copy; {new Date().getFullYear()} SOQ. All rights reserved.</span>
-              <span className="text-neutral-700">|</span>
-              <button
-                onClick={() => setShowTerms(true)}
-                className="hover:text-white transition-colors underline underline-offset-2"
-              >
-                {t('terms')}
-              </button>
+              {termsSections.length > 0 && (
+                <>
+                  <span className="text-neutral-700">|</span>
+                  <button
+                    onClick={() => setShowTerms(true)}
+                    className="hover:text-white transition-colors underline underline-offset-2"
+                  >
+                    {t('terms')}
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="flex gap-4 text-xs font-medium">
@@ -340,8 +351,8 @@ export default function Footer() {
       </footer>
 
       {/* Terms modal — portalled to body, z-[300] above BackToTop(z-50) & CartToast(z-200) */}
-      {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
-      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
+      {showTerms && <TermsModal onClose={() => setShowTerms(false)} termsSections={termsSections} />}
+      {showContact && <ContactModal onClose={() => setShowContact(false)} contactInfo={ci} />}
     </>
   )
 }

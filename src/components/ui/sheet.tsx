@@ -1,7 +1,7 @@
 // src/components/ui/sheet.tsx
 import * as React from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Cross2Icon } from '@radix-ui/react-icons'
+import { X as Cross2Icon } from 'lucide-react'
 import { cn } from '@/lib/utils' // keep your cn util
 
 type SheetSide = 'top' | 'right' | 'bottom' | 'left'

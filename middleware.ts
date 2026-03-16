@@ -5,7 +5,7 @@ import { routing } from './src/i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
-const protectedPaths = ['/profile', '/checkout']
+const protectedPaths = ['/profile', '/checkout', '/admin']
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
