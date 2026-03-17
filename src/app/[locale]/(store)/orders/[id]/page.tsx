@@ -260,10 +260,23 @@ export default function OrderDetailPage() {
                 }
               </button>
               {order.tracking_number && (
-                <div className="w-full text-center bg-neutral-100 text-neutral-700 py-2.5 text-xs font-medium mt-2">
-                  <i className="fa-solid fa-truck mr-2 text-xs" />
-                  {t('trackDelivery')} — {order.tracking_number}
-                </div>
+                order.tracking_url ? (
+                  <a
+                    href={order.tracking_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-neutral-900 text-white py-3 text-sm font-medium mt-2 hover:bg-neutral-800 transition-colors"
+                  >
+                    <i className="fa-solid fa-truck mr-2 text-xs" />
+                    {t('trackDelivery')} — {order.tracking_number}
+                    <i className="fa-solid fa-arrow-up-right-from-square ml-2 text-xs opacity-60" />
+                  </a>
+                ) : (
+                  <div className="w-full text-center bg-neutral-100 text-neutral-700 py-2.5 text-xs font-medium mt-2">
+                    <i className="fa-solid fa-truck mr-2 text-xs" />
+                    {t('trackDelivery')} — {order.tracking_number}
+                  </div>
+                )
               )}
             </motion.div>
           )}
@@ -285,18 +298,18 @@ export default function OrderDetailPage() {
                 </span>
               </div>
             ) : (
-              <div className="flex items-center justify-between gap-0">
+              <div className="flex items-center justify-between gap-0 overflow-x-auto">
                 {TIMELINE_STEPS.map((step, i) => {
                   const isPast = i < currentStepIdx
                   const isCurrent = i === currentStepIdx
                   const isFuture = i > currentStepIdx
 
                   return (
-                    <div key={step} className="flex items-center flex-1 last:flex-none">
+                    <div key={step} className="flex items-center flex-1 last:flex-none min-w-0">
                       {/* Step circle + label */}
-                      <div className="flex flex-col items-center gap-1.5 min-w-0">
+                      <div className="flex flex-col items-center gap-1 min-w-0 w-14 sm:w-auto shrink-0">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
                             isPast
                               ? 'bg-green-500 text-white'
                               : isCurrent
@@ -313,7 +326,7 @@ export default function OrderDetailPage() {
                           )}
                         </div>
                         <span
-                          className={`text-[10px] text-center leading-tight ${
+                          className={`text-[9px] sm:text-[10px] text-center leading-tight w-full px-0.5 ${
                             isFuture ? 'text-neutral-300' : 'text-neutral-700 font-medium'
                           }`}
                         >
@@ -323,7 +336,7 @@ export default function OrderDetailPage() {
 
                       {/* Connector line */}
                       {i < TIMELINE_STEPS.length - 1 && (
-                        <div className="flex-1 mx-1">
+                        <div className="flex-1 mx-0.5 sm:mx-1">
                           <div
                             className={`h-0.5 w-full ${
                               i < currentStepIdx ? 'bg-green-500' : 'bg-neutral-200'

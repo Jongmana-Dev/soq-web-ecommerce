@@ -98,7 +98,7 @@ export default function BrandHistorySection({ items }: Props) {
                           isLeft ? 'lg:ml-12' : 'lg:mr-12'
                         }`}
                       >
-                        <span className="text-6xl font-black text-neutral-200">{item.year}</span>
+                        <span className="text-4xl sm:text-6xl font-black text-neutral-200">{item.year}</span>
                       </div>
                     )}
                   </div>

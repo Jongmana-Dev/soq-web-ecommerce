@@ -97,8 +97,8 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
           >
             {/* Header Text */}
             <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
-              <h2 className="font-prompt text-4xl font-bold leading-tight text-neutral-800 lg:text-5xl">
-                <span className="text-[var(--accent)] text-6xl block mb-2">&#10077;</span>
+              <h2 className="font-prompt text-3xl font-bold leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+                <span className="text-[var(--accent)] text-5xl sm:text-6xl block mb-2">&#10077;</span>
                 {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
               </h2>
@@ -157,7 +157,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
              className="relative pb-20"
           >
              {/* Stacked cards container */}
-             <div className="relative" style={{ minHeight: 380 }}>
+             <div className="relative overflow-hidden" style={{ minHeight: 340 }}>
                {/* Background stacked cards — messy scattered deck */}
                {reviews.length > 4 && (
                  <div
@@ -226,8 +226,8 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                    initial="enter"
                    animate="center"
                    exit="exit"
-                   className="relative bg-white p-8 md:p-10 shadow-xl border border-neutral-100"
-                   style={{ minHeight: 380, zIndex: 10 }}
+                   className="relative bg-white p-6 md:p-10 shadow-xl border border-neutral-100"
+                   style={{ minHeight: 340, zIndex: 10 }}
                  >
                    <span className="absolute top-8 left-0 w-1 h-12 bg-[var(--accent)]" />
 

@@ -42,7 +42,7 @@ export default function HeroV2({ products }: Props) {
             className="w-full max-w-2xl text-center lg:text-left"
           >
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="font-prompt text-5xl font-light leading-tight sm:text-6xl lg:text-8xl xl:text-9xl text-[var(--accent)] tracking-tighter drop-shadow-lg">
+              <h1 className="font-prompt text-4xl font-light leading-tight sm:text-6xl lg:text-8xl xl:text-9xl text-[var(--accent)] tracking-tighter drop-shadow-lg">
                 SOQ.
               </h1>
               <h2 className="font-prompt text-2xl font-light leading-tight text-white sm:text-3xl lg:text-5xl xl:text-6xl uppercase tracking-wide drop-shadow-md">

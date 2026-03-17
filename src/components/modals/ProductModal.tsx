@@ -247,8 +247,8 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
           <div className="lg:w-1/2 flex-1 bg-[#F5F5F7] p-5 sm:p-8 lg:p-12 overflow-y-auto overscroll-contain custom-scrollbar">
             
             {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-neutral-800 leading-tight mb-2">
+            <div className="mb-5 sm:mb-8">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-light text-neutral-800 leading-tight mb-2">
                 {locale === 'th' ? product.name_th : product.name_en}
               </h2>
               
@@ -259,7 +259,7 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
                     <button
                       key={size.volume}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 text-sm border transition-colors ${
+                      className={`px-4 py-2.5 text-sm border transition-colors min-h-[44px] ${
                         selectedSize.volume === size.volume
                           ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-neutral-900 font-medium'
                           : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
@@ -273,19 +273,19 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
             </div>
 
             {/* Price */}
-            <div className="mb-8">
-               <span className="text-3xl font-bold text-neutral-900">
+            <div className="mb-5 sm:mb-8">
+               <span className="text-2xl sm:text-3xl font-bold text-neutral-900">
                  {selectedSize.price.toLocaleString('th-TH', { minimumFractionDigits: 2 })} {locale === 'th' ? 'บาท' : 'THB'}
                </span>
             </div>
 
             {/* Description */}
-            <p className="text-neutral-500 leading-relaxed mb-8 font-light">
+            <p className="text-neutral-500 leading-relaxed mb-5 sm:mb-8 font-light">
               {locale === 'th' ? product.long_desc_th : product.long_desc_en}
             </p>
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center gap-4 mb-10 pb-10 border-b border-neutral-200">
+            <div className="flex flex-wrap items-center gap-3 mb-6 sm:mb-10 pb-6 sm:pb-10 border-b border-neutral-200">
                {/* Quantity */}
                <div className="flex items-center bg-white border border-neutral-300 h-12">
                   <button onClick={() => handleQuantityChange('decrease')} className="w-11 h-full text-neutral-700 hover:bg-neutral-100 transition-colors">
@@ -314,7 +314,7 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
                     onClose()
                     router.push('/cart')
                   }}
-                  className="h-12 px-8 bg-neutral-900 font-bold text-white hover:bg-neutral-800 transition-all shadow-md flex-1"
+                  className="h-12 px-4 sm:px-8 bg-neutral-900 font-bold text-white hover:bg-neutral-800 transition-all shadow-md flex-1 min-w-0"
                >
                   <i className="fa-solid fa-cart-shopping mr-2" />
                   {locale === 'th' ? 'ไปที่รถเข็น' : 'Go to Cart'}

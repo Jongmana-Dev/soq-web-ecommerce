@@ -15,11 +15,11 @@ type ContactModalProps = {
 }
 
 const contactSchema = z.object({
-  name: z.string().min(1, 'Required').max(120),
-  email: z.string().email('Invalid email'),
-  phone: z.string().optional(),
-  subject: z.string().min(1, 'Required').max(200),
-  message: z.string().min(1, 'Required').max(2000),
+  name: z.string().min(2, 'กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร').max(100, 'ชื่อต้องไม่เกิน 100 ตัวอักษร'),
+  email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง').max(254, 'อีเมลยาวเกินไป'),
+  phone: z.string().max(20, 'เบอร์โทรยาวเกินไป').regex(/^[0-9\-+() ]*$/, 'รูปแบบเบอร์โทรไม่ถูกต้อง').optional().or(z.literal('')),
+  subject: z.string().min(2, 'กรุณากรอกหัวข้ออย่างน้อย 2 ตัวอักษร').max(200, 'หัวข้อต้องไม่เกิน 200 ตัวอักษร'),
+  message: z.string().min(10, 'กรุณากรอกข้อความอย่างน้อย 10 ตัวอักษร').max(2000, 'ข้อความต้องไม่เกิน 2,000 ตัวอักษร'),
 })
 
 type ContactForm = z.infer<typeof contactSchema>
@@ -37,6 +37,7 @@ export default function ContactModal({ onClose, contactInfo: contactInfoProp }: 
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({})
+  const [serverError, setServerError] = useState<string | null>(null)
   const [form, setForm] = useState<ContactForm>({
     name: '',
     email: '',
@@ -86,17 +87,21 @@ export default function ContactModal({ onClose, contactInfo: contactInfoProp }: 
     }
 
     setSubmitting(true)
+    setServerError(null)
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(result.data),
       })
+      const data = await res.json()
       if (res.ok) {
         setSubmitted(true)
+      } else {
+        setServerError(data.error || (locale === 'th' ? 'ส่งข้อความไม่สำเร็จ' : 'Failed to send message'))
       }
     } catch {
-      // silent
+      setServerError(locale === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'Something went wrong')
     } finally {
       setSubmitting(false)
     }
@@ -254,6 +259,7 @@ export default function ContactModal({ onClose, contactInfo: contactInfoProp }: 
                       type="text"
                       value={form.name}
                       onChange={(e) => handleChange('name', e.target.value)}
+                      maxLength={100}
                       className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.name ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'กรอกชื่อ' : 'Your name'}
                     />
@@ -295,6 +301,7 @@ export default function ContactModal({ onClose, contactInfo: contactInfoProp }: 
                       type="text"
                       value={form.subject}
                       onChange={(e) => handleChange('subject', e.target.value)}
+                      maxLength={200}
                       className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors ${errors.subject ? 'border-red-400' : 'border-neutral-200'}`}
                       placeholder={locale === 'th' ? 'หัวข้อ' : 'Subject'}
                     />
@@ -307,13 +314,25 @@ export default function ContactModal({ onClose, contactInfo: contactInfoProp }: 
                     </label>
                     <textarea
                       value={form.message}
-                      onChange={(e) => handleChange('message', e.target.value)}
+                      onChange={(e) => handleChange('message', e.target.value.slice(0, 2000))}
                       rows={4}
+                      maxLength={2000}
                       className={`w-full px-4 py-2.5 border text-base text-neutral-900 outline-none focus:border-neutral-900 transition-colors resize-none ${errors.message ? 'border-red-400' : 'border-neutral-200'}`}
-                      placeholder={locale === 'th' ? 'รายละเอียด' : 'Details'}
+                      placeholder={locale === 'th' ? 'รายละเอียด (อย่างน้อย 10 ตัวอักษร)' : 'Details (at least 10 characters)'}
                     />
-                    {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
+                    <div className="flex justify-between mt-1">
+                      {errors.message ? <p className="text-xs text-red-500">{errors.message}</p> : <span />}
+                      <span className={`text-xs ${form.message.length > 1800 ? 'text-amber-500' : 'text-neutral-400'}`}>
+                        {form.message.length}/2,000
+                      </span>
+                    </div>
                   </div>
+
+                  {serverError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
+                      {serverError}
+                    </div>
+                  )}
 
                   <button
                     type="submit"

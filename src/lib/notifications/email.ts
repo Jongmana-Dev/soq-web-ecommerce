@@ -88,7 +88,7 @@ function baseLayout(content: string) {
     <a href="${SITE_URL}" style="text-decoration:none;">
       <h1 style="margin:0;color:#d4a853;font-size:24px;font-weight:700;letter-spacing:1px;">SOQ Thailand</h1>
     </a>
-    <p style="margin:6px 0 0;color:#888;font-size:12px;letter-spacing:0.5px;">Star San Sanitizer</p>
+    <p style="margin:6px 0 0;color:#888;font-size:12px;letter-spacing:0.5px;">Safe for Sip</p>
   </td></tr>
 
   <!-- Body -->
@@ -108,7 +108,7 @@ function baseLayout(content: string) {
         <td style="padding:0 8px;"><a href="${CONTACT_FACEBOOK_URL}" style="color:#888;text-decoration:none;font-size:12px;">Facebook</a></td>
       </tr>
     </table>
-    <p style="margin:0;color:#666;font-size:11px;">SOQ Thailand — Star San Sanitizer</p>
+    <p style="margin:0;color:#666;font-size:11px;">SOQ Thailand — Safe for Sip</p>
     <p style="margin:4px 0 0;color:#555;font-size:11px;">
       อีเมลนี้ถูกส่งจาก <a href="${SITE_URL}" style="color:#d4a853;text-decoration:none;">soqthailand.com</a>
     </p>
@@ -277,7 +277,66 @@ export async function sendOrderCancelledEmail(email: string, orderNumber: string
   await sendEmail(email, `คำสั่งซื้อ ${orderNumber} ถูกยกเลิก — SOQ Thailand`, html)
 }
 
+// ─── Contact Form Email ─────────────────────────────────────────
+
+const CONTACT_FORM_RECIPIENT = process.env.CONTACT_FORM_EMAIL ?? 'jmn.services.soq@gmail.com'
+
+export async function sendContactFormEmail(data: {
+  name: string
+  email: string
+  phone?: string
+  subject: string
+  message: string
+}) {
+  // ส่งให้ทีมงาน
+  const adminHtml = baseLayout(`
+    <h2 style="margin:0 0 16px;color:#1a1a1a;font-size:20px;">มีข้อความใหม่จากฟอร์มติดต่อ</h2>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border:1px solid #eee;border-radius:6px;overflow:hidden;">
+      <tr style="background:#f9f9f9;">
+        <td style="padding:10px 16px;color:#666;font-size:13px;width:100px;">ชื่อ</td>
+        <td style="padding:10px 16px;color:#333;font-size:14px;">${escapeHtml(data.name)}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 16px;color:#666;font-size:13px;border-top:1px solid #eee;">อีเมล</td>
+        <td style="padding:10px 16px;color:#333;font-size:14px;border-top:1px solid #eee;">
+          <a href="mailto:${escapeHtml(data.email)}" style="color:#d4a853;text-decoration:none;">${escapeHtml(data.email)}</a>
+        </td>
+      </tr>
+      ${data.phone ? `<tr>
+        <td style="padding:10px 16px;color:#666;font-size:13px;border-top:1px solid #eee;">โทรศัพท์</td>
+        <td style="padding:10px 16px;color:#333;font-size:14px;border-top:1px solid #eee;">${escapeHtml(data.phone)}</td>
+      </tr>` : ''}
+      <tr>
+        <td style="padding:10px 16px;color:#666;font-size:13px;border-top:1px solid #eee;">หัวข้อ</td>
+        <td style="padding:10px 16px;color:#333;font-size:14px;font-weight:600;border-top:1px solid #eee;">${escapeHtml(data.subject)}</td>
+      </tr>
+    </table>
+
+    <div style="margin:16px 0;padding:16px;background:#f9f9f9;border-radius:6px;border-left:4px solid #d4a853;">
+      <p style="margin:0 0 8px;color:#666;font-size:12px;font-weight:600;">ข้อความ:</p>
+      <p style="margin:0;color:#333;line-height:1.6;white-space:pre-wrap;">${escapeHtml(data.message)}</p>
+    </div>
+
+    <p style="color:#888;font-size:12px;">ตอบกลับลูกค้าโดยตรงที่ <a href="mailto:${escapeHtml(data.email)}" style="color:#d4a853;">${escapeHtml(data.email)}</a></p>
+  `)
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: CONTACT_FORM_RECIPIENT,
+    replyTo: data.email,
+    subject: `[Contact Form] ${data.subject} — จาก ${data.name}`,
+    html: adminHtml,
+  })
+
+  console.log(`[Email] Contact form sent to ${CONTACT_FORM_RECIPIENT} from ${data.email}`)
+}
+
 // ─── Helpers ────────────────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
 
 function formatCurrency(amount: number): string {
   return `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`

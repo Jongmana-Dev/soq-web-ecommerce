@@ -143,7 +143,7 @@ export default function PaymentModal({ order, onClose, onSuccess }: PaymentModal
             <button
               onClick={onClose}
               disabled={submitting}
-              className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors"
             >
               <i className="fa-solid fa-xmark" />
             </button>

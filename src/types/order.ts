@@ -45,6 +45,7 @@ export interface Order {
   discount: number
   total: number
   tracking_number: string | null
+  tracking_url: string | null
   shipping_provider: string | null
   note: string | null
   referral_source: string | null

@@ -104,12 +104,12 @@ export default function ProfilePage() {
           </div>
 
           {/* Tabs */}
-          <div className="relative flex gap-0 border-b border-neutral-200 mb-8">
+          <div className="relative flex gap-0 border-b border-neutral-200 mb-8 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`relative px-5 py-3 text-sm font-medium transition-colors ${
+                className={`relative px-4 sm:px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab.key
                     ? 'text-neutral-900'
                     : 'text-neutral-400 hover:text-neutral-600'

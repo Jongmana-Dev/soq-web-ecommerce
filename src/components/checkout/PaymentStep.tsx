@@ -106,20 +106,20 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/logo.svg" alt="SOQ" className="h-6 w-auto" />
-          <div>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <img src="/logo.svg" alt="SOQ" className="h-6 w-auto shrink-0" />
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold">{t('checkout.payment')}</h3>
             {orderNumber && (
-              <p className="text-xs text-neutral-400">Order #{orderNumber}</p>
+              <p className="text-xs text-neutral-400 truncate">Order #{orderNumber}</p>
             )}
           </div>
         </div>
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-neutral-500 hover:text-neutral-700 underline underline-offset-4"
+          className="text-sm text-neutral-500 hover:text-neutral-700 underline underline-offset-4 shrink-0"
         >
           {t('checkout.backToShipping')}
         </button>

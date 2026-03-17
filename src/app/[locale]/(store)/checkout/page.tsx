@@ -172,6 +172,28 @@ export default function CheckoutPage() {
   const createOrder = async (data: ShippingData) => {
     setError(null);
 
+    // ตรวจสอบ pending orders ไม่เกิน 3 รายการ
+    try {
+      const pendingRes = await fetch('/api/orders-proxy');
+      if (pendingRes.ok) {
+        const pendingData = await pendingRes.json();
+        const orders = pendingData.data ?? pendingData ?? [];
+        const pendingOrders = Array.isArray(orders)
+          ? orders.filter((o: { status: string }) => o.status === 'pending_payment')
+          : [];
+        if (pendingOrders.length >= 3) {
+          setError(
+            locale === 'th'
+              ? 'คุณมีคำสั่งซื้อที่รอชำระเงินอยู่ 3 รายการแล้ว กรุณาชำระเงินหรือยกเลิกคำสั่งซื้อเดิมก่อนสั่งใหม่'
+              : 'You already have 3 pending orders. Please complete payment or cancel existing orders before placing a new one.'
+          );
+          return;
+        }
+      }
+    } catch {
+      // ถ้าเช็คไม่ได้ ให้ดำเนินการต่อ backend จะ validate อีกชั้น
+    }
+
     // Save new address if requested
     if (data.save_address && !data.address_id) {
       try {
