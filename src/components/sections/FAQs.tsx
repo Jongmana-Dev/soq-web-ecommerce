@@ -26,14 +26,16 @@ export default function FAQ({ faqs }: FAQsProps) {
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-12 text-center lg:mb-16">
-          <span className="mb-4 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-medium text-neutral-500 shadow-sm border border-neutral-100">
-            FAQs
-          </span>
-          <h2 className="mb-4 font-prompt text-3xl font-light text-neutral-800 sm:text-4xl lg:text-5xl">
+        <div className="mb-12 lg:mb-16 pl-4 border-l-4 border-[var(--accent)]">
+          <h2 className="font-prompt text-3xl font-bold leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
             {locale === 'th' ? 'คำถามที่' : 'Frequently Asked'} <br />
-            <span className="font-semibold">{locale === 'th' ? 'พบบ่อย' : 'Questions'}</span>
+            <span className="text-[var(--accent)]">{locale === 'th' ? 'พบบ่อย' : 'Questions'}</span>
           </h2>
+          <p className="mt-4 text-neutral-500 font-light">
+            {locale === 'th'
+              ? 'รวมคำถามที่ลูกค้าถามบ่อยเกี่ยวกับผลิตภัณฑ์ SOQ'
+              : 'Common questions about SOQ products'}
+          </p>
         </div>
 
         {/* FAQ Grid — 1 col mobile, 2 col tablet, 3 col desktop */}
