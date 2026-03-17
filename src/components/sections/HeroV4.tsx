@@ -81,7 +81,7 @@ export default function HeroV4({ products }: Props) {
           >
             <Image
               src="/hero-section/v4/hero.jpg"
-              alt="SOQ Star San Sanitizer"
+              alt="SOQ. Safe for Sip"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover object-center"

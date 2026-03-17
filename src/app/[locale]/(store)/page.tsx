@@ -31,12 +31,12 @@ export async function generateMetadata({
 
   const title =
     locale === 'th'
-      ? ''
-      : ''
+      ? 'SOQ. Safe for Sip — ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
+      : 'SOQ. Safe for Sip — No-rinse antibacterial product'
   const description =
     locale === 'th'
-      ? 'SOQ Star San Sanitizer น้ำยาทำความสะอาดมาตรฐานสากล สำหรับโรงเบียร์คราฟต์และอุตสาหกรรมอาหาร ปลอดภัย ไร้สารตกค้าง'
-      : 'SOQ Star San Sanitizer — Professional-grade sanitizer for craft breweries and food industry. Safe, residue-free, globally certified.'
+      ? 'SOQ. Safe for Sip — ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ปลอดภัย ไร้สารตกค้าง'
+      : 'SOQ. Safe for Sip — No-rinse antibacterial product. Safe, residue-free.'
 
   return {
     title,
@@ -54,7 +54,7 @@ export async function generateMetadata({
       type: 'website',
       siteName: 'SOQ',
       url: `${base}/${locale}`,
-      images: [{ url: '/og', width: 1200, height: 630, alt: 'SOQ Star San Sanitizer' }],
+      images: [{ url: '/og', width: 1200, height: 630, alt: 'SOQ. Safe for Sip' }],
       locale: locale === 'th' ? 'th_TH' : 'en_US',
       alternateLocale: locale === 'th' ? 'en_US' : 'th_TH',
     },
@@ -88,7 +88,7 @@ export default async function IndexPage({
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: 'SOQ Star San Sanitizer',
+    name: 'SOQ. Safe for Sip',
     description:
       locale === 'th'
         ? 'น้ำยาทำความสะอาดระดับพรีเมียมสำหรับอุตสาหกรรม Brewing ปลอดภัย ไร้สารตกค้าง'

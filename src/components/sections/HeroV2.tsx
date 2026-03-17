@@ -27,7 +27,7 @@ export default function HeroV2({ products }: Props) {
           {/* Background image constrained to container */}
           <Image
             src="/hero-section/v2/hero.webp"
-            alt="SOQ Star San Sanitizer"
+            alt="SOQ. Safe for Sip"
             fill
             sizes="(max-width: 1440px) 100vw, 1440px"
             className="object-cover object-[center_30%]"

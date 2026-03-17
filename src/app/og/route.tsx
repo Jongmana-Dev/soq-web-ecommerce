@@ -85,7 +85,7 @@ export async function GET() {
           lineHeight: 1.5,
         },
       },
-      'Star San Sanitizer — Safe, Residue-Free, Globally Certified',
+      'Safe for Sip — No-rinse antibacterial product',
     ),
     // Accent line bottom
     React.createElement('div', {

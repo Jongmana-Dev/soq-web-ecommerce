@@ -105,7 +105,7 @@ export default function HeroV3({ products }: Props) {
               <div className="relative w-[115%] h-[115%]">
                 <Image
                   src="/hero-section/v3/frame-0061.webp"
-                  alt="SOQ Star San Sanitizer"
+                  alt="SOQ. Safe for Sip"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-contain scale-110"
