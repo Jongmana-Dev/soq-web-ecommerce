@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from '@/i18n/navigation'
@@ -75,6 +76,101 @@ function AccordionItem({ title, children, defaultOpen = false }: { title: string
   )
 }
 
+function EmailButton({ email, locale }: { email: string; locale: string }) {
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [sending, setSending] = useState(false)
+
+  const handleSend = () => {
+    setSending(true)
+    const subject = encodeURIComponent(locale === 'th' ? 'สอบถามสินค้า SOQ' : 'SOQ Product Inquiry')
+    const body = encodeURIComponent(
+      `${locale === 'th' ? 'ชื่อ' : 'Name'}: ${form.name}\n${locale === 'th' ? 'อีเมล' : 'Email'}: ${form.email}\n\n${form.message}`
+    )
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_self')
+    setSending(false)
+    setOpen(false)
+    setForm({ name: '', email: '', message: '' })
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        title={email}
+        className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-900/5 transition-all"
+      >
+        <i className="fa-solid fa-envelope text-base" />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] grid place-items-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-white p-6 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-lg font-light text-neutral-900">
+                  {locale === 'th' ? 'ส่งอีเมลถึงเรา' : 'Send us an email'}
+                </h3>
+                <button onClick={() => setOpen(false)} className="text-neutral-400 hover:text-black">
+                  <i className="fa-solid fa-xmark text-lg" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder={locale === 'th' ? 'ชื่อของคุณ' : 'Your name'}
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+                <input
+                  type="email"
+                  placeholder={locale === 'th' ? 'อีเมลของคุณ' : 'Your email'}
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+                <textarea
+                  placeholder={locale === 'th' ? 'ข้อความ' : 'Message'}
+                  rows={4}
+                  value={form.message}
+                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!form.name || !form.message || sending}
+                  className="w-full py-3 bg-[var(--accent)] text-neutral-900 font-normal text-sm hover:brightness-110 transition-all disabled:opacity-40"
+                >
+                  <i className="fa-solid fa-paper-plane mr-2" />
+                  {locale === 'th' ? 'ส่งอีเมล' : 'Send Email'}
+                </button>
+              </div>
+
+              <p className="mt-3 text-xs text-neutral-400 text-center font-light">
+                {locale === 'th' ? 'หรือส่งตรงที่' : 'Or email directly at'} {email}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
 interface ShippingRate {
   min_qty: number
   max_qty: number | null
@@ -137,9 +233,20 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
     return () => window.removeEventListener('keydown', handleEsc)
   }, [onClose])
 
+  const overlayRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
+    // Stop Lenis smooth scroll + native scroll
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
+    document.documentElement.style.overflow = 'hidden'
+    // Scroll modal overlay to top
+    overlayRef.current?.scrollTo(0, 0)
+    // Scroll window to ensure modal is visible
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
   }, [])
 
   // Build accordion items from API data
@@ -173,13 +280,14 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
     })
   }
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] grid place-items-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto"
+        ref={overlayRef}
+        className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto"
         onClick={onClose}
       >
         <motion.div
@@ -420,13 +528,7 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
                   </a>
                 )}
                 {process.env.NEXT_PUBLIC_EMAIL && (
-                  <a
-                    href={`mailto:${process.env.NEXT_PUBLIC_EMAIL}`}
-                    title={process.env.NEXT_PUBLIC_EMAIL}
-                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-900/5 transition-all"
-                  >
-                    <i className="fa-solid fa-envelope text-base" />
-                  </a>
+                  <EmailButton email={process.env.NEXT_PUBLIC_EMAIL} locale={locale} />
                 )}
               </div>
             </div>
@@ -436,7 +538,8 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
 
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
 

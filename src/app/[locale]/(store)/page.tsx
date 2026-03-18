@@ -16,7 +16,7 @@ import { getReviews, getCertifications, getFAQs, getUsageSteps, getTermsSections
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://soqthailand.com'
 
-export const revalidate = 86_400 // 24 hours — CMS content rarely changes
+export const revalidate = 300 // 5 minutes
 
 export function generateStaticParams() {
   return [{ locale: 'th' }, { locale: 'en' }]
