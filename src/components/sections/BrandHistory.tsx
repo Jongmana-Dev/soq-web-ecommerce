@@ -31,7 +31,7 @@ export default function BrandHistorySection({ items }: Props) {
               {locale === 'th' ? 'แบรนด์' : 'Story'}
             </span>
           </h2>
-          <p className="mt-4 text-black text-lg max-w-2xl mx-auto font-light">
+          <p className="mt-16 lg:mt-20 text-black text-lg max-w-2xl mx-auto font-light">
             {locale === 'th'
               ? 'เส้นทางการพัฒนาผลิตภัณฑ์ SOQ จากจุดเริ่มต้นสู่มาตรฐานระดับสากล'
               : 'The journey of SOQ from inception to international standards'}

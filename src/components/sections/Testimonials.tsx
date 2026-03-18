@@ -102,7 +102,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                 {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
               </h2>
-              <p className="mt-4 text-black font-light">
+              <p className="mt-16 lg:mt-20 text-black font-light">
                 {locale === 'th'
                   ? 'สิ่งที่เราพูดอาจไม่สำคัญ เท่ากับสิ่งที่ลูกค้าพูดถึงเรา'
                   : 'What we say matters less than what our customers say about us'}

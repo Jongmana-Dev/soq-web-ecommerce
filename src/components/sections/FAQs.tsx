@@ -26,12 +26,14 @@ export default function FAQ({ faqs }: FAQsProps) {
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-12 lg:mb-16 pl-4 border-l-4 border-[var(--accent)]">
-          <h2 className="font-prompt text-3xl font-thin leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
-            {locale === 'th' ? 'คำถามที่' : 'Frequently Asked'} <br />
-            <span className="text-[var(--accent)]">{locale === 'th' ? 'พบบ่อย' : 'Questions'}</span>
+        <div className="mb-12 lg:mb-16">
+          <h2 className="mb-2 font-prompt text-3xl font-thin leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
+            FAQs.
           </h2>
-          <p className="mt-4 text-black font-light">
+          <h3 className="mb-8 font-prompt text-3xl font-thin leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+            {locale === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
+          </h3>
+          <p className="text-sm text-black font-light sm:text-base">
             {locale === 'th'
               ? 'รวมคำถามที่ลูกค้าถามบ่อยเกี่ยวกับผลิตภัณฑ์ SOQ'
               : 'Common questions about SOQ products'}
@@ -46,17 +48,18 @@ export default function FAQ({ faqs }: FAQsProps) {
               className={`reveal reveal-delay-${Math.min(index + 1, 6)} flex flex-col`}
             >
               {/* Icon */}
-              <span className="mb-4 flex h-12 w-12 items-center justify-center text-[var(--accent)]">
+              <span className="mb-4 flex h-12 w-12 items-center justify-center text-neutral-800">
                 <i className={`${item.icon} text-2xl`} />
+                <span className="absolute w-3 h-3 bg-[var(--accent)] rounded-full -mt-4 -mr-4 opacity-60" />
               </span>
 
               {/* Question */}
-              <h3 className="font-prompt text-lg font-semibold text-neutral-900 mb-2 leading-snug">
+              <h3 className="font-prompt text-base font-normal text-black mb-3 leading-relaxed">
                 {locale === 'th' ? item.question_th : item.question_en}
               </h3>
 
               {/* Answer */}
-              <p className="text-sm text-neutral-500 leading-relaxed flex-1">
+              <p className="text-sm text-neutral-600 leading-relaxed flex-1 font-light">
                 {locale === 'th' ? item.answer_th : item.answer_en}
               </p>
             </div>

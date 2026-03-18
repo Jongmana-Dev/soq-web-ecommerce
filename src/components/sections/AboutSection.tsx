@@ -30,14 +30,11 @@ export default function AboutSection({ content }: Props) {
           className="reveal bg-white p-8 sm:p-12 lg:p-14"
         >
           {/* Header — same style as Testimonials */}
-          <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
-            <h2 className="font-prompt text-3xl font-bold leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
-              {locale === 'th' ? 'เรื่องราวของ' : 'The Story of'}{' '}
-              <span className="text-[var(--accent)]">SOQ.</span>
+          <div className="mb-16 lg:mb-24 pl-4 border-l-4 border-[var(--accent)]">
+            <h2 className="font-prompt text-3xl font-thin leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              {locale === 'th' ? 'เรื่องราวของ' : 'The Story of'} <br />
+              <span className="text-[var(--accent)]">{locale === 'th' ? 'SOQ.' : 'SOQ.'}</span>
             </h2>
-            <p className="mt-3 text-neutral-500 font-light text-sm sm:text-base">
-              {locale === 'th' ? 'จุดเริ่มต้นเล็ก ๆ เพื่อวงการ BREWER ไทย' : 'A small beginning for Thailand\'s BREWER community'}
-            </p>
           </div>
 
           {/* Content */}
