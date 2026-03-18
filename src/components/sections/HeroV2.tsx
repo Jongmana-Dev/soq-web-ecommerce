@@ -1,11 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import ProductModal from '@/components/modals/ProductModal'
 import type { ProductData } from '@/lib/products'
+
+function AccentBackdrop() {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  })
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, -50])
+  const rotate = useTransform(scrollYProgress, [0, 1], [-15, -8])
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.06])
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      style={{ y, rotate, scale }}
+      className="absolute z-[2] top-[10%] bottom-[5%] left-[40%] right-[-5%] bg-[var(--accent)]/10"
+    />
+  )
+}
 
 interface Props {
   products: ProductData[]
@@ -21,7 +44,6 @@ export default function HeroV2({ products }: Props) {
   return (
     <div style={{ backgroundColor: '#ECEDEA' }}>
       <section
-        id="hero"
         data-section="true"
         className="relative w-full overflow-hidden"
       >
@@ -77,6 +99,7 @@ export default function HeroV2({ products }: Props) {
         {/* ══════════ Desktop ══════════ */}
         <div className="hidden lg:block">
           <div className="relative w-full aspect-[2.2/1]">
+
 
             {/* Bottles — right side, vertically centered in section */}
             <div className="absolute inset-0 z-[5]">

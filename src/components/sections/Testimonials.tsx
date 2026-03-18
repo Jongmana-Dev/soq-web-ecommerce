@@ -1,60 +1,29 @@
 'use client'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import type { Review } from '@/lib/cms'
-import { useParallax } from '@/components/motion'
 
 type TestimonialsProps = {
   reviews: Review[]
-}
-
-type Orientation = 'landscape' | 'portrait' | 'unknown'
-
-function getImageSrc(review: Review): string {
-  if (review.media_type === 'image' && review.review_image) return review.review_image
-  return review.avatar
 }
 
 export default function Testimonials({ reviews }: TestimonialsProps) {
   const locale = useLocale()
   const [activeIndex, setActiveIndex] = useState(0)
   const [direction, setDirection] = useState(0)
-  const [playingVideo, setPlayingVideo] = useState(false)
-  const [orientations, setOrientations] = useState<Record<string, Orientation>>({})
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
-
-  const { ref: leftRef, y: leftY } = useParallax({ speed: 0.03 })
-  const { ref: rightRef, y: rightY } = useParallax({ speed: -0.03 })
-
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  // Detect image orientations on mount
-  useEffect(() => {
-    reviews.forEach((review) => {
-      const src = getImageSrc(review)
-      if (!src) return
-      const img = new window.Image()
-      img.onload = () => {
-        setOrientations((prev) => ({
-          ...prev,
-          [review.id]: img.naturalWidth >= img.naturalHeight ? 'landscape' : 'portrait',
-        }))
-      }
-      img.src = src
-    })
-  }, [reviews])
 
   const resetAutoplay = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
     if (reviews.length <= 1) return
     timerRef.current = setInterval(() => {
       setDirection(1)
-      setPlayingVideo(false)
       setActiveIndex((prev) => (prev + 1) % reviews.length)
-    }, 10_000)
+    }, 8_000)
   }, [reviews.length])
 
   useEffect(() => {
@@ -65,297 +34,195 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
   if (reviews.length === 0) return null
 
   const active = reviews[activeIndex]
-  const activeOrientation = orientations[active.id] ?? 'landscape'
-  const isPortrait = activeOrientation === 'portrait'
-  const imageSrc = getImageSrc(active)
 
-  const nextTestimonial = () => {
+  const next = () => {
     setDirection(1)
-    setPlayingVideo(false)
     setActiveIndex((prev) => (prev + 1) % reviews.length)
     resetAutoplay()
   }
 
-  const prevTestimonial = () => {
+  const prev = () => {
     setDirection(-1)
-    setPlayingVideo(false)
     setActiveIndex((prev) => (prev - 1 + reviews.length) % reviews.length)
     resetAutoplay()
   }
-
-  // ─── Shared sub-components ───
-
-  const HeaderBlock = (
-    <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
-      <h2 className="font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
-        <span className="text-[var(--accent)] text-5xl sm:text-6xl block mb-2">&#10077;</span>
-        {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
-        <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
-      </h2>
-      <p className="mt-16 lg:mt-20 text-black font-light">
-        {locale === 'th'
-          ? 'สิ่งที่เราพูดอาจไม่สำคัญ เท่ากับสิ่งที่ลูกค้าพูดถึงเรา'
-          : 'What we say matters less than what our customers say about us'}
-      </p>
-    </div>
-  )
-
-  const ImageBlock = ({ className = '' }: { className?: string }) => (
-    <div className={`relative w-full overflow-hidden shadow-2xl group cursor-pointer bg-neutral-100 ${isPortrait ? 'aspect-[3/4] max-h-[500px]' : 'aspect-video'} ${className}`}>
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
-        <motion.div
-          key={`img-${activeIndex}`}
-          custom={direction}
-          variants={{
-            enter: (d: number) => ({ opacity: 0, x: d > 0 ? 40 : -40 }),
-            center: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-            exit: (d: number) => ({ opacity: 0, x: d > 0 ? -40 : 40, transition: { duration: 0.4 } }),
-          }}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          className="absolute inset-0"
-        >
-          {active.media_type === 'video' && active.video_url && playingVideo ? (
-            <iframe
-              src={active.video_url}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <>
-              <Image
-                src={imageSrc}
-                alt={active.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className={`${isPortrait ? 'object-cover object-top' : 'object-cover'} transition-transform duration-700 group-hover:scale-105`}
-              />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors" />
-
-              {active.media_type === 'video' && active.video_url && (
-                <button
-                  onClick={() => setPlayingVideo(true)}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                >
-                  <div className="absolute inset-0 rounded-full bg-white/30 animate-pulse-glow" />
-                  <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110">
-                    <i className="fa-solid fa-play text-[var(--accent)] text-xl ml-1" />
-                  </div>
-                </button>
-              )}
-            </>
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  )
-
-  const ReviewCard = (
-    <AnimatePresence initial={false} custom={direction} mode="popLayout">
-      <motion.div
-        key={activeIndex}
-        custom={direction}
-        variants={{
-          enter: (d: number) => ({
-            x: d > 0 ? 280 : -280, y: -40, rotate: d > 0 ? 25 : -25, opacity: 0, scale: 0.8,
-          }),
-          center: {
-            x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, zIndex: 10,
-            transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1], rotate: { duration: 1.1, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.6 } },
-          },
-          exit: (d: number) => ({
-            x: d > 0 ? -350 : 350, y: -60, rotate: d > 0 ? -30 : 30, opacity: 0, scale: 0.75,
-            transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
-          }),
-        }}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        className="relative bg-white p-6 md:p-10 shadow-xl border border-neutral-100"
-        style={{ minHeight: isPortrait ? 240 : 340, zIndex: 10 }}
-      >
-        <span className="absolute top-8 left-0 w-1 h-12 bg-[var(--accent)]" />
-
-        <div className="mb-4">
-          {active.brand_logo ? (
-            <Image
-              src={active.brand_logo}
-              alt={active.brand_name ?? ''}
-              width={120}
-              height={40}
-              className="h-10 w-auto object-contain"
-            />
-          ) : (
-            <h3 className="text-2xl font-light text-neutral-800 uppercase tracking-tighter">
-              {active.brand_name ?? active.name.split(' ')[0]}
-            </h3>
-          )}
-        </div>
-
-        <span className="text-[var(--accent)] text-3xl leading-none font-serif">&ldquo;</span>
-        <p className="font-prompt text-base text-neutral-600 leading-relaxed mb-6 font-light">
-          {locale === 'th' ? active.quote_th : active.quote_en}
-        </p>
-
-        <div className="mt-6 pt-6 border-t border-neutral-100">
-          <h4 className="font-normal text-neutral-800 text-base">
-            {active.name}
-          </h4>
-          <p className="text-xs text-neutral-600 font-light">
-            {active.role}
-          </p>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  )
-
-  const StackedCards = (
-    <>
-      {reviews.length > 4 && (
-        <div className="absolute inset-0 bg-white/10 shadow-sm border border-neutral-200/25" style={{ transform: 'rotate(14deg) translate(30px, -20px) scale(0.91)', zIndex: 0 }} />
-      )}
-      {reviews.length > 3 && (
-        <div className="absolute inset-0 bg-white/20 shadow-sm border border-neutral-200/35" style={{ transform: 'rotate(-11deg) translate(-28px, 24px) scale(0.93)', zIndex: 1 }} />
-      )}
-      {reviews.length > 2 && (
-        <div className="absolute inset-0 bg-white/40 shadow-sm border border-neutral-200/50" style={{ transform: 'rotate(8deg) translate(18px, -14px) scale(0.95)', zIndex: 2 }} />
-      )}
-      {reviews.length > 1 && (
-        <div className="absolute inset-0 bg-white/65 shadow-sm border border-neutral-100" style={{ transform: 'rotate(-5deg) translate(-10px, 10px) scale(0.97)', zIndex: 3 }} />
-      )}
-    </>
-  )
-
-  const NavControls = (
-    <div className="absolute bottom-0 right-0 flex items-center gap-4">
-      <motion.button
-        onClick={prevTestimonial}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="w-11 h-11 border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-colors text-neutral-500 hover:text-black"
-      >
-        <i className="fa-solid fa-arrow-left" />
-      </motion.button>
-      <span className="font-mono text-sm text-neutral-500">
-        {activeIndex + 1} / {reviews.length}
-      </span>
-      <motion.button
-        onClick={nextTestimonial}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="w-11 h-11 border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-black transition-colors text-neutral-500 hover:text-black"
-      >
-        <i className="fa-solid fa-arrow-right" />
-      </motion.button>
-    </div>
-  )
-
-  // ─── LAYOUT ───
 
   return (
     <section
       id="testimonials"
       data-section="true"
       ref={ref}
-      className="relative overflow-hidden pt-8 sm:pt-12 lg:pt-16 pb-16 sm:pb-20 lg:pb-28"
+      className="relative overflow-hidden py-20 lg:py-28"
       style={{ backgroundColor: '#ECEDEA' }}
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20" style={{ backgroundColor: '#F6F7F5' }}>
 
-        <AnimatePresence mode="wait">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+          {/* ═══ LEFT: Header (4 cols) ═══ */}
           <motion.div
-            key={isPortrait ? 'portrait' : 'landscape'}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-4 pl-4 border-l-4 border-[var(--accent)]"
           >
-            {isPortrait ? (
-              /* ══════════════ PORTRAIT LAYOUT ══════════════
-                 Left: Header + Review card
-                 Right: Full-height portrait image
-              */
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-                {/* Left: Header + Review (3 cols) */}
-                <motion.div
-                  ref={leftRef}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ y: leftY }}
-                  className="lg:col-span-3 relative"
-                >
-                  {HeaderBlock}
+            <h2 className="font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              <span className="text-[var(--accent)] text-5xl sm:text-6xl block mb-2">&#10077;</span>
+              {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
+              <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
+            </h2>
+            <p className="mt-8 text-black font-light text-sm">
+              {locale === 'th'
+                ? 'สิ่งที่เราพูดอาจไม่สำคัญ เท่ากับสิ่งที่ลูกค้าพูดถึงเรา'
+                : 'What we say matters less than what our customers say about us'}
+            </p>
 
-                  {/* Review card (no stacked cards in portrait mode for cleaner look) */}
-                  <div className="relative pb-20">
-                    <div className="relative overflow-hidden" style={{ minHeight: 240 }}>
-                      {StackedCards}
-                      {ReviewCard}
+            {/* Navigation — under header */}
+            <div className="flex items-center gap-4 mt-10">
+              <button
+                onClick={prev}
+                className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-neutral-800 transition-colors text-neutral-500 hover:text-neutral-800"
+              >
+                <i className="fa-solid fa-arrow-left text-xs" />
+              </button>
+              <span className="font-mono text-xs text-neutral-400">
+                {activeIndex + 1} / {reviews.length}
+              </span>
+              <button
+                onClick={next}
+                className="w-10 h-10 border border-neutral-300 flex items-center justify-center hover:bg-white hover:border-neutral-800 transition-colors text-neutral-500 hover:text-neutral-800"
+              >
+                <i className="fa-solid fa-arrow-right text-xs" />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* ═══ RIGHT: Review Card (8 cols) ═══ */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-8"
+          >
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={activeIndex}
+                custom={direction}
+                variants={{
+                  enter: (d: number) => ({
+                    opacity: 0,
+                    x: d > 0 ? 100 : -100,
+                    scale: 0.96,
+                    rotateY: d > 0 ? 4 : -4,
+                  }),
+                  center: {
+                    opacity: 1,
+                    x: 0,
+                    scale: 1,
+                    rotateY: 0,
+                    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                  },
+                  exit: (d: number) => ({
+                    opacity: 0,
+                    x: d > 0 ? -100 : 100,
+                    scale: 0.96,
+                    rotateY: d > 0 ? -4 : 4,
+                    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                  }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="bg-white overflow-hidden shadow-[0_6px_50px_rgba(0,0,0,0.07)]"
+              >
+                <div className="flex flex-col sm:flex-row">
+
+                  {/* Image */}
+                  <div className="relative w-full sm:w-[260px] lg:w-[300px] flex-shrink-0 aspect-[4/3] sm:aspect-auto sm:min-h-[380px] bg-neutral-100 overflow-hidden">
+                    <motion.div
+                      key={`img-${activeIndex}`}
+                      initial={{ scale: 1.08, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute inset-0"
+                    >
+                      <Image
+                        src={active.media_type === 'image' && active.review_image ? active.review_image : active.avatar}
+                        alt={active.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 300px"
+                        className="object-cover object-top"
+                      />
+                    </motion.div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 p-8 lg:p-10 flex flex-col justify-between relative min-h-[380px]">
+                    {/* Accent left border */}
+                    <div className="absolute top-8 bottom-8 left-0 w-[3px] bg-[var(--accent)]" />
+
+                    {/* Decorative quote */}
+                    <span className="absolute bottom-6 right-8 text-[var(--accent)] text-[100px] leading-none font-serif select-none pointer-events-none">&rdquo;</span>
+
+                    <div className="relative z-10 flex flex-col h-full">
+                      {/* Brand logo + name */}
+                      <div className="mb-5 flex items-center gap-3">
+                        {active.brand_logo ? (
+                          <Image
+                            src={active.brand_logo}
+                            alt={active.brand_name ?? ''}
+                            width={80}
+                            height={28}
+                            className="h-6 w-auto object-contain"
+                          />
+                        ) : null}
+                        {active.brand_name && (
+                          <span className="text-lg font-normal text-neutral-800 tracking-wide">
+                            {active.brand_name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Quote */}
+                      <p className="font-prompt text-sm lg:text-base text-neutral-600 leading-relaxed font-light flex-1">
+                        {locale === 'th' ? active.quote_th : active.quote_en}
+                      </p>
+
+                      {/* Author */}
+                      <div className="mt-8 pt-6 border-t border-[var(--accent)]">
+                        <h4 className="font-normal text-neutral-800 text-sm">{active.name}</h4>
+                        <p className="text-xs text-neutral-500 font-light">{active.role}</p>
+                      </div>
                     </div>
-                    {NavControls}
                   </div>
-                </motion.div>
 
-                {/* Right: Portrait image (2 cols) */}
-                <motion.div
-                  ref={rightRef}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ y: rightY }}
-                  className="lg:col-span-2"
-                >
-                  {/* Mobile: show above */}
-                  <div className="lg:hidden mb-8">
-                    <ImageBlock />
-                  </div>
-                  {/* Desktop: sticky on right */}
-                  <div className="hidden lg:block lg:sticky lg:top-24">
-                    <ImageBlock />
-                  </div>
-                </motion.div>
-              </div>
-            ) : (
-              /* ══════════════ LANDSCAPE LAYOUT ══════════════
-                 Left: Header + landscape image
-                 Right: Review card stack
-              */
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                <motion.div
-                  ref={leftRef}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ y: leftY }}
-                  className="relative"
-                >
-                  {HeaderBlock}
-                  <ImageBlock />
-                </motion.div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-                <motion.div
-                  ref={rightRef}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ y: rightY }}
-                  className="relative pb-20"
-                >
-                  <div className="relative overflow-hidden" style={{ minHeight: 340 }}>
-                    {StackedCards}
-                    {ReviewCard}
-                  </div>
-                  {NavControls}
-                </motion.div>
+            {/* Dots */}
+            {reviews.length > 1 && (
+              <div className="flex gap-1.5 mt-6">
+                {reviews.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setDirection(i > activeIndex ? 1 : -1)
+                      setActiveIndex(i)
+                      resetAutoplay()
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === activeIndex
+                        ? 'w-6 bg-[var(--accent)]'
+                        : 'w-1.5 bg-neutral-300 hover:bg-neutral-400'
+                    }`}
+                  />
+                ))}
               </div>
             )}
           </motion.div>
-        </AnimatePresence>
+
+        </div>
 
       </div>
     </section>

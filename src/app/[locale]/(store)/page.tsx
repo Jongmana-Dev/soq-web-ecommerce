@@ -150,7 +150,7 @@ export default async function IndexPage({
           default:   return <HeroV3 products={products} />
         }
       })()}
-      <div style={{ backgroundColor: '#ECEDEA' }} className="py-4 sm:py-6 lg:py-8">
+      <div style={{ backgroundColor: '#ECEDEA' }} className="py-2 sm:py-3 lg:py-4">
         <ClientLogos logos={clientLogos} />
       </div>
       <Testimonials reviews={reviews} />
