@@ -12,7 +12,7 @@ import { getProducts } from '@/lib/products'
 import BrandHistory from '@/components/sections/BrandHistory'
 import AboutSection from '@/components/sections/AboutSection'
 import ClientLogos from '@/components/sections/ClientLogos'
-import { getReviews, getCertifications, getFAQs, getUsageSteps, getTermsSections, getBrandHistories, getHistoryContent, getContactInfo, getClientLogos } from '@/lib/cms'
+import { getReviews, getCertifications, getFAQs, getUsageSteps, getTermsSections, getBrandHistories, getHistoryContent, getContactInfo, getClientLogos, getAboutImages } from '@/lib/cms'
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://soqthailand.com'
 
@@ -67,7 +67,7 @@ export default async function IndexPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const [products, reviews, certifications, faqs, usageSteps, termsSections, brandHistories, historyContent, contactInfo, clientLogos] = await Promise.all([
+  const [products, reviews, certifications, faqs, usageSteps, termsSections, brandHistories, historyContent, contactInfo, clientLogos, aboutImages] = await Promise.all([
     getProducts(),
     getReviews(),
     getCertifications(),
@@ -78,6 +78,7 @@ export default async function IndexPage({
     getHistoryContent(),
     getContactInfo(),
     getClientLogos(),
+    getAboutImages(),
   ])
 
   const avgRating =
@@ -149,7 +150,7 @@ export default async function IndexPage({
           default:   return <HeroV3 products={products} />
         }
       })()}
-      <div style={{ backgroundColor: '#ECEDEA' }} className="py-10 sm:py-14 lg:py-16">
+      <div style={{ backgroundColor: '#ECEDEA' }} className="py-4 sm:py-6 lg:py-8">
         <ClientLogos logos={clientLogos} />
       </div>
       <Testimonials reviews={reviews} />
@@ -157,7 +158,7 @@ export default async function IndexPage({
       <BrandHistory items={brandHistories} />
       <Standards certifications={certifications} />
       {(historyContent.th || historyContent.en) && (
-        <AboutSection content={historyContent} />
+        <AboutSection content={historyContent} images={aboutImages} />
       )}
       <FAQs faqs={faqs} />
       <Footer termsSections={termsSections} contactInfo={contactInfo} />

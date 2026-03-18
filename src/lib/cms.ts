@@ -234,3 +234,14 @@ export async function getHistoryContent(): Promise<HistoryContent> {
     return { th: '', en: '' }
   }
 }
+
+export async function getAboutImages(): Promise<string[]> {
+  try {
+    const res = await apiFetch<ApiResponse<string[]>>('/api/settings/about-images', {
+      next: { revalidate: CMS_REVALIDATE, tags: ['landing', 'about'] },
+    })
+    return res.data
+  } catch {
+    return []
+  }
+}

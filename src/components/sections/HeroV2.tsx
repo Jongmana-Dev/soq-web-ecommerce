@@ -11,6 +11,8 @@ interface Props {
   products: ProductData[]
 }
 
+const R2 = '/hero-section/v2/responsive2'
+
 export default function HeroV2({ products }: Props) {
   const locale = useLocale()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -21,52 +23,33 @@ export default function HeroV2({ products }: Props) {
       <section
         id="hero"
         data-section="true"
-        className="relative w-full overflow-hidden pt-[40px]"
+        className="relative w-full overflow-hidden"
       >
-        {/* Mobile: image on top + text below */}
-        <div className="lg:hidden">
-          <div className="relative w-full h-[50vh]">
-            <Image
-              src="/hero-section/v2/hero.webp"
-              alt="SOQ. Safe for Sip"
-              fill
-              sizes="100vw"
-              className="object-cover object-[center_30%]"
-              priority
-            />
-          </div>
+        {/* ══════════ Mobile ══════════ */}
+        <div className="lg:hidden" style={{ backgroundColor: '#ECEDEA' }}>
+          {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="px-6 py-8 text-center"
+            className="px-6 pt-20 mt-20 pb-4 text-center"
           >
             <div className="space-y-2">
-              <h1 className="font-prompt text-3xl font-thin leading-tight text-[var(--accent)] tracking-wide">
+              <h1 className="font-prompt text-3xl font-extralight leading-tight text-[var(--accent)] tracking-wide">
                 SOQ.
               </h1>
-              <h2 className="font-prompt text-3xl font-thin leading-tight text-black uppercase tracking-wide">
+              <h2 className="font-prompt text-3xl font-extralight leading-tight text-black uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-6 max-w-md mx-auto font-poppins text-sm leading-relaxed text-black font-light"
-            >
+            <p className="mt-4 max-w-xs mx-auto font-poppins text-sm leading-relaxed text-black font-light">
               {locale === 'th'
                 ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
                 : 'No-rinse antibacterial product'}
-            </motion.p>
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-6"
-            >
+            <div className="mt-4">
               <motion.button
                 onClick={() => setIsModalOpen(true)}
                 whileHover={{ scale: 1.05 }}
@@ -78,69 +61,88 @@ export default function HeroV2({ products }: Props) {
                   {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
                 </span>
               </motion.button>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Desktop: original layout with background image */}
-        <div className="hidden lg:block">
-        <div className="container mx-auto px-8 relative min-h-[calc(85vh-76px)]">
-          <Image
-            src="/hero-section/v2/hero.webp"
-            alt="SOQ. Safe for Sip"
-            fill
-            sizes="1440px"
-            className="object-cover object-[center_30%]"
-          />
-
-          <div className="relative z-10 flex min-h-[calc(85vh-76px)] items-start pt-28">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-2xl text-left"
-          >
-            <div className="space-y-3">
-              <h1 className="font-prompt text-5xl font-thin leading-tight xl:text-6xl text-[var(--accent)] tracking-wide drop-shadow-lg">
-                SOQ.
-              </h1>
-              <h2 className="font-prompt text-5xl font-thin leading-tight text-black xl:text-6xl uppercase tracking-wide drop-shadow-md">
-                SAFE FOR SIP
-              </h2>
             </div>
-
-            <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-24 max-w-md font-poppins text-base leading-relaxed text-black font-light"
-            >
-              {locale === 'th'
-                ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
-                : 'No-rinse antibacterial product'}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-10"
-            >
-              <motion.button
-                onClick={() => setIsModalOpen(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden bg-[var(--accent)] px-12 font-prompt text-sm font-normal text-black shadow-xl shadow-black/5"
-              >
-                <span className="relative z-10">
-                  {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
-                </span>
-              </motion.button>
-            </motion.div>
           </motion.div>
+
+          {/* Bottles — single image, scales with screen */}
+          <div className="px-6 mt-30 drop-shadow-2xl">
+            <img
+              src={`${R2}/hero-bottles-1x.png`}
+              alt="SOQ bottles"
+              className="w-full h-auto block"
+            />
           </div>
         </div>
+
+        {/* ══════════ Desktop ══════════ */}
+        <div className="hidden lg:block">
+          <div className="relative w-full aspect-[2.2/1]">
+
+            {/* Bottles — right side, vertically centered in section */}
+            <div className="absolute inset-0 z-[5]">
+              <div className="relative h-full mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="absolute top-[20%] bottom-[-5%] left-[38%] right-[3%] drop-shadow-2xl">
+                  <Image
+                    src={`${R2}/hero-bottles-1x.png`}
+                    alt="SOQ bottles"
+                    fill
+                    sizes="(min-width: 1536px) 55vw, (min-width: 1280px) 60vw, 65vw"
+                    className="object-contain object-center"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Text overlay */}
+            <div className="absolute inset-0 z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-2xl text-left"
+              >
+                <div className="space-y-3">
+                  <h1 className="font-prompt text-5xl font-extralight leading-tight xl:text-6xl text-[var(--accent)] tracking-wide">
+                    SOQ.
+                  </h1>
+                  <h2 className="font-prompt text-5xl font-extralight leading-tight text-black xl:text-6xl uppercase tracking-wide">
+                    SAFE FOR SIP
+                  </h2>
+                </div>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-20 xl:mt-24 max-w-md font-poppins text-base leading-relaxed text-black font-light"
+                >
+                  {locale === 'th'
+                    ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
+                    : 'No-rinse antibacterial product'}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-10"
+                >
+                  <motion.button
+                    onClick={() => setIsModalOpen(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className="group relative inline-flex h-12 items-center justify-center overflow-hidden bg-[var(--accent)] px-12 font-prompt text-sm font-normal text-black shadow-xl shadow-black/5"
+                  >
+                    <span className="relative z-10">
+                      {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
+                    </span>
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
         </div>
 
         {isModalOpen && product && (

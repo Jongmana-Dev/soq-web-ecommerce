@@ -36,10 +36,10 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
           {/* LEFT: Title + Product Grid + Desc + CTA */}
           <div className="lg:w-[32%] flex-shrink-0">
             {/* Title */}
-            <h3 className="text-[var(--accent)] font-prompt font-thin text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
+            <h3 className="text-[var(--accent)] font-prompt font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
               SOQ.
             </h3>
-            <h2 className="text-neutral-800 font-thin text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
+            <h2 className="text-neutral-800 font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
               SAFE FOR SIP
             </h2>
 
@@ -81,7 +81,7 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
 
                     {/* Step content */}
                     <div className="p-5 flex items-start gap-3">
-                      <span className="text-4xl font-thin text-[var(--accent)] tabular-nums leading-none shrink-0">
+                      <span className="text-4xl font-extralight text-[var(--accent)] tabular-nums leading-none shrink-0">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                       <p className="text-sm text-neutral-800 leading-relaxed font-light pt-1">

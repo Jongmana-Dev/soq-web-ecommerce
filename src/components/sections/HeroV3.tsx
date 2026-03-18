@@ -46,10 +46,10 @@ export default function HeroV3({ products }: Props) {
             className="w-full lg:flex-1 min-w-0 text-center lg:text-left pt-4 lg:pt-0 shrink-0"
           >
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="font-prompt text-2xl font-thin leading-tight sm:text-3xl lg:text-5xl xl:text-6xl text-[var(--accent)] tracking-wide">
+              <h1 className="font-prompt text-2xl font-extralight leading-tight sm:text-3xl lg:text-5xl xl:text-6xl text-[var(--accent)] tracking-wide">
                 SOQ.
               </h1>
-              <h2 className="font-prompt text-2xl font-thin leading-tight text-neutral-900 sm:text-3xl lg:text-5xl xl:text-6xl uppercase tracking-wide">
+              <h2 className="font-prompt text-2xl font-extralight leading-tight text-neutral-900 sm:text-3xl lg:text-5xl xl:text-6xl uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
