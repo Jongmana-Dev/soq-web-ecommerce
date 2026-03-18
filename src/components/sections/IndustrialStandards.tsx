@@ -40,10 +40,10 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
             style={{ y: leftY }}
             className="flex flex-col justify-center"
           >
-            <h2 className="mb-2 font-prompt text-3xl font-extralight leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
+            <h2 className="mb-2 font-poppins text-3xl font-extralight leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
               {locale === 'th' ? 'Industrial Standards' : 'Industrial Standards'}
             </h2>
-            <h3 className="mb-8 font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+            <h3 className="mb-8 font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
               {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
             </h3>
 

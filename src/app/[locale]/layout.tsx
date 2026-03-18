@@ -14,7 +14,7 @@ const prompt = Prompt({
 })
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['600'],
+  weight: ['300', '400', '600'],
   display: 'swap',
   variable: '--font-poppins'
 })

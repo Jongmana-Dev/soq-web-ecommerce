@@ -26,8 +26,19 @@ export default function SmoothScrollProvider({ children }: Props) {
     const updateActive = (id: string) => {
       document.body.dataset.activeSection = id
       window.dispatchEvent(new CustomEvent('sectionchange', { detail: id }))
-      window.history.replaceState(null, '', '#' + id)
+      if (id) {
+        window.history.replaceState(null, '', '#' + id)
+      }
     }
+
+    // Clear hash when scrolled to top
+    const onScroll = () => {
+      if (lenis.scroll <= 50) {
+        window.history.replaceState(null, '', window.location.pathname)
+        document.body.dataset.activeSection = ''
+      }
+    }
+    lenis.on('scroll', onScroll)
 
     const sections = Array.from(
       document.querySelectorAll<HTMLElement>('[data-section="true"]'),
@@ -68,6 +79,7 @@ export default function SmoothScrollProvider({ children }: Props) {
 
     return () => {
       document.removeEventListener('click', onClick, true)
+      lenis.off('scroll', onScroll)
       sections.forEach((s) => io.unobserve(s))
       io.disconnect()
       lenis.destroy()

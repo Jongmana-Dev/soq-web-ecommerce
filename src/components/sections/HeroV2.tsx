@@ -30,13 +30,21 @@ function AccentBackdrop() {
   )
 }
 
+interface UsageStep {
+  title_th: string
+  title_en: string
+  description_th: string
+  description_en: string
+}
+
 interface Props {
   products: ProductData[]
+  usageSteps?: UsageStep[]
 }
 
 const R2 = '/hero-section/v2/responsive2'
 
-export default function HeroV2({ products }: Props) {
+export default function HeroV2({ products, usageSteps }: Props) {
   const locale = useLocale()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const product = products[0]
@@ -57,10 +65,10 @@ export default function HeroV2({ products }: Props) {
             className="px-6 pt-20 mt-20 pb-4 text-center"
           >
             <div className="space-y-2">
-              <h1 className="font-prompt text-3xl font-light leading-tight text-[var(--accent)] tracking-wide">
+              <h1 className="font-poppins text-3xl font-light leading-tight text-[var(--accent)] tracking-wide">
                 SOQ.
               </h1>
-              <h2 className="font-prompt text-3xl font-light leading-tight text-black uppercase tracking-wide">
+              <h2 className="font-poppins text-3xl font-light leading-tight text-black uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
@@ -126,10 +134,10 @@ export default function HeroV2({ products }: Props) {
                 className="w-full max-w-2xl text-left"
               >
                 <div className="space-y-3">
-                  <h1 className="font-prompt text-5xl font-light leading-tight xl:text-6xl text-[var(--accent)] tracking-wide">
+                  <h1 className="font-poppins text-5xl font-light leading-tight xl:text-6xl text-[var(--accent)] tracking-wide">
                     SOQ.
                   </h1>
-                  <h2 className="font-prompt text-5xl font-light leading-tight text-black xl:text-6xl uppercase tracking-wide">
+                  <h2 className="font-poppins text-5xl font-light leading-tight text-black xl:text-6xl uppercase tracking-wide">
                     SAFE FOR SIP
                   </h2>
                 </div>
@@ -182,6 +190,7 @@ export default function HeroV2({ products }: Props) {
             }}
             onClose={() => setIsModalOpen(false)}
             locale={locale}
+            usageSteps={usageSteps}
           />
         )}
       </section>

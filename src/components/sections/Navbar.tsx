@@ -228,18 +228,14 @@ function Navbar() {
             <button
               onClick={handleOrderClick}
               disabled={orderLoading}
-              className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold transition-all ${
-                isDarkNav
-                  ? "bg-[var(--accent)] text-neutral-900 hover:brightness-110"
-                  : "bg-neutral-900 text-white hover:bg-neutral-800"
-              } disabled:opacity-50`}
+              className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold transition-all bg-[var(--accent)] text-neutral-900 hover:brightness-110 disabled:opacity-50"
             >
               {orderLoading ? (
                 <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
                 <ShoppingBagIcon className="w-4 h-4" strokeWidth={2} />
               )}
-              {locale === "th" ? "สั่งซื้อ" : "Order"}
+              {locale === "th" ? "ซื้อเลย" : "Buy Now"}
             </button>
 
             {/* Desktop Icons */}

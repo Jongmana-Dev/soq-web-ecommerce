@@ -66,7 +66,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-4 pl-4 border-l-4 border-[var(--accent)]"
           >
-            <h2 className="font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+            <h2 className="font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
               <span className="text-[var(--accent)] text-5xl sm:text-6xl block mb-2">&#10077;</span>
               {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
               <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>

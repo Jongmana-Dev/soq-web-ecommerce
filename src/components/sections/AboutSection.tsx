@@ -39,7 +39,7 @@ export default function AboutSection({ content, images = [] }: Props) {
           <div>
             {/* Header — same style as Testimonials */}
             <div className="mb-16 lg:mb-24 pl-4 border-l-4 border-[var(--accent)]">
-              <h2 className="font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              <h2 className="font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
                 {locale === 'th' ? 'เรื่องราวของ' : 'The Story of'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'SOQ.' : 'SOQ.'}</span>
               </h2>

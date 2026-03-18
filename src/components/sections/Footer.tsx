@@ -151,7 +151,7 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
 
   return (
     <>
-      <footer id="footer" ref={ref} className="relative bg-[#0f0f0f] text-white z-10">
+      <footer id="footer" ref={ref} className="relative bg-[#292929] text-white z-10">
         {/* Main */}
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-20 pb-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
@@ -168,7 +168,7 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
                 alt="SOQ"
                 className="h-16 lg:h-20 w-auto invert"
               />
-              <p className="mt-4 text-neutral-400 text-sm leading-relaxed max-w-xs text-center lg:text-left">
+              <p className="mt-2 text-neutral-400 text-sm tracking-widest text-center">
                 {t('tagline')}
               </p>
 
@@ -202,7 +202,7 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-4 lg:col-start-9 flex flex-col items-center lg:items-end gap-6"
+              className="lg:col-span-4 lg:col-start-9 flex flex-col items-center gap-6"
             >
               {/* LINE QR Code with glow */}
               {LINE_URL ? (

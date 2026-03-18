@@ -27,10 +27,10 @@ export default function FAQ({ faqs }: FAQsProps) {
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-12 lg:mb-16">
-          <h2 className="mb-2 font-prompt text-3xl font-extralight leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
+          <h2 className="mb-2 font-poppins text-3xl font-extralight leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
             FAQs.
           </h2>
-          <h3 className="mb-8 font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+          <h3 className="mb-8 font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
             {locale === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
           </h3>
           <p className="text-[16px] text-black font-light sm:text-base">

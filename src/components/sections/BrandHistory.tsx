@@ -25,7 +25,7 @@ export default function BrandHistorySection({ items }: Props) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extralight text-neutral-800">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-poppins font-extralight text-neutral-800">
             {locale === 'th' ? 'เรื่องราวของ' : 'Our'}{' '}
             <span className="font-semibold text-[var(--accent)]">
               {locale === 'th' ? 'แบรนด์' : 'Story'}

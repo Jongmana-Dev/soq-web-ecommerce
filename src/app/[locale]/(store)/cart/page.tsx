@@ -160,7 +160,7 @@ export default function CartPage() {
 
           <button
             onClick={handleCheckout}
-            className="w-full mt-6 bg-neutral-900 text-white py-3.5 text-base font-bold tracking-wide hover:bg-neutral-800 transition-colors shadow-lg"
+            className="w-full mt-6 bg-[var(--accent)] text-neutral-900 py-3.5 text-base font-bold tracking-wide hover:brightness-110 transition-colors shadow-lg"
           >
             {t('cart.checkout')}
           </button>

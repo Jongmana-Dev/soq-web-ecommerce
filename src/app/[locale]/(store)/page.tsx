@@ -145,7 +145,7 @@ export default async function IndexPage({
       {(() => {
         switch (process.env.NEXT_PUBLIC_HERO_MODE) {
           case 'v1': return <HeroV1 products={products} />
-          case 'v2': return <HeroV2 products={products} />
+          case 'v2': return <HeroV2 products={products} usageSteps={usageSteps} />
           case 'v4': return <HeroV4 products={products} />
           default:   return <HeroV3 products={products} />
         }

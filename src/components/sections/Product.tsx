@@ -36,10 +36,10 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
           {/* LEFT: Title + Product Grid + Desc + CTA */}
           <div className="lg:w-[32%] flex-shrink-0">
             {/* Title */}
-            <h3 className="text-[var(--accent)] font-prompt font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
+            <h3 className="text-[var(--accent)] font-poppins font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
               SOQ.
             </h3>
-            <h2 className="text-neutral-800 font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
+            <h2 className="text-neutral-800 font-poppins font-extralight text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
               SAFE FOR SIP
             </h2>
 
@@ -58,7 +58,12 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
           {/* ─── RIGHT: Usage Steps Cards ─── */}
           {usageSteps.length > 0 && (
             <div className="reveal reveal-delay-2 lg:w-[68%] w-full">
- 
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-[2px] bg-[var(--accent)]" />
+                <h3 className="text-sm font-semibold text-neutral-800 uppercase tracking-widest">
+                  {locale === 'th' ? 'วิธีใช้งาน' : 'How to Use'}
+                </h3>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {usageSteps.map((step, index) => (
