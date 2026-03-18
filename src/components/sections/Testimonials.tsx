@@ -71,7 +71,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
               {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
               <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
             </h2>
-            <p className="mt-8 text-black font-light text-sm">
+            <p className="mt-8 text-black font-light text-[16px]">
               {locale === 'th'
                 ? 'สิ่งที่เราพูดอาจไม่สำคัญ เท่ากับสิ่งที่ลูกค้าพูดถึงเรา'
                 : 'What we say matters less than what our customers say about us'}
@@ -111,23 +111,35 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                 variants={{
                   enter: (d: number) => ({
                     opacity: 0,
-                    x: d > 0 ? 100 : -100,
-                    scale: 0.96,
-                    rotateY: d > 0 ? 4 : -4,
+                    x: d > 0 ? 50 : -50,
+                    y: 20,
+                    scale: 0.97,
+                    filter: 'blur(4px)',
                   }),
                   center: {
                     opacity: 1,
                     x: 0,
+                    y: 0,
                     scale: 1,
-                    rotateY: 0,
-                    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                    filter: 'blur(0px)',
+                    transition: {
+                      duration: 1.2,
+                      ease: [0.16, 1, 0.3, 1],
+                      opacity: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                      filter: { duration: 0.6 },
+                    },
                   },
                   exit: (d: number) => ({
                     opacity: 0,
-                    x: d > 0 ? -100 : 100,
-                    scale: 0.96,
-                    rotateY: d > 0 ? -4 : 4,
-                    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                    x: d > 0 ? -40 : 40,
+                    y: -10,
+                    scale: 0.98,
+                    filter: 'blur(4px)',
+                    transition: {
+                      duration: 0.8,
+                      ease: [0.4, 0, 0.2, 1],
+                      opacity: { duration: 0.5 },
+                    },
                   }),
                 }}
                 initial="enter"
@@ -141,9 +153,9 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                   <div className="relative w-full sm:w-[260px] lg:w-[300px] flex-shrink-0 aspect-[4/3] sm:aspect-auto sm:min-h-[380px] bg-neutral-100 overflow-hidden">
                     <motion.div
                       key={`img-${activeIndex}`}
-                      initial={{ scale: 1.08, opacity: 0 }}
+                      initial={{ scale: 1.1, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], opacity: { duration: 0.8 } }}
                       className="absolute inset-0"
                     >
                       <Image
@@ -159,7 +171,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                   {/* Content */}
                   <div className="flex-1 p-8 lg:p-10 flex flex-col justify-between relative min-h-[380px]">
                     {/* Accent left border */}
-                    <div className="absolute top-8 bottom-8 left-0 w-[3px] bg-[var(--accent)]" />
+                    <div className="absolute top-8 h-12 left-0 w-[3px] bg-[var(--accent)]" />
 
                     {/* Decorative quote */}
                     <span className="absolute bottom-6 right-8 text-[var(--accent)] text-[100px] leading-none font-serif select-none pointer-events-none">&rdquo;</span>
@@ -189,7 +201,7 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
                       </p>
 
                       {/* Author */}
-                      <div className="mt-8 pt-6 border-t border-[var(--accent)]">
+                      <div className="mt-8 pt-6 border-t border-[var(--accent)] mr-[60px]">
                         <h4 className="font-normal text-neutral-800 text-sm">{active.name}</h4>
                         <p className="text-xs text-neutral-500 font-light">{active.role}</p>
                       </div>

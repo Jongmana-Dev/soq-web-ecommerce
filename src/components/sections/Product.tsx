@@ -44,7 +44,7 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
             </h2>
 
             {/* Description + CTA */}
-            <p className="text-black text-sm sm:text-base leading-relaxed mb-6 font-light mt-16 lg:mt-20">
+            <p className="text-black text-[16px] sm:text-base leading-relaxed mb-6 font-light mt-16 lg:mt-20">
               {locale === 'th' ? firstProduct.short_desc_th : firstProduct.short_desc_en}
             </p>
             <button

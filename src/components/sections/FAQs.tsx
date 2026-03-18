@@ -33,7 +33,7 @@ export default function FAQ({ faqs }: FAQsProps) {
           <h3 className="mb-8 font-prompt text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
             {locale === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
           </h3>
-          <p className="text-sm text-black font-light sm:text-base">
+          <p className="text-[16px] text-black font-light sm:text-base">
             {locale === 'th'
               ? 'รวมคำถามที่ลูกค้าถามบ่อยเกี่ยวกับผลิตภัณฑ์ SOQ'
               : 'Common questions about SOQ products'}

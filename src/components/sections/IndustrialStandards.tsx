@@ -47,7 +47,7 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
               {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
             </h3>
 
-            <p className="mb-8 max-w-lg text-sm leading-relaxed text-black font-light sm:text-base">
+            <p className="mb-8 max-w-lg text-[16px] leading-relaxed text-black font-light sm:text-base">
               {locale === 'th'
                 ? 'สินค้าได้รับการผลิตภายใต้โรงงานที่ได้มาตรฐาน ทั้ง ในด้านคุณภาพ ความปลอดภัยและขั้นตอนการ ควบ คุมการผลิตอย่างเข้มงวด เพื่อให้มั่นใจว่าสินค้า ได้คุณภาพ และปลอดภัยต่อผู้บริโภค'
                 : 'Our products are manufactured in internationally certified facilities, ensuring quality and safety at every stage of production.'}

@@ -9,9 +9,10 @@ export default function SmoothScrollProvider({ children }: Props) {
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.4,
+      duration: 1.8,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      lerp: 0.08,
     })
     lenisRef.current = lenis
 

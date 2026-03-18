@@ -57,15 +57,15 @@ export default function HeroV2({ products }: Props) {
             className="px-6 pt-20 mt-20 pb-4 text-center"
           >
             <div className="space-y-2">
-              <h1 className="font-prompt text-3xl font-extralight leading-tight text-[var(--accent)] tracking-wide">
+              <h1 className="font-prompt text-3xl font-light leading-tight text-[var(--accent)] tracking-wide">
                 SOQ.
               </h1>
-              <h2 className="font-prompt text-3xl font-extralight leading-tight text-black uppercase tracking-wide">
+              <h2 className="font-prompt text-3xl font-light leading-tight text-black uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
 
-            <p className="mt-4 max-w-xs mx-auto font-poppins text-sm leading-relaxed text-black font-light">
+            <p className="mt-4 max-w-xs mx-auto font-poppins text-[17px] leading-relaxed text-black font-normal">
               {locale === 'th'
                 ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
                 : 'No-rinse antibacterial product'}
@@ -126,10 +126,10 @@ export default function HeroV2({ products }: Props) {
                 className="w-full max-w-2xl text-left"
               >
                 <div className="space-y-3">
-                  <h1 className="font-prompt text-5xl font-extralight leading-tight xl:text-6xl text-[var(--accent)] tracking-wide">
+                  <h1 className="font-prompt text-5xl font-light leading-tight xl:text-6xl text-[var(--accent)] tracking-wide">
                     SOQ.
                   </h1>
-                  <h2 className="font-prompt text-5xl font-extralight leading-tight text-black xl:text-6xl uppercase tracking-wide">
+                  <h2 className="font-prompt text-5xl font-light leading-tight text-black xl:text-6xl uppercase tracking-wide">
                     SAFE FOR SIP
                   </h2>
                 </div>
@@ -138,7 +138,7 @@ export default function HeroV2({ products }: Props) {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-20 xl:mt-24 max-w-md font-poppins text-base leading-relaxed text-black font-light"
+                  className="mt-20 xl:mt-24 max-w-md font-poppins text-[17px] leading-relaxed text-black font-light"
                 >
                   {locale === 'th'
                     ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
