@@ -40,14 +40,16 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
             style={{ y: leftY }}
             className="flex flex-col justify-center"
           >
-            <h2 className="mb-6 font-prompt text-3xl font-light leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
-              {locale === 'th' ? 'มาตรฐานระดับ' : 'Industrial'} <br/>
-              <span className="font-semibold">{locale === 'th' ? 'อุตสาหกรรม' : 'Standards'}</span>
+            <h2 className="mb-2 font-prompt text-3xl font-thin leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
+              {locale === 'th' ? 'Industrial Standards' : 'Industrial Standards'}
             </h2>
+            <h3 className="mb-8 font-prompt text-3xl font-thin leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
+            </h3>
 
-            <p className="mb-8 max-w-lg text-base leading-relaxed text-neutral-500 sm:text-lg font-light">
+            <p className="mb-8 max-w-lg text-sm leading-relaxed text-black font-light sm:text-base">
               {locale === 'th'
-                ? 'ผลิตภัณฑ์ของเราผลิตจากโรงงานที่ได้รับการรับรองมาตรฐานสากล มั่นใจได้ในคุณภาพและความปลอดภัยทุกขั้นตอนการผลิต'
+                ? 'สินค้าได้รับการผลิตภายใต้โรงงานที่ได้มาตรฐาน ทั้ง ในด้านคุณภาพ ความปลอดภัยและขั้นตอนการ ควบ คุมการผลิตอย่างเข้มงวด เพื่อให้มั่นใจว่าสินค้า ได้คุณภาพ และปลอดภัยต่อผู้บริโภค'
                 : 'Our products are manufactured in internationally certified facilities, ensuring quality and safety at every stage of production.'}
             </p>
 
@@ -57,10 +59,9 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="inline-flex h-12 items-center justify-center gap-2 bg-neutral-900 px-8 font-prompt text-sm font-semibold text-white shadow-lg shadow-black/10"
+                className="inline-flex items-center gap-2 font-prompt text-base font-light text-[var(--accent)] underline underline-offset-4"
               >
-                {locale === 'th' ? 'รายละเอียด' : 'Details'}
-                <i className="fa-solid fa-arrow-right" />
+                {locale === 'th' ? 'อ่านรายละเอียด' : 'Read more'}
               </motion.button>
             </div>
           </motion.div>

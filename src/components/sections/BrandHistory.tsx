@@ -25,13 +25,13 @@ export default function BrandHistorySection({ items }: Props) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-neutral-800">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-thin text-neutral-800">
             {locale === 'th' ? 'เรื่องราวของ' : 'Our'}{' '}
             <span className="font-semibold text-[var(--accent)]">
               {locale === 'th' ? 'แบรนด์' : 'Story'}
             </span>
           </h2>
-          <p className="mt-4 text-neutral-500 text-lg max-w-2xl mx-auto font-light">
+          <p className="mt-4 text-black text-lg max-w-2xl mx-auto font-light">
             {locale === 'th'
               ? 'เส้นทางการพัฒนาผลิตภัณฑ์ SOQ จากจุดเริ่มต้นสู่มาตรฐานระดับสากล'
               : 'The journey of SOQ from inception to international standards'}

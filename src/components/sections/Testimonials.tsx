@@ -97,12 +97,12 @@ export default function Testimonials({ reviews }: TestimonialsProps) {
           >
             {/* Header Text */}
             <div className="mb-8 pl-4 border-l-4 border-[var(--accent)]">
-              <h2 className="font-prompt text-3xl font-bold leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+              <h2 className="font-prompt text-3xl font-thin leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
                 <span className="text-[var(--accent)] text-5xl sm:text-6xl block mb-2">&#10077;</span>
                 {locale === 'th' ? 'คำยืนยันจาก' : 'Testimonials from'} <br />
                 <span className="text-[var(--accent)]">{locale === 'th' ? 'ลูกค้าที่ประทับใจ' : 'Our Happy Customers'}</span>
               </h2>
-              <p className="mt-4 text-neutral-500 font-light">
+              <p className="mt-4 text-black font-light">
                 {locale === 'th'
                   ? 'สิ่งที่เราพูดอาจไม่สำคัญ เท่ากับสิ่งที่ลูกค้าพูดถึงเรา'
                   : 'What we say matters less than what our customers say about us'}

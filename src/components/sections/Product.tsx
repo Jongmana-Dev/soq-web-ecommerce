@@ -36,20 +36,20 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
           {/* LEFT: Title + Product Grid + Desc + CTA */}
           <div className="lg:w-[32%] flex-shrink-0">
             {/* Title */}
-            <h3 className="text-[var(--accent)] font-prompt font-bold text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
+            <h3 className="text-[var(--accent)] font-prompt font-thin text-4xl sm:text-5xl lg:text-[3.5rem] mb-1 tracking-tighter">
               SOQ.
             </h3>
-            <h2 className="text-neutral-800 font-bold text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
+            <h2 className="text-neutral-800 font-thin text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.05] mb-8 tracking-wide uppercase">
               SAFE FOR SIP
             </h2>
 
             {/* Description + CTA */}
-            <p className="text-neutral-500 text-sm sm:text-base leading-relaxed mb-6 font-light">
+            <p className="text-black text-sm sm:text-base leading-relaxed mb-6 font-light">
               {locale === 'th' ? firstProduct.short_desc_th : firstProduct.short_desc_en}
             </p>
             <button
               onClick={() => setModalProduct(firstProduct)}
-              className="bg-[var(--accent)] text-neutral-900 px-10 py-3.5 font-semibold text-base shadow-lg shadow-[var(--accent)]/20 hover:scale-105 active:scale-95 transition-transform"
+              className="bg-[var(--accent)] text-neutral-900 px-10 py-3.5 font-normal text-sm shadow-lg shadow-[var(--accent)]/20 hover:scale-105 active:scale-95 transition-transform"
             >
               {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
             </button>
@@ -60,7 +60,7 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
             <div className="reveal reveal-delay-2 lg:w-[68%] w-full">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-[2px] bg-[var(--accent)]" />
-                <h3 className="text-sm font-semibold text-neutral-400 uppercase tracking-widest">
+                <h3 className="text-sm font-semibold text-neutral-800 uppercase tracking-widest">
                   {locale === 'th' ? 'วิธีใช้งาน' : 'How to Use'}
                 </h3>
               </div>
@@ -85,14 +85,11 @@ export default function ProductShowcase({ products, usageSteps }: Props) {
                     )}
 
                     {/* Step content */}
-                    <div className="p-5">
-                      <span className="text-3xl font-black text-[var(--accent)] tabular-nums leading-none">
+                    <div className="p-5 flex items-start gap-3">
+                      <span className="text-4xl font-thin text-[var(--accent)] tabular-nums leading-none shrink-0">
                         {String(index + 1).padStart(2, '0')}
                       </span>
-                      <h4 className="text-base font-semibold text-neutral-800 mt-2.5 mb-2 leading-snug">
-                        {locale === 'th' ? step.title_th : step.title_en}
-                      </h4>
-                      <p className="text-sm text-neutral-400 leading-relaxed font-light">
+                      <p className="text-sm text-neutral-800 leading-relaxed font-light pt-1">
                         {locale === 'th' ? step.description_th : step.description_en}
                       </p>
                     </div>

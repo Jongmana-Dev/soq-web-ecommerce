@@ -54,7 +54,7 @@ export default function HeroV2({ products }: Props) {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-6 max-w-md mx-auto font-poppins text-sm leading-relaxed text-neutral-700"
+              className="mt-6 max-w-md mx-auto font-poppins text-sm leading-relaxed text-black font-light"
             >
               {locale === 'th'
                 ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
@@ -72,7 +72,7 @@ export default function HeroV2({ products }: Props) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative inline-flex h-10 items-center justify-center overflow-hidden bg-[var(--accent)] px-8 font-prompt text-base font-normal text-black shadow-xl shadow-black/5"
+                className="group relative inline-flex h-10 items-center justify-center overflow-hidden bg-[var(--accent)] px-8 font-prompt text-sm font-normal text-black shadow-xl shadow-black/5"
               >
                 <span className="relative z-10">
                   {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
@@ -113,7 +113,7 @@ export default function HeroV2({ products }: Props) {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-24 max-w-md font-poppins text-base leading-relaxed text-neutral-700"
+              className="mt-24 max-w-md font-poppins text-base leading-relaxed text-black font-light"
             >
               {locale === 'th'
                 ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
@@ -131,7 +131,7 @@ export default function HeroV2({ products }: Props) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative inline-flex h-12 items-center justify-center overflow-hidden bg-[var(--accent)] px-12 font-prompt text-lg font-normal text-black shadow-xl shadow-black/5"
+                className="group relative inline-flex h-12 items-center justify-center overflow-hidden bg-[var(--accent)] px-12 font-prompt text-sm font-normal text-black shadow-xl shadow-black/5"
               >
                 <span className="relative z-10">
                   {locale === 'th' ? 'ซื้อเลย' : 'Buy Now'}
