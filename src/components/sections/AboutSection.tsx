@@ -69,7 +69,7 @@ function ImageRotator({
 }: {
   images: string[]
   activeIndex: number
-  setActiveIndex: (i: number) => void
+  setActiveIndex: React.Dispatch<React.SetStateAction<number>>
 }) {
   useEffect(() => {
     if (images.length <= 1) return
