@@ -8,7 +8,7 @@ import '@/app/globals.css'
 
 const prompt = Prompt({
   subsets: ['latin', 'thai'],
-  weight: ['400', '600', '700'],
+  weight: ['100', '400', '600', '700'],
   display: 'swap',
   variable: '--font-prompt'
 })

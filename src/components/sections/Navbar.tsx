@@ -6,12 +6,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart as ShoppingCartIcon, User as UserIcon, Menu as Bars3Icon, X as XMarkIcon } from "lucide-react";
+import { ShoppingCart as ShoppingCartIcon, User as UserIcon, Menu as Bars3Icon, X as XMarkIcon, ShoppingBag as ShoppingBagIcon } from "lucide-react";
 import { MiniCart } from "@/components/MiniCart";
 import { useCart } from "@/lib/store";
 import ContactModal from "@/components/modals/ContactModal";
 import LoginModal from "@/components/modals/LoginModal";
 import LogoutConfirmModal from "@/components/modals/LogoutConfirmModal";
+import ProductModal from "@/components/modals/ProductModal";
+import type { ProductData } from "@/lib/products";
 import { useSession } from "next-auth/react";
 import { usePendingOrders } from "@/lib/pending-orders-store";
 
@@ -45,6 +47,8 @@ function Navbar() {
   const [isLoginOpen, setLoginOpen] = React.useState(false);
   const [isUserDropdownOpen, setUserDropdownOpen] = React.useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = React.useState(false);
+  const [orderProduct, setOrderProduct] = React.useState<ProductData | null>(null);
+  const [orderLoading, setOrderLoading] = React.useState(false);
 
   const itemCount = useCart((state) =>
     state.items.reduce((total, item) => total + item.qty, 0)
@@ -138,6 +142,22 @@ function Navbar() {
     }
   };
 
+  const handleOrderClick = React.useCallback(async () => {
+    if (orderLoading) return;
+    setOrderLoading(true);
+    try {
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Failed");
+      const json = await res.json();
+      const products: ProductData[] = json.data ?? json;
+      if (products[0]) setOrderProduct(products[0]);
+    } catch {
+      // silently ignore
+    } finally {
+      setOrderLoading(false);
+    }
+  }, [orderLoading]);
+
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -203,6 +223,24 @@ function Navbar() {
                 </button>
               </li>
             </ul>
+
+            {/* Order Button */}
+            <button
+              onClick={handleOrderClick}
+              disabled={orderLoading}
+              className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold transition-all ${
+                isDarkNav
+                  ? "bg-[var(--accent)] text-neutral-900 hover:brightness-110"
+                  : "bg-neutral-900 text-white hover:bg-neutral-800"
+              } disabled:opacity-50`}
+            >
+              {orderLoading ? (
+                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <ShoppingBagIcon className="w-4 h-4" strokeWidth={2} />
+              )}
+              {locale === "th" ? "สั่งซื้อ" : "Order"}
+            </button>
 
             {/* Desktop Icons */}
             <div className="flex items-center gap-2 ml-8 pl-0">
@@ -396,6 +434,23 @@ function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-3 lg:hidden">
+            <button
+              onClick={handleOrderClick}
+              disabled={orderLoading}
+              className={`p-2 transition-colors ${
+                isDarkNav
+                  ? "text-[var(--accent)]"
+                  : "text-neutral-600 hover:text-neutral-900"
+              } disabled:opacity-50`}
+              aria-label={locale === "th" ? "สั่งซื้อสินค้า" : "Order products"}
+            >
+              {orderLoading ? (
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+              ) : (
+                <ShoppingBagIcon className="w-5 h-5" strokeWidth={1.5} />
+              )}
+            </button>
+
             <button
               onClick={() => setCartOpen((open) => !open)}
               className={`relative p-2 transition-colors ${
@@ -607,6 +662,22 @@ function Navbar() {
       {isContactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
       {isLoginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
       {isLogoutModalOpen && <LogoutConfirmModal onClose={() => setLogoutModalOpen(false)} />}
+      {orderProduct && (
+        <ProductModal
+          product={{
+            id: orderProduct.id,
+            name_th: orderProduct.name_th,
+            name_en: orderProduct.name_en,
+            long_desc_th: orderProduct.long_desc_th ?? orderProduct.short_desc_th,
+            long_desc_en: orderProduct.long_desc_en ?? orderProduct.short_desc_en,
+            image: orderProduct.image,
+            images: orderProduct.images,
+            sizes: orderProduct.sizes,
+          }}
+          onClose={() => setOrderProduct(null)}
+          locale={locale}
+        />
+      )}
     </>
   );
 }
