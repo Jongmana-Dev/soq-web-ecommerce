@@ -21,7 +21,7 @@ export default function HeroV2({ products }: Props) {
       <section
         id="hero"
         data-section="true"
-        className="relative w-full overflow-hidden pt-[56px]"
+        className="relative w-full overflow-hidden pt-[40px]"
       >
         {/* Mobile: image on top + text below */}
         <div className="lg:hidden">
