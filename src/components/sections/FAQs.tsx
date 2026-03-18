@@ -22,7 +22,7 @@ export default function FAQ({ faqs }: FAQsProps) {
       id="faq"
       data-section="true"
       ref={ref}
-      className="reveal relative bg-[#ECEDEA] py-20 lg:py-28"
+      className="reveal relative bg-[#ECEDEA] py-10 lg:py-16"
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -73,7 +73,7 @@ export default function FAQ({ faqs }: FAQsProps) {
           </p>
           <button
             onClick={() => setShowContact(true)}
-            className="inline-flex items-center gap-2 bg-neutral-900 px-6 py-3.5 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 hover:scale-105 active:scale-97 transition-transform"
+            className="inline-flex items-center gap-2 bg-neutral-800 px-6 py-3.5 font-prompt text-sm font-semibold text-white shadow-lg shadow-neutral-900/10 hover:scale-105 active:scale-97 transition-transform"
           >
             <i className="fa-solid fa-message" />
             {locale === 'th' ? 'ติดต่อเรา' : 'Contact Us'}

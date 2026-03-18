@@ -75,8 +75,8 @@ export default function HeroV2({ products, usageSteps }: Props) {
 
             <p className="mt-4 max-w-xs mx-auto font-poppins text-[17px] leading-relaxed text-black font-normal">
               {locale === 'th'
-                ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
-                : 'No-rinse antibacterial product'}
+                ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูงด้วยมาตราฐานโรงงาน '
+                : 'A no-rinse antibacterial sanitizer. Easy to use, safe, and highly effective, backed by factory-standard quality.'}
             </p>
 
             <div className="mt-4">
@@ -148,9 +148,9 @@ export default function HeroV2({ products, usageSteps }: Props) {
                   transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="mt-20 xl:mt-24 max-w-md font-poppins text-[17px] leading-relaxed text-black font-light"
                 >
-                  {locale === 'th'
-                    ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก'
-                    : 'No-rinse antibacterial product'}
+                {locale === 'th'
+                ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูงด้วยมาตราฐานโรงงาน '
+                : 'A no-rinse antibacterial sanitizer. Easy to use, safe, and highly effective, backed by factory-standard quality.'}
                 </motion.p>
 
                 <motion.div

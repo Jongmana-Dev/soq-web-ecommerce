@@ -26,7 +26,7 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
       id="industrial-standards"
       data-section="true"
       ref={ref}
-      className="relative overflow-hidden bg-[#ECEDEA] py-20 lg:py-28"
+      className="relative overflow-hidden bg-[#ECEDEA] py-10 lg:py-16"
     >
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 items-center">
@@ -43,7 +43,7 @@ export default function IndustrialStandards({ certifications }: IndustrialStanda
             <h2 className="mb-2 font-poppins text-3xl font-extralight leading-tight text-neutral-400 sm:text-4xl lg:text-5xl">
               {locale === 'th' ? 'Industrial Standards' : 'Industrial Standards'}
             </h2>
-            <h3 className="mb-8 font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
+            <h3 className="mb-16 lg:mb-20 font-poppins text-3xl font-extralight leading-tight text-neutral-800 sm:text-4xl lg:text-5xl">
               {locale === 'th' ? 'มาตรฐานโรงงาน' : 'Factory Standards'}
             </h3>
 

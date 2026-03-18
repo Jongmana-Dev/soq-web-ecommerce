@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from '@/i18n/navigation'
 import { useCart } from '@/lib/store'
 import { useCartToast } from '@/lib/cart-toast'
+import ContactModal from '@/components/modals/ContactModal'
 
 
 interface ProductSize {
@@ -76,97 +77,19 @@ function AccordionItem({ title, children, defaultOpen = false }: { title: string
   )
 }
 
-function EmailButton({ email, locale }: { email: string; locale: string }) {
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
-  const [sending, setSending] = useState(false)
-
-  const handleSend = () => {
-    setSending(true)
-    const subject = encodeURIComponent(locale === 'th' ? 'สอบถามสินค้า SOQ' : 'SOQ Product Inquiry')
-    const body = encodeURIComponent(
-      `${locale === 'th' ? 'ชื่อ' : 'Name'}: ${form.name}\n${locale === 'th' ? 'อีเมล' : 'Email'}: ${form.email}\n\n${form.message}`
-    )
-    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_self')
-    setSending(false)
-    setOpen(false)
-    setForm({ name: '', email: '', message: '' })
-  }
+function EmailContactButton({ locale }: { locale: string }) {
+  const [showContact, setShowContact] = useState(false)
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        title={email}
+        onClick={() => setShowContact(true)}
+        title={locale === 'th' ? 'ส่งอีเมล' : 'Send email'}
         className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-900/5 transition-all"
       >
         <i className="fa-solid fa-envelope text-base" />
       </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] grid place-items-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-white p-6 shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg font-light text-neutral-900">
-                  {locale === 'th' ? 'ส่งอีเมลถึงเรา' : 'Send us an email'}
-                </h3>
-                <button onClick={() => setOpen(false)} className="text-neutral-400 hover:text-black">
-                  <i className="fa-solid fa-xmark text-lg" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder={locale === 'th' ? 'ชื่อของคุณ' : 'Your name'}
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors"
-                />
-                <input
-                  type="email"
-                  placeholder={locale === 'th' ? 'อีเมลของคุณ' : 'Your email'}
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors"
-                />
-                <textarea
-                  placeholder={locale === 'th' ? 'ข้อความ' : 'Message'}
-                  rows={4}
-                  value={form.message}
-                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                  className="w-full px-4 py-2.5 text-sm border border-neutral-200 bg-neutral-50 focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!form.name || !form.message || sending}
-                  className="w-full py-3 bg-[var(--accent)] text-neutral-900 font-normal text-sm hover:brightness-110 transition-all disabled:opacity-40"
-                >
-                  <i className="fa-solid fa-paper-plane mr-2" />
-                  {locale === 'th' ? 'ส่งอีเมล' : 'Send Email'}
-                </button>
-              </div>
-
-              <p className="mt-3 text-xs text-neutral-400 text-center font-light">
-                {locale === 'th' ? 'หรือส่งตรงที่' : 'Or email directly at'} {email}
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
     </>
   )
 }
@@ -187,23 +110,32 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
   const [imgDirection, setImgDirection] = useState(0)
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
   const [fetchedSteps, setFetchedSteps] = useState<UsageStepData[]>([])
+  const [dataReady, setDataReady] = useState(false)
   const add = useCart((state) => state.add)
   const showToast = useCartToast((s) => s.show)
 
   // Fetch shipping rates + usage steps (if not provided via props)
   useEffect(() => {
-    fetch('/api/settings-proxy/shipping')
-      .then((res) => res.json())
-      .then((data) => setShippingRates(data.rates ?? []))
-      .catch(() => {})
+    const promises: Promise<void>[] = []
+
+    promises.push(
+      fetch('/api/settings-proxy/shipping')
+        .then((res) => res.json())
+        .then((data) => setShippingRates(data.rates ?? []))
+        .catch(() => {})
+    )
 
     if (!usageSteps || usageSteps.length === 0) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      fetch(`${apiUrl}/api/cms/usage-steps`)
-        .then((res) => res.json())
-        .then((json) => setFetchedSteps(json.data ?? []))
-        .catch(() => {})
+      promises.push(
+        fetch(`${apiUrl}/api/cms/usage-steps`)
+          .then((res) => res.json())
+          .then((json) => setFetchedSteps(json.data ?? []))
+          .catch(() => {})
+      )
     }
+
+    Promise.all(promises).then(() => setDataReady(true))
   }, [usageSteps])
 
   const resolvedSteps = (usageSteps && usageSteps.length > 0) ? usageSteps : fetchedSteps
@@ -236,13 +168,9 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Stop Lenis smooth scroll + native scroll
     document.body.style.overflow = 'hidden'
     document.documentElement.style.overflow = 'hidden'
-    // Scroll modal overlay to top
     overlayRef.current?.scrollTo(0, 0)
-    // Scroll window to ensure modal is visible
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
     return () => {
       document.body.style.overflow = ''
       document.documentElement.style.overflow = ''
@@ -278,6 +206,19 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
       content_en: lines.join('\n'),
       defaultOpen: false,
     })
+  }
+
+  // Show loading overlay until data is ready
+  if (!dataReady) {
+    return createPortal(
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="bg-white p-8 flex flex-col items-center gap-3">
+          <span className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-neutral-500 font-light">{locale === 'th' ? 'กำลังโหลด...' : 'Loading...'}</span>
+        </div>
+      </div>,
+      document.body
+    )
   }
 
   return createPortal(
@@ -444,7 +385,7 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
                       add(item)
                       showToast(item)
                     }}
-                    className="h-12 px-4 sm:px-8 bg-neutral-900 font-normal text-white hover:bg-neutral-800 transition-all flex-1 min-w-0"
+                    className="h-12 px-4 sm:px-8 bg-neutral-800 font-normal text-white hover:bg-neutral-800 transition-all flex-1 min-w-0"
                  >
                     <i className="fa-solid fa-cart-plus mr-2" />
                     {locale === 'th' ? 'เพิ่มลงตะกร้า' : 'Add to Cart'}
@@ -527,9 +468,7 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
                     <i className="fa-solid fa-phone text-base" />
                   </a>
                 )}
-                {process.env.NEXT_PUBLIC_EMAIL && (
-                  <EmailButton email={process.env.NEXT_PUBLIC_EMAIL} locale={locale} />
-                )}
+                <EmailContactButton locale={locale} />
               </div>
             </div>
 

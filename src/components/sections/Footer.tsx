@@ -143,7 +143,9 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
 
   const navLinks = [
     { href: '#testimonials', label: tHeader('reviews') },
+    { href: '#products', label: tHeader('products') },
     { href: '#industrial-standards', label: tHeader('standards') },
+    { href: '#about', label: locale === 'th' ? 'เกี่ยวกับเรา' : 'About Us' },
     { href: '#faq', label: tHeader('faq') },
   ]
 
@@ -151,200 +153,120 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
 
   return (
     <>
-      <footer id="footer" ref={ref} className="relative bg-[#292929] text-white z-10">
+      <footer id="footer" ref={ref} className="relative bg-[#171717] text-white z-10">
         {/* Main */}
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-10 pb-8">
+          <div className="flex flex-col lg:flex-row justify-between gap-12">
 
-            {/* Left — Brand + tagline + nav */}
+            {/* LEFT GROUP — Logo + tagline + nav + social */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-5 flex flex-col items-center lg:items-start"
+              className="flex flex-col items-center lg:items-start"
             >
-              <img
-                src="/logo.svg"
-                alt="SOQ"
-                className="h-16 lg:h-20 w-auto invert"
-              />
-              <p className="mt-2 text-neutral-400 text-sm tracking-widest text-center">
-                {t('tagline')}
-              </p>
+              <div className="flex flex-col items-center">
+                <img src="/logo.svg" alt="SOQ" className="h-14 w-auto invert" />
+                <p className="mt-2 text-neutral-500 text-xs tracking-widest uppercase text-center">
+                  {t('tagline')}
+                </p>
+              </div>
 
-              {/* Nav — desktop */}
-              <nav className="mt-10 hidden lg:block">
-                <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {/* Nav — stacked with bullets */}
+              <nav className="mt-8">
+                <ul className="flex flex-col items-center lg:items-start gap-2.5">
                   {navLinks.map((link) => (
-                    <li key={link.href}>
-                      <a
-                        href={link.href}
-                        className="text-sm text-neutral-500 hover:text-white transition-colors"
-                      >
+                    <li key={link.href} className="flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+                      <a href={link.href} className="text-sm text-neutral-400 hover:text-white transition-colors font-light">
                         {link.label}
                       </a>
                     </li>
                   ))}
-                  <li>
-                    <button
-                      onClick={() => setShowContact(true)}
-                      className="text-sm text-neutral-500 hover:text-white transition-colors"
-                    >
+                  <li className="flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+                    <button onClick={() => setShowContact(true)} className="text-sm text-neutral-400 hover:text-white transition-colors font-light">
                       {contactLabel}
                     </button>
                   </li>
                 </ul>
               </nav>
+
             </motion.div>
 
-            {/* Right — QR + social */}
+            {/* RIGHT GROUP — LINE QR */}
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-4 lg:col-start-9 flex flex-col items-center gap-6"
+              className="flex flex-col items-center lg:items-end"
             >
-              {/* LINE QR Code with glow */}
               {LINE_URL ? (
                 <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="relative block">
-                  <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse-glow" />
-                  <div className="relative bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
+                  <div className="relative bg-white p-1.0 shadow-lg shadow-white/5">
                     <Image
                       src="/line_oa.webp"
                       alt="LINE Official Account QR Code"
-                      width={160}
-                      height={160}
-                      className="w-40 h-40 object-contain rounded-lg"
+                      width={170}
+                      height={170}
+                      className="w-[170px] h-[170px] object-contain"
                     />
                   </div>
+                  <p className="mt-2 text-neutral-500 text-[10px] text-center tracking-wide">{t('addLine')}</p>
                 </a>
               ) : (
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse-glow" />
-                  <div className="relative bg-white rounded-2xl p-3 shadow-lg shadow-white/5">
-                    <div className="w-40 h-40 border-2 border-dashed border-neutral-300 rounded-lg flex items-center justify-center text-neutral-400">
-                      <span className="text-xs">LINE QR</span>
-                    </div>
+                <div className="relative bg-white rounded-xl p-2.5 shadow-lg shadow-white/5">
+                  <div className="w-28 h-28 border-2 border-dashed border-neutral-300 rounded-md flex items-center justify-center text-neutral-400">
+                    <span className="text-xs">LINE QR</span>
                   </div>
                 </div>
               )}
 
               {/* Social icons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 mt-6">
                 {FACEBOOK_URL && (
-                  <motion.a
-                    href={FACEBOOK_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook"
-                    whileHover={{ scale: 1.15, y: -2 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
-                  >
-                    <i className="fa-brands fa-facebook-f text-sm" />
-                  </motion.a>
+                  <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-500 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors">
+                    <i className="fa-brands fa-facebook-f text-xs" />
+                  </a>
                 )}
                 {LINE_URL && (
-                  <motion.a
-                    href={LINE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="LINE"
-                    whileHover={{ scale: 1.15, y: -2 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-[#06C755] hover:text-[#06C755] transition-colors"
-                  >
-                    <i className="fa-brands fa-line text-sm" />
-                  </motion.a>
+                  <a href={LINE_URL} target="_blank" rel="noopener noreferrer" aria-label="LINE"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-500 hover:border-[#06C755] hover:text-[#06C755] transition-colors">
+                    <i className="fa-brands fa-line text-xs" />
+                  </a>
                 )}
                 {PHONE && (
-                  <motion.a
-                    href={`tel:${PHONE.replace(/-/g, '')}`}
-                    aria-label="Phone"
-                    whileHover={{ scale: 1.15, y: -2 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-emerald-500 hover:text-emerald-500 transition-colors"
-                  >
-                    <i className="fa-solid fa-phone text-sm" />
-                  </motion.a>
+                  <a href={`tel:${PHONE.replace(/-/g, '')}`} aria-label="Phone"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-500 hover:border-emerald-500 hover:text-emerald-500 transition-colors">
+                    <i className="fa-solid fa-phone text-xs" />
+                  </a>
                 )}
                 {EMAIL && (
-                  <motion.button
-                    onClick={() => setShowContact(true)}
-                    aria-label="Email"
-                    whileHover={{ scale: 1.15, y: -2 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-10 h-10 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-400 hover:border-white hover:text-white transition-colors"
-                  >
-                    <i className="fa-solid fa-envelope text-sm" />
-                  </motion.button>
+                  <button onClick={() => setShowContact(true)} aria-label="Email"
+                    className="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-700 text-neutral-500 hover:border-white hover:text-white transition-colors">
+                    <i className="fa-solid fa-envelope text-xs" />
+                  </button>
                 )}
               </div>
-
-              {/* Nav — mobile */}
-              <nav className="lg:hidden mt-4">
-                <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                  {navLinks.map((link) => (
-                    <li key={link.href}>
-                      <a
-                        href={link.href}
-                        className="text-sm text-neutral-500 hover:text-white transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                  <li>
-                    <button
-                      onClick={() => setShowContact(true)}
-                      className="text-sm text-neutral-500 hover:text-white transition-colors"
-                    >
-                      {contactLabel}
-                    </button>
-                  </li>
-                </ul>
-              </nav>
             </motion.div>
 
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-neutral-800">
-          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-neutral-500 text-xs">
+        <div className="border-t border-neutral-700/50">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-neutral-600 text-[11px]">
               <span>&copy; {new Date().getFullYear()} SOQ. All rights reserved.</span>
               {termsSections.length > 0 && (
                 <>
                   <span className="text-neutral-700">|</span>
-                  <button
-                    onClick={() => setShowTerms(true)}
-                    className="hover:text-white transition-colors underline underline-offset-2"
-                  >
+                  <button onClick={() => setShowTerms(true)} className="hover:text-white transition-colors underline underline-offset-2">
                     {t('terms')}
                   </button>
                 </>
               )}
-            </div>
-
-            <div className="flex gap-4 text-xs font-medium">
-              <button
-                onClick={() => changeLocale('en')}
-                className={`transition-colors ${locale === 'en' ? 'text-white' : 'text-neutral-500 hover:text-white'}`}
-              >
-                Eng
-              </button>
-              <span className="text-neutral-700">|</span>
-              <button
-                onClick={() => changeLocale('th')}
-                className={`transition-colors ${locale === 'th' ? 'text-white' : 'text-neutral-500 hover:text-white'}`}
-              >
-                ไทย
-              </button>
             </div>
           </div>
         </div>

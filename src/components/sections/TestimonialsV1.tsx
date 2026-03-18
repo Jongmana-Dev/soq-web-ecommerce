@@ -10,7 +10,7 @@ type TestimonialsProps = {
   reviews: Review[]
 }
 
-export default function Testimonials({ reviews }: TestimonialsProps) {
+export default function TestimonialsV1({ reviews }: TestimonialsProps) {
   const locale = useLocale()
   const [activeIndex, setActiveIndex] = useState(0)
   const [direction, setDirection] = useState(0)

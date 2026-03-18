@@ -28,7 +28,7 @@ export default function AboutSection({ content, images = [] }: Props) {
     <section
       id="about"
       data-section="true"
-      className="relative bg-[#ECEDEA] py-20 lg:py-28 overflow-hidden"
+      className="relative bg-[#ECEDEA] py-10 lg:py-16 overflow-hidden"
     >
       <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${hasImages ? 'max-w-6xl' : 'max-w-4xl'}`}>
         <div

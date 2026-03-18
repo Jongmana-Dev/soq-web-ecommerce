@@ -20,7 +20,7 @@ export default function BrandHistorySection({ items }: Props) {
       id="brand-history"
       data-section="true"
       ref={ref}
-      className="reveal relative bg-[#ECEDEA] py-20 lg:py-32 overflow-hidden"
+      className="reveal relative bg-[#ECEDEA] py-10 lg:py-16 overflow-hidden"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}

@@ -3,7 +3,7 @@ import HeroV1 from '@/components/sections/HeroV1'
 import HeroV2 from '@/components/sections/HeroV2'
 import HeroV3 from '@/components/sections/HeroV3'
 import HeroV4 from '@/components/sections/HeroV4'
-import Testimonials from '@/components/sections/Testimonials'
+import Testimonials from '@/components/sections/TestimonialsV2'
 import Product from '@/components/sections/Product'
 import Standards from '@/components/sections/IndustrialStandards'
 import FAQs from '@/components/sections/FAQs'
@@ -35,8 +35,8 @@ export async function generateMetadata({
       : 'SOQ. Safe for Sip — No-rinse antibacterial product'
   const description =
     locale === 'th'
-      ? 'SOQ. Safe for Sip — ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ปลอดภัย ไร้สารตกค้าง'
-      : 'SOQ. Safe for Sip — No-rinse antibacterial product. Safe, residue-free.'
+      ? 'SOQ. Safe for Sip — ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูงด้วยมาตราฐานโรงงาน'
+      : 'SOQ. Safe for Sip — A no-rinse antibacterial sanitizer. Easy to use, safe, and highly effective, backed by factory-standard quality. '
 
   return {
     title,
