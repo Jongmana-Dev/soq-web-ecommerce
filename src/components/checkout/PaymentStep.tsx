@@ -124,13 +124,6 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
             )}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm text-neutral-500 hover:text-neutral-700 underline underline-offset-4 shrink-0"
-        >
-          {t('checkout.backToShipping')}
-        </button>
       </div>
 
       {/* Payment Method Section */}

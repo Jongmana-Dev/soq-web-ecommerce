@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
@@ -23,6 +23,48 @@ const statusColor: Record<OrderStatus, string> = {
   expire: 'bg-neutral-100 text-neutral-600',
 }
 
+function CountdownTimer({ expiredAt, locale, onExpired }: { expiredAt: string; locale: string; onExpired?: () => void }) {
+  const [timeLeft, setTimeLeft] = useState('')
+  const [expired, setExpired] = useState(false)
+  const firedRef = useRef(false)
+
+  useEffect(() => {
+    const update = () => {
+      const diff = new Date(expiredAt).getTime() - Date.now()
+      if (diff <= 0) {
+        setTimeLeft(locale === 'th' ? 'หมดเวลา' : 'Expired')
+        setExpired(true)
+        if (!firedRef.current) {
+          firedRef.current = true
+          onExpired?.()
+        }
+        return
+      }
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setTimeLeft(
+        h > 0
+          ? `${h} ${locale === 'th' ? 'ชม.' : 'hr'} ${m} ${locale === 'th' ? 'นาที' : 'min'}`
+          : `${m}:${String(s).padStart(2, '0')} ${locale === 'th' ? 'นาที' : 'min'}`
+      )
+    }
+    update()
+    const timer = setInterval(update, 1000)
+    return () => clearInterval(timer)
+  }, [expiredAt, locale, onExpired])
+
+  const diff = new Date(expiredAt).getTime() - Date.now()
+  const isUrgent = diff > 0 && diff < 30 * 60 * 1000
+
+  return (
+    <span className={`text-xs font-medium ${expired ? 'text-red-500' : isUrgent ? 'text-red-500' : 'text-amber-600'}`}>
+      <i className="fa-solid fa-clock mr-1" />
+      {timeLeft}
+    </span>
+  )
+}
+
 export default function OrdersPage() {
   const t = useTranslations('orders')
   const locale = useLocale()
@@ -39,6 +81,15 @@ export default function OrdersPage() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }
+
+  const handleOrderExpired = useCallback((orderId: string) => {
+    // Mark as expired (not cancelled — different status for tracking)
+    fetch(`/api/orders-proxy/${orderId}/expire`, { method: 'PATCH' })
+      .catch(() => {})
+      .finally(() => {
+        setTimeout(fetchOrders, 500)
+      })
+  }, [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -133,6 +184,13 @@ export default function OrdersPage() {
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[order.status]}`}>
                             {t(`status.${order.status}`)}
                           </span>
+                          {order.status === 'pending_payment' && order.expired_at && (
+                            <CountdownTimer
+                              expiredAt={order.expired_at}
+                              locale={locale}
+                              onExpired={() => handleOrderExpired(order.id)}
+                            />
+                          )}
                         </div>
                         <p className="text-xs text-neutral-400 mb-2">
                           {new Date(order.created_at).toLocaleDateString('th-TH', {
@@ -154,12 +212,12 @@ export default function OrdersPage() {
                     </div>
                   </Link>
 
-                  {/* Action buttons */}
+                  {/* Action buttons — CountdownTimer handles auto-cancel when expired */}
                   {order.status === 'pending_payment' && (
                     <div className="px-5 pb-4 flex gap-2">
                       <button
                         onClick={(e) => { e.preventDefault(); setPayingOrder(order) }}
-                        className="flex-1 bg-neutral-900 text-white py-2.5 text-sm font-medium hover:bg-black transition-colors"
+                        className="flex-1 bg-neutral-800 text-white py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors"
                       >
                         <i className="fa-solid fa-credit-card mr-2 text-xs" />
                         {t('notifyPayment')}

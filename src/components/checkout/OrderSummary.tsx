@@ -8,9 +8,10 @@ interface OrderSummaryProps {
   items: CartItem[];
   shippingFee: number;
   remoteAreaFee: number;
+  locked?: boolean;
 }
 
-export default function OrderSummary({ items, shippingFee, remoteAreaFee }: OrderSummaryProps) {
+export default function OrderSummary({ items, shippingFee, remoteAreaFee, locked = false }: OrderSummaryProps) {
   const t = useTranslations();
   const updateQty = useCart((s) => s.updateQty);
   const remove = useCart((s) => s.remove);
@@ -44,24 +45,28 @@ export default function OrderSummary({ items, shippingFee, remoteAreaFee }: Orde
                 <p className="text-xs text-neutral-400">{item.size_label}</p>
               )}
               {/* Qty controls */}
-              <div className="flex items-center gap-1.5 mt-1">
-                <button
-                  type="button"
-                  disabled={item.qty <= 1}
-                  onClick={() => updateQty(item.id, item.qty - 1)}
-                  className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  −
-                </button>
-                <span className="text-xs font-medium w-6 text-center">{item.qty}</span>
-                <button
-                  type="button"
-                  onClick={() => updateQty(item.id, item.qty + 1)}
-                  className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs"
-                >
-                  +
-                </button>
-              </div>
+              {locked ? (
+                <p className="text-xs text-neutral-400 mt-1">x{item.qty}</p>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <button
+                    type="button"
+                    disabled={item.qty <= 1}
+                    onClick={() => updateQty(item.id, item.qty - 1)}
+                    className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    −
+                  </button>
+                  <span className="text-xs font-medium w-6 text-center">{item.qty}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateQty(item.id, item.qty + 1)}
+                    className="w-7 h-7 flex items-center justify-center border border-neutral-300 text-neutral-500 hover:bg-neutral-100 transition-colors text-xs"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
             </div>
             <p className="text-sm font-medium whitespace-nowrap">
               ฿{(item.price * item.qty).toLocaleString()}

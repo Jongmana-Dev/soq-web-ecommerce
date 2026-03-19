@@ -211,7 +211,7 @@ export default function AlertToast() {
                       className={`flex-1 px-4 py-2.5 rounded-[10px] text-sm font-medium text-white transition-colors disabled:opacity-50 ${
                         isDanger
                           ? 'bg-[#FF3B30] hover:bg-[#E0352B]'
-                          : 'bg-[#86868B] hover:bg-[#6E6E73]'
+                          : 'bg-neutral-800 hover:bg-neutral-700'
                       }`}
                     >
                       {confirming ? (

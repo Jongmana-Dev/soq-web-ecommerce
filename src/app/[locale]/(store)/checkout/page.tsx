@@ -200,11 +200,15 @@ export default function CheckoutPage() {
           ? orders.filter((o: { status: string }) => o.status === 'pending_payment')
           : [];
         if (pendingOrders.length >= 3) {
-          setError(
-            locale === 'th'
+          useAlertStore.getState().showResultAlert({
+            type: 'error',
+            title: locale === 'th' ? 'ไม่สามารถสั่งซื้อได้' : 'Cannot place order',
+            message: locale === 'th'
               ? 'คุณมีคำสั่งซื้อที่รอชำระเงินอยู่ 3 รายการแล้ว กรุณาชำระเงินหรือยกเลิกคำสั่งซื้อเดิมก่อนสั่งใหม่'
-              : 'You already have 3 pending orders. Please complete payment or cancel existing orders before placing a new one.'
-          );
+              : 'You already have 3 pending orders. Please complete payment or cancel existing orders before placing a new one.',
+            buttonText: locale === 'th' ? 'ไปที่คำสั่งซื้อ' : 'Go to Orders',
+            onClose: () => router.push('/orders'),
+          });
           return;
         }
       }
@@ -286,6 +290,10 @@ export default function CheckoutPage() {
       setOrderExpiredAt(order.expired_at);
       setOrderTotal(order.total);
       prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
+
+      // Clear cart immediately after order created — items are now in the order
+      clear();
+
       setStep('payment');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -444,6 +452,7 @@ export default function CheckoutPage() {
               items={items}
               shippingFee={shippingFee}
               remoteAreaFee={remoteAreaFee}
+              locked={step === 'payment'}
             />
           </div>
         </div>
