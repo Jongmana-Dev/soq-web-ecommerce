@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter as useNextIntlRouter } from '@/i18n/navigation';
+import { useRouter as useNextRouter } from 'next/navigation';
 import { useCart, useCartHydrated } from '@/lib/store';
 import { useAlertStore } from '@/lib/alert-store';
 import ShippingForm, { type ShippingData } from '@/components/checkout/ShippingForm';
@@ -35,7 +36,8 @@ type Step = 'shipping' | 'payment';
 export default function CheckoutPage() {
   const t = useTranslations();
   const locale = useLocale();
-  const router = useRouter();
+  const router = useNextIntlRouter();
+  const nextRouter = useNextRouter();
   const items = useCart((state) => state.items);
   const hydrated = useCartHydrated();
   const clear = useCart((state) => state.clear);
@@ -291,10 +293,10 @@ export default function CheckoutPage() {
       setOrderTotal(order.total);
       prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
 
-      // Clear cart immediately after order created — items are now in the order
-      clear();
-
+      // Set step BEFORE clearing cart — Zustand clear() triggers re-render independently
+      // from React setState, so without this order the empty-cart guard fires briefly
       setStep('payment');
+      clear();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       useAlertStore.getState().showAlert('error',
@@ -351,7 +353,7 @@ export default function CheckoutPage() {
         buttonText: locale === 'th' ? 'ตกลง' : 'OK',
         onClose: () => {
           clear();
-          router.push({ pathname: '/checkout/confirmation', query: { order: orderNumber ?? '' } });
+          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(orderNumber ?? '')}`);
         },
       });
     } catch (err) {

@@ -485,7 +485,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
       {/* Submit */}
       <button
         type="submit"
-        className="w-full bg-[var(--accent)] text-neutral-900 py-3 font-semibold transition-transform"
+        className="w-full bg-neutral-800 text-white py-3 font-semibold hover:bg-neutral-900 transition-colors"
       >
         {t('checkout.continueToPayment')}
       </button>

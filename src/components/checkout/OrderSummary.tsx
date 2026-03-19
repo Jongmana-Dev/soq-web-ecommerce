@@ -21,7 +21,7 @@ export default function OrderSummary({ items, shippingFee, remoteAreaFee, locked
 
   return (
     <div className="border border-neutral-200 overflow-hidden h-fit lg:sticky lg:top-24">
-      <div className="bg-neutral-900 px-6 py-4">
+      <div className="bg-neutral-800 px-6 py-4">
         <h3 className="text-lg font-semibold text-white">{t('checkout.orderSummary')}</h3>
       </div>
 

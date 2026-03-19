@@ -298,7 +298,7 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
             onConfirm: () => onSubmit(slipBase64),
           });
         }}
-        className="w-full bg-neutral-900 text-white py-3.5 font-semibold hover:bg-black transition-colors disabled:opacity-50"
+        className="w-full bg-neutral-800 text-white py-3.5 font-semibold hover:bg-neutral-900 transition-colors disabled:opacity-50"
       >
         {submitting ? (
           <i className="fa-solid fa-spinner fa-spin" />

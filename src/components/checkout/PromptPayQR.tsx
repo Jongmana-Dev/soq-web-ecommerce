@@ -9,7 +9,7 @@ interface PromptPayQRProps {
 }
 
 export default function PromptPayQR({ amount, promptpayId }: PromptPayQRProps) {
-  if (!promptpayId) {
+  if (!promptpayId || !amount) {
     return (
       <div className="flex flex-col items-center gap-3">
         <div className="w-[256px] h-[256px] border border-neutral-200 p-1 flex items-center justify-center">
