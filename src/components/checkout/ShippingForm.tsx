@@ -38,12 +38,13 @@ export interface ShippingData {
 interface ShippingFormProps {
   onSubmit: (data: ShippingData) => void;
   onProvinceChange?: (province: string) => void;
+  onPostalCodeChange?: (postalCode: string) => void;
 }
 
 const REFERRAL_OPTIONS = ['search', 'facebook', 'line', 'friend', 'ig', 'event', 'other'] as const;
 const FEATURE_TAX_INFO = process.env.NEXT_PUBLIC_FEATURE_TAX_INFO === 'true';
 
-export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFormProps) {
+export default function ShippingForm({ onSubmit, onProvinceChange, onPostalCodeChange }: ShippingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -104,6 +105,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
           const defaultAddr = addresses.find((a: Address) => a.is_default) ?? addresses[0];
           setSelectedAddressId(defaultAddr.id);
           onProvinceChange?.(defaultAddr.province);
+          onPostalCodeChange?.(defaultAddr.postal_code);
         }
         if (taxRes.data) {
           setSavedTaxInfo(taxRes.data);
@@ -120,12 +122,14 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
     setSubdistrict('');
     setPostalCode('');
     onProvinceChange?.(value);
+    onPostalCodeChange?.('');
   };
 
   const handleDistrictChange = (value: string) => {
     setDistrict(value);
     setSubdistrict('');
     setPostalCode('');
+    onPostalCodeChange?.('');
   };
 
   const handleSubdistrictChange = (value: string) => {
@@ -133,7 +137,10 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
     const subdistrictName = value.includes('||') ? value.split('||')[0] : value;
     setSubdistrict(subdistrictName);
     const sub = subdistricts.find((s) => s.value === value);
-    if (sub) setPostalCode(sub.zipcode);
+    if (sub) {
+      setPostalCode(sub.zipcode);
+      onPostalCodeChange?.(sub.zipcode);
+    }
   };
 
   const validate = (): boolean => {
@@ -278,7 +285,7 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
                   name="savedAddress"
                   value={addr.id}
                   checked={selectedAddressId === addr.id}
-                  onChange={() => { setSelectedAddressId(addr.id); onProvinceChange?.(addr.province); }}
+                  onChange={() => { setSelectedAddressId(addr.id); onProvinceChange?.(addr.province); onPostalCodeChange?.(addr.postal_code); }}
                   className="sr-only"
                 />
                 <p className="font-medium text-sm">{addr.recipient_name} — {addr.phone}</p>

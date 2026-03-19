@@ -20,6 +20,7 @@ interface ShippingRate {
 
 interface RemoteProvince {
   province_name: string;
+  postal_code: string | null;
   surcharge: number;
 }
 
@@ -62,6 +63,7 @@ export default function CheckoutPage() {
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [remoteProvinces, setRemoteProvinces] = useState<RemoteProvince[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedPostalCode, setSelectedPostalCode] = useState<string>('');
 
   // Payment accounts from API
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
@@ -106,7 +108,11 @@ export default function CheckoutPage() {
     }
   }
 
-  const remoteMatch = remoteProvinces.find((p) => p.province_name === selectedProvince);
+  // Match remote area by postal code first (exact), then fallback to province (null postal_code = whole province)
+  const remoteMatch = selectedPostalCode
+    ? remoteProvinces.find((p) => p.postal_code === selectedPostalCode)
+      ?? remoteProvinces.find((p) => p.province_name === selectedProvince && !p.postal_code)
+    : remoteProvinces.find((p) => p.province_name === selectedProvince && !p.postal_code);
   const remoteAreaFee = remoteMatch ? remoteMatch.surcharge : 0;
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -376,6 +382,8 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Failed to verify slip');
       }
 
+      // Capture orderNumber before closure to avoid stale state
+      const confirmedOrderNumber = orderNumber;
       useAlertStore.getState().showResultAlert({
         type: 'success',
         title: locale === 'th' ? 'ตรวจสอบสลิปสำเร็จ' : 'Slip Verified',
@@ -383,7 +391,7 @@ export default function CheckoutPage() {
         buttonText: locale === 'th' ? 'ตกลง' : 'OK',
         onClose: () => {
           clear();
-          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(orderNumber ?? '')}`);
+          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(confirmedOrderNumber ?? '')}`);
         },
       });
     } catch (err) {
@@ -441,6 +449,7 @@ export default function CheckoutPage() {
               <ShippingForm
                 onSubmit={handleShippingSubmit}
                 onProvinceChange={setSelectedProvince}
+                onPostalCodeChange={setSelectedPostalCode}
               />
             </div>
 
