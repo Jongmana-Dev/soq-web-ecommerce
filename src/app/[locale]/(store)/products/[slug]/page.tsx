@@ -7,9 +7,14 @@ import { getReviews } from '@/lib/cms'
 const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://soqthailand.com'
 
 export async function generateStaticParams() {
-  const products = await getProducts()
-  const locales = ['th', 'en']
-  return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })))
+  try {
+    const products = await getProducts()
+    const locales = ['th', 'en']
+    return locales.flatMap((locale) => products.map((p) => ({ locale, slug: p.slug })))
+  } catch {
+    // API not available during build — pages will be generated on-demand via ISR
+    return []
+  }
 }
 
 export async function generateMetadata({

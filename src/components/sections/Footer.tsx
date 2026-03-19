@@ -7,7 +7,8 @@ import { useRouter } from '@/i18n/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import Image from 'next/image'
-import ContactModal from '@/components/modals/ContactModal'
+import dynamic from 'next/dynamic'
+const ContactModal = dynamic(() => import('@/components/modals/ContactModal'))
 import { useContactInfo } from '@/providers/ContactInfoProvider'
 import type { ContactInfo } from '@/lib/cms'
 

@@ -12,11 +12,11 @@ import { getProducts } from '@/lib/products'
 import BrandHistory from '@/components/sections/BrandHistory'
 import AboutSection from '@/components/sections/AboutSection'
 import ClientLogos from '@/components/sections/ClientLogos'
-import { getReviews, getCertifications, getFAQs, getUsageSteps, getTermsSections, getBrandHistories, getHistoryContent, getContactInfo, getClientLogos, getAboutImages } from '@/lib/cms'
+import { getReviews, getCertifications, getFAQs, getUsageSteps, getTermsSections, getBrandHistories, getHistoryContent, getClientLogos, getAboutImages } from '@/lib/cms'
 
 const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://soqthailand.com'
 
-export const revalidate = 300 // 5 minutes
+export const revalidate = 3_600 // 1 hour
 
 export function generateStaticParams() {
   return [{ locale: 'th' }, { locale: 'en' }]
@@ -67,7 +67,7 @@ export default async function IndexPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const [products, reviews, certifications, faqs, usageSteps, termsSections, brandHistories, historyContent, contactInfo, clientLogos, aboutImages] = await Promise.all([
+  const [products, reviews, certifications, faqs, usageSteps, termsSections, brandHistories, historyContent, clientLogos, aboutImages] = await Promise.all([
     getProducts(),
     getReviews(),
     getCertifications(),
@@ -76,7 +76,6 @@ export default async function IndexPage({
     getTermsSections(),
     getBrandHistories(),
     getHistoryContent(),
-    getContactInfo(),
     getClientLogos(),
     getAboutImages(),
   ])
@@ -161,7 +160,7 @@ export default async function IndexPage({
         <AboutSection content={historyContent} images={aboutImages} />
       )}
       <FAQs faqs={faqs} />
-      <Footer termsSections={termsSections} contactInfo={contactInfo} />
+      <Footer termsSections={termsSections} />
     </>
   )
 }

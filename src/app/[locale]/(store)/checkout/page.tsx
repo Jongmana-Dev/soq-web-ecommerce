@@ -59,15 +59,27 @@ export default function CheckoutPage() {
   // Payment accounts from API
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
 
+  // Shipping config load error (EC-08)
+  const [shippingConfigError, setShippingConfigError] = useState<string | null>(null);
+
   // Fetch shipping config + payment accounts on mount
   useEffect(() => {
     fetch('/api/settings-proxy/shipping')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load shipping config');
+        return res.json();
+      })
       .then((data) => {
         setShippingRates(data.rates ?? []);
         setRemoteProvinces(data.remote_provinces ?? []);
       })
-      .catch(() => {});
+      .catch(() => {
+        setShippingConfigError(
+          locale === 'th'
+            ? 'ไม่สามารถโหลดข้อมูลการจัดส่งได้ กรุณาลองรีเฟรชหน้า'
+            : 'Failed to load shipping info. Please refresh the page.'
+        );
+      });
 
     fetch('/api/settings-proxy/payment-accounts')
       .then((res) => res.json())
@@ -75,7 +87,7 @@ export default function CheckoutPage() {
         setPaymentAccounts(json.data ?? []);
       })
       .catch(() => {});
-  }, []);
+  }, [locale]);
 
   // Calculate shipping from rates
   const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
@@ -96,9 +108,12 @@ export default function CheckoutPage() {
   // --- Sync qty changes to backend when order exists ---
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevItemsRef = useRef<string>('');
+  // EC-04: track in-flight sync so submit can be blocked while syncing
+  const syncingRef = useRef(false);
 
   const syncItemsToBackend = useCallback(async () => {
     if (!orderId || items.length === 0) return;
+    syncingRef.current = true;
     try {
       const res = await fetch(`/api/orders-proxy/${orderId}/update-items`, {
         method: 'PATCH',
@@ -116,6 +131,8 @@ export default function CheckoutPage() {
       }
     } catch {
       // non-critical sync failure
+    } finally {
+      syncingRef.current = false;
     }
   }, [orderId, items]);
 
@@ -154,6 +171,7 @@ export default function CheckoutPage() {
 
   // --- Shipping submit: confirm → create order → show QR ---
   const handleShippingSubmit = (data: ShippingData) => {
+    setError(null); // EC-10: clear stale errors when user re-submits
     setShippingData(data);
     setSelectedProvince(data.shipping_province);
 
@@ -281,6 +299,22 @@ export default function CheckoutPage() {
   // --- Upload slip → verify with SlipOk → forward to backend ---
   const handleUploadSlip = async (slipBase64: string) => {
     if (!orderId) return;
+
+    // EC-04: flush pending debounced sync before submitting
+    if (syncTimerRef.current) {
+      clearTimeout(syncTimerRef.current);
+      syncTimerRef.current = null;
+      await syncItemsToBackend();
+    }
+    // Wait for any in-flight sync to finish
+    if (syncingRef.current) {
+      await new Promise<void>((resolve) => {
+        const poll = setInterval(() => {
+          if (!syncingRef.current) { clearInterval(poll); resolve(); }
+        }, 50);
+      });
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -365,6 +399,12 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-white text-neutral-900 pt-24">
       <div className="container mx-auto px-4 pb-12">
         <h1 className="text-3xl font-semibold mb-8">{t('checkout.title')}</h1>
+
+        {shippingConfigError && (
+          <div className="mb-6 border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+            {shippingConfigError}
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">

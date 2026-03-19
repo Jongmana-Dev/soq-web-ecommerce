@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import { useReveal } from '@/hooks/useReveal'
-import ProductModal from '@/components/modals/ProductModal'
+import dynamic from 'next/dynamic'
+const ProductModal = dynamic(() => import('@/components/modals/ProductModal'))
 import type { ProductData } from '@/lib/products'
 import type { UsageStep } from '@/lib/cms'
 

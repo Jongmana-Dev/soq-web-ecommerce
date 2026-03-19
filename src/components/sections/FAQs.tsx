@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import { useReveal } from '@/hooks/useReveal'
-import ContactModal from '@/components/modals/ContactModal'
+import dynamic from 'next/dynamic'
+const ContactModal = dynamic(() => import('@/components/modals/ContactModal'))
 import type { FAQItem } from '@/lib/cms'
 
 interface FAQsProps {

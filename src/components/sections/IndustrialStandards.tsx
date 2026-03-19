@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import StandardsModal from '@/components/modals/StandardsModal'
+import dynamic from 'next/dynamic'
+const StandardsModal = dynamic(() => import('@/components/modals/StandardsModal'))
 import type { Certification } from '@/lib/cms'
 import { useParallax } from '@/components/motion'
 

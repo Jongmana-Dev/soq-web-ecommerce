@@ -123,14 +123,8 @@ export default function TestimonialsV2({ reviews }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const total = reviews.length
-  if (total === 0) return null
 
-  const visibleIndices = [
-    activeIndex % total,
-    (activeIndex + 1) % total,
-    (activeIndex + 2) % total,
-  ]
-
+  // EC-11: transition and resetAutoplay depend on `total` — must be defined before early return
   const transition = useCallback((direction: 1 | -1) => {
     // Slow fade out
     setIsVisible(false)
@@ -151,6 +145,15 @@ export default function TestimonialsV2({ reviews }: Props) {
     resetAutoplay()
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [resetAutoplay])
+
+  // Guard placed after all hooks (EC-11: was incorrectly before hooks)
+  if (total === 0) return null
+
+  const visibleIndices = [
+    activeIndex % total,
+    (activeIndex + 1) % total,
+    (activeIndex + 2) % total,
+  ]
 
   const next = () => { transition(1); resetAutoplay() }
   const prev = () => { transition(-1); resetAutoplay() }

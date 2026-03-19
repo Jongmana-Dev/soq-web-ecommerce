@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from '@/i18n/navigation'
 import { useCart } from '@/lib/store'
 import { useCartToast } from '@/lib/cart-toast'
-import ContactModal from '@/components/modals/ContactModal'
+import dynamic from 'next/dynamic'
+const ContactModal = dynamic(() => import('@/components/modals/ContactModal'))
 
 
 interface ProductSize {
@@ -105,37 +106,43 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
   const router = useRouter()
   const [selectedSize, setSelectedSize] = useState<ProductSize>(product.sizes[0])
   const [quantity, setQuantity] = useState(1)
-  const [viewMode] = useState<'360' | 'gallery'>('gallery')
   const [imgIndex, setImgIndex] = useState(0)
   const [imgDirection, setImgDirection] = useState(0)
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
   const [fetchedSteps, setFetchedSteps] = useState<UsageStepData[]>([])
   const [dataReady, setDataReady] = useState(false)
+  const [dataError, setDataError] = useState(false)
   const add = useCart((state) => state.add)
   const showToast = useCartToast((s) => s.show)
 
   // Fetch shipping rates + usage steps (if not provided via props)
   useEffect(() => {
-    const promises: Promise<void>[] = []
+    const loadData = async () => {
+      try {
+        // Shipping rates
+        const shippingRes = await fetch('/api/settings-proxy/shipping')
+        if (!shippingRes.ok) throw new Error(`Shipping API error: ${shippingRes.status}`)
+        const shippingData = await shippingRes.json()
+        setShippingRates(shippingData.rates ?? [])
 
-    promises.push(
-      fetch('/api/settings-proxy/shipping')
-        .then((res) => res.json())
-        .then((data) => setShippingRates(data.rates ?? []))
-        .catch(() => {})
-    )
+        // Usage steps (if not provided via props)
+        if (!usageSteps || usageSteps.length === 0) {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+          const stepsRes = await fetch(`${apiUrl}/api/cms/usage-steps`)
+          if (!stepsRes.ok) throw new Error(`Usage steps API error: ${stepsRes.status}`)
+          const stepsData = await stepsRes.json()
+          setFetchedSteps(stepsData.data ?? [])
+        }
 
-    if (!usageSteps || usageSteps.length === 0) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      promises.push(
-        fetch(`${apiUrl}/api/cms/usage-steps`)
-          .then((res) => res.json())
-          .then((json) => setFetchedSteps(json.data ?? []))
-          .catch(() => {})
-      )
+        setDataReady(true)
+      } catch (err) {
+        console.error('ProductModal data load failed:', err)
+        setDataError(true)
+        // Still show modal but with available data
+        setDataReady(true)
+      }
     }
-
-    Promise.all(promises).then(() => setDataReady(true))
+    loadData()
   }, [usageSteps])
 
   const resolvedSteps = (usageSteps && usageSteps.length > 0) ? usageSteps : fetchedSteps
@@ -157,13 +164,18 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
     })
   }
 
+  // EC-12: use a ref so the event listener is registered only once,
+  // regardless of whether the parent re-creates the onClose callback identity
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose })
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
-  }, [onClose])
+  }, []) // empty deps — stable via ref
 
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -211,10 +223,25 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
   // Show loading overlay until data is ready
   if (!dataReady) {
     return createPortal(
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="bg-white p-8 flex flex-col items-center gap-3">
-          <span className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-neutral-500 font-light">{locale === 'th' ? 'กำลังโหลด...' : 'Loading...'}</span>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+        <div className="bg-white p-8 flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+          {dataError ? (
+            <>
+              <i className="fa-solid fa-circle-exclamation text-2xl text-red-500" />
+              <span className="text-sm text-neutral-700">{locale === 'th' ? 'โหลดข้อมูลไม่สำเร็จ' : 'Failed to load data'}</span>
+              <button
+                onClick={() => { setDataError(false); setDataReady(false); }}
+                className="mt-2 px-4 py-2 text-sm bg-neutral-900 text-white hover:bg-neutral-800 transition-colors"
+              >
+                {locale === 'th' ? 'ลองใหม่' : 'Retry'}
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-neutral-500 font-light">{locale === 'th' ? 'กำลังโหลด...' : 'Loading...'}</span>
+            </>
+          )}
         </div>
       </div>,
       document.body
@@ -247,11 +274,9 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
             <i className="fa-solid fa-xmark text-2xl" />
           </button>
 
-          {/* Left: Image / 360 */}
+          {/* Left: Image Gallery */}
           <div className="lg:w-1/2 relative h-[35vh] sm:h-[40vh] lg:h-auto shrink-0" style={{ backgroundColor: '#ECEDEA' }}>
-            {viewMode === '360' ? (
-              <BottleInteractive />
-            ) : (
+            {(
               <div className="absolute inset-0">
                 <AnimatePresence initial={false} custom={imgDirection} mode="wait">
                   <motion.div
@@ -482,97 +507,4 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
   )
 }
 
-const FRAME_COUNT = 61
-const FRAME_URLS = Array.from(
-  { length: FRAME_COUNT },
-  (_, i) => `/hero-section/v3/frame-${String(i + 1).padStart(4, '0')}.webp`,
-)
-
-function BottleInteractive() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const imagesRef = useRef<HTMLImageElement[]>([])
-  const frameRef = useRef(30) // start at middle frame
-  const loadedRef = useRef(0)
-  const [ready, setReady] = useState(false)
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
-
-  const draw = useCallback((frame: number) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const img = imagesRef.current[frame]
-    if (!img) return
-
-    canvas.width = canvas.offsetWidth * window.devicePixelRatio
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    const scale = (canvas.height / img.height) * 1.15
-    const w = img.width * scale
-    const h = img.height * scale
-    const x = (canvas.width - w) / 2
-    const y = (canvas.height - h) / 2
-    ctx.drawImage(img, x, y, w, h)
-  }, [])
-
-  useEffect(() => {
-    const images: HTMLImageElement[] = []
-    FRAME_URLS.forEach((url, i) => {
-      const img = new window.Image()
-      img.src = url
-      img.onload = () => {
-        loadedRef.current++
-        if (loadedRef.current >= 10 && !ready) {
-          setReady(true)
-          draw(frameRef.current)
-        }
-      }
-      images[i] = img
-    })
-    imagesRef.current = images
-  }, [draw, ready])
-
-  const updateFromPosition = useCallback((clientX: number, clientY: number) => {
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
-    setMousePos({ x, y })
-    const frame = Math.floor(x * (FRAME_COUNT - 1))
-    frameRef.current = Math.max(0, Math.min(FRAME_COUNT - 1, frame))
-    draw(frameRef.current)
-  }, [draw])
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    updateFromPosition(e.clientX, e.clientY)
-  }, [updateFromPosition])
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0]
-    if (touch) updateFromPosition(touch.clientX, touch.clientY)
-  }, [updateFromPosition])
-
-  const offsetX = (mousePos.x - 0.5) * 6
-  const offsetY = (mousePos.y - 0.5) * 4
-
-  return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onTouchMove={handleTouchMove}
-      className="absolute inset-0 cursor-crosshair overflow-hidden touch-none"
-    >
-      {/* Bottle canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{
-          transform: `translate(${offsetX}px, ${offsetY}px)`,
-          transition: 'transform 0.15s ease-out',
-        }}
-      />
-    </div>
-  )
-}
+// 360° BottleInteractive removed — using gallery mode only

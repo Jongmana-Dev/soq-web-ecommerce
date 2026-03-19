@@ -9,10 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart as ShoppingCartIcon, User as UserIcon, Menu as Bars3Icon, X as XMarkIcon, ShoppingBag as ShoppingBagIcon } from "lucide-react";
 import { MiniCart } from "@/components/MiniCart";
 import { useCart } from "@/lib/store";
-import ContactModal from "@/components/modals/ContactModal";
-import LoginModal from "@/components/modals/LoginModal";
-import LogoutConfirmModal from "@/components/modals/LogoutConfirmModal";
-import ProductModal from "@/components/modals/ProductModal";
+import dynamic from "next/dynamic"
+const ContactModal = dynamic(() => import("@/components/modals/ContactModal"))
+const LoginModal = dynamic(() => import("@/components/modals/LoginModal"))
+const LogoutConfirmModal = dynamic(() => import("@/components/modals/LogoutConfirmModal"))
+const ProductModal = dynamic(() => import("@/components/modals/ProductModal"))
 import type { ProductData } from "@/lib/products";
 import { useSession } from "next-auth/react";
 import { usePendingOrders } from "@/lib/pending-orders-store";
@@ -565,7 +566,7 @@ function Navbar() {
                   {isAuthenticated ? (
                     <>
                       <div className="flex items-center gap-3 px-4 py-2">
-                        {session.user.image && (
+                        {session.user.image ? (
                           <Image
                             src={session.user.image}
                             alt={session.user.name ?? "User"}
@@ -573,6 +574,10 @@ function Navbar() {
                             height={32}
                             className="rounded-full"
                           />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-200 text-neutral-600 text-xs font-bold flex-shrink-0">
+                            {session.user.name?.charAt(0)?.toUpperCase()}
+                          </div>
                         )}
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-white truncate">{session.user.name}</p>

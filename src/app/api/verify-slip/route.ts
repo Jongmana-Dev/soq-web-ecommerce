@@ -78,6 +78,14 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Limit slip image size (~7.5MB original = ~10MB base64)
+  if (slip_image.length > 10 * 1024 * 1024) {
+    return NextResponse.json(
+      { error: locale === 'th' ? 'รูป slip ใหญ่เกินไป (สูงสุด 7.5MB)' : 'Slip image too large (max 7.5MB)' },
+      { status: 413 },
+    )
+  }
+
   // --- Step 1: Verify slip with SlipOk ---
   try {
     // Convert base64 data URL to a Blob for FormData

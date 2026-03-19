@@ -90,17 +90,25 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
     });
   }, [expiredAt]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setPreview(result);
-      setSlipBase64(result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { resizeImageToBase64 } = await import('@/lib/image-utils');
+      const base64 = await resizeImageToBase64(file, 1600, 1600, 0.8);
+      setPreview(base64);
+      setSlipBase64(base64);
+    } catch {
+      // Fallback: use original if resize fails
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        setPreview(result);
+        setSlipBase64(result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (

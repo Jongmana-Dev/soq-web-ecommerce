@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import ContactModal from '@/components/modals/ContactModal'
+import dynamic from 'next/dynamic'
+const ContactModal = dynamic(() => import('@/components/modals/ContactModal'))
 
 export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false)

@@ -38,10 +38,14 @@ interface ApiResponse<T> {
 }
 
 export async function getProducts(): Promise<ProductData[]> {
-  const res = await apiFetch<ApiResponse<ProductData[]>>('/api/products', {
-    next: { revalidate: 3600, tags: ['landing', 'products'] },
-  })
-  return res.data
+  try {
+    const res = await apiFetch<ApiResponse<ProductData[]>>('/api/products', {
+      next: { revalidate: 3600, tags: ['landing', 'products'] },
+    })
+    return res.data
+  } catch {
+    return []
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductData | undefined> {

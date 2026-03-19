@@ -50,7 +50,10 @@ async function handler(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/orders`, fetchOptions)
+    const url = new URL(`${BACKEND_URL}/api/orders`)
+    // Forward query params (status, limit, etc.)
+    req.nextUrl.searchParams.forEach((value, key) => url.searchParams.set(key, value))
+    const res = await fetch(url.toString(), fetchOptions)
     const data = await res.json()
 
     // Fire order created notifications (non-blocking, isolated try-catch)

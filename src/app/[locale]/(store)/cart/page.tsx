@@ -7,7 +7,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useCart, useCartHydrated } from '@/lib/store';
 import { Minus, Plus } from 'lucide-react';
-import LoginModal from '@/components/modals/LoginModal';
+import dynamic from 'next/dynamic'
+const LoginModal = dynamic(() => import('@/components/modals/LoginModal'))
 
 export default function CartPage() {
   const t = useTranslations();

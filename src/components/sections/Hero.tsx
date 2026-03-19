@@ -9,7 +9,8 @@ import {
 } from 'framer-motion'
 import { useLocale } from 'next-intl'
 import BottleScroll from './BottleScroll'
-import ProductModal from '@/components/modals/ProductModal'
+import dynamic from 'next/dynamic'
+const ProductModal = dynamic(() => import('@/components/modals/ProductModal'))
 import GeometricOverlay from '@/components/HeroSection/GeometricOverlay'
 import type { ProductData } from '@/lib/products'
 import { useParallax } from '@/components/motion'

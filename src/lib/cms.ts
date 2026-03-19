@@ -80,7 +80,7 @@ interface ApiResponse<T> {
 }
 
 /** CMS content rarely changes — cache for 24 hours, revalidate on-demand via tags */
-const CMS_REVALIDATE = 86_400 // 24 hours
+const CMS_REVALIDATE = 3_600 // 1 hour
 
 export async function getReviews(): Promise<Review[]> {
   try {

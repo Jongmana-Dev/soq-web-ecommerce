@@ -5,7 +5,8 @@ import { useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from './useScrollAnimation'
 import GeometricOverlay from './GeometricOverlay'
-import ProductModal from '@/components/modals/ProductModal'
+import dynamic from 'next/dynamic'
+const ProductModal = dynamic(() => import('@/components/modals/ProductModal'))
 import type { HeroSectionProps, ScrollState } from './types'
 import type { ProductData } from '@/lib/products'
 

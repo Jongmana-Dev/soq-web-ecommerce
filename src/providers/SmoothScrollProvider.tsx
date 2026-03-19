@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import Lenis from '@studio-freight/lenis'
+import Lenis from 'lenis'
 
 type Props = { children: React.ReactNode }
 
@@ -13,14 +13,9 @@ export default function SmoothScrollProvider({ children }: Props) {
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       lerp: 0.08,
+      autoRaf: true,
     })
     lenisRef.current = lenis
-
-    function raf(time: number) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-    requestAnimationFrame(raf)
 
     // --- Section tracking via IntersectionObserver ---
     const updateActive = (id: string) => {

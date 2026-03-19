@@ -13,14 +13,11 @@ export const usePendingOrders = create<PendingOrdersStore>()((set) => ({
 
   fetch: async () => {
     try {
-      const res = await fetch('/api/orders-proxy')
+      const res = await fetch('/api/orders-proxy?status=pending_payment&limit=10')
       if (!res.ok) return
       const json = await res.json()
       const orders = json.data ?? []
-      const pending = orders.filter(
-        (o: { status: string }) => o.status === 'pending_payment',
-      ).length
-      set({ count: pending })
+      set({ count: Array.isArray(orders) ? orders.length : 0 })
     } catch {
       // silent
     }
