@@ -129,7 +129,9 @@ export default function ShippingForm({ onSubmit, onProvinceChange }: ShippingFor
   };
 
   const handleSubdistrictChange = (value: string) => {
-    setSubdistrict(value);
+    // Extract real subdistrict name (value may contain "||zipcode" for duplicates)
+    const subdistrictName = value.includes('||') ? value.split('||')[0] : value;
+    setSubdistrict(subdistrictName);
     const sub = subdistricts.find((s) => s.value === value);
     if (sub) setPostalCode(sub.zipcode);
   };

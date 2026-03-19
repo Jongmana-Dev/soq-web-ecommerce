@@ -56,8 +56,8 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
   const [errors, setErrors] = useState<Partial<Record<keyof AddressForm, string>>>({})
 
   const isDirty = useMemo(
-    () => showForm && JSON.stringify(form) !== JSON.stringify(originalForm),
-    [showForm, form, originalForm],
+    () => showForm,
+    [showForm],
   )
   useUnsavedChanges(isDirty)
 
@@ -144,9 +144,11 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
 
   const handleSubdistrictChange = (value: string) => {
     const sub = subdistricts.find((s) => s.value === value)
+    // Extract real subdistrict name (value may contain "||zipcode" for duplicates)
+    const subdistrictName = value.includes('||') ? value.split('||')[0] : value
     setForm((prev) => ({
       ...prev,
-      subdistrict: value,
+      subdistrict: subdistrictName,
       postal_code: sub?.zipcode ?? prev.postal_code,
     }))
   }
@@ -423,7 +425,7 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-neutral-900 text-white text-sm font-medium hover:bg-black transition-colors disabled:opacity-50"
+              className="px-5 py-2 bg-neutral-800 text-white text-sm font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
             >
               {saving ? t.saving : t.save}
             </button>
@@ -460,7 +462,7 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-medium px-2 py-0.5 ${
                       addr.is_default
-                        ? 'bg-neutral-900 text-white'
+                        ? 'bg-neutral-800 text-white'
                         : 'bg-neutral-100 text-neutral-600'
                     }`}>
                       {addr.is_default ? t.primary : t.secondary}

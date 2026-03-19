@@ -290,7 +290,7 @@ export default function ProfileForm({ session, onUpdate, locale, onDirtyChange }
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="px-6 py-2.5 border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all"
+          className="px-6 py-2.5 bg-neutral-800 text-sm font-medium text-white hover:bg-neutral-700 transition-all"
         >
           <i className="fa-solid fa-pen mr-2 text-xs" />
           {t.editBtn}

@@ -32,7 +32,7 @@ export function confirmUnsaved(): Promise<boolean> {
  * Handles:
  * - Browser tab close / reload (`beforeunload`)
  * - Browser back/forward buttons (`popstate`)
- * - Next.js client-side navigation (`pushState` / `replaceState`)
+ * - Click on links that navigate away (`<a>`, `<Link>`)
  */
 export function useUnsavedChanges(isDirty: boolean) {
   const isDirtyRef = useRef(isDirty)
@@ -48,72 +48,70 @@ export function useUnsavedChanges(isDirty: boolean) {
     return () => window.removeEventListener('beforeunload', handler)
   }, [])
 
-  // --- Intercept pushState / replaceState for SPA navigation ---
-  useEffect(() => {
-    const originalPushState = history.pushState.bind(history)
-    const originalReplaceState = history.replaceState.bind(history)
-
-    const intercept = (
-      original: typeof history.pushState,
-      data: unknown,
-      unused: string,
-      url?: string | URL | null,
-    ) => {
-      if (!isDirtyRef.current) {
-        return original(data, unused, url)
-      }
-
-      useAlertStore.getState().showConfirm({
-        title: CONFIRM_TITLE,
-        message: CONFIRM_MESSAGE,
-        confirmText: CONFIRM_OK,
-        cancelText: CONFIRM_CANCEL,
-        variant: 'info',
-        onConfirm: () => {
-          isDirtyRef.current = false
-          original(data, unused, url)
-          window.dispatchEvent(new PopStateEvent('popstate'))
-        },
-      })
-    }
-
-    history.pushState = function (data, unused, url) {
-      intercept(originalPushState, data, unused, url)
-    }
-
-    history.replaceState = function (data, unused, url) {
-      intercept(originalReplaceState, data, unused, url)
-    }
-
-    return () => {
-      history.pushState = originalPushState
-      history.replaceState = originalReplaceState
-    }
-  }, [])
-
   // --- popstate: browser back/forward ---
   useEffect(() => {
-    const handler = (e: PopStateEvent) => {
+    const handler = () => {
       if (!isDirtyRef.current) return
 
-      e.preventDefault()
       history.pushState(null, '', window.location.href)
 
-      useAlertStore.getState().showConfirm({
-        title: CONFIRM_TITLE,
-        message: CONFIRM_MESSAGE,
-        confirmText: CONFIRM_OK,
-        cancelText: CONFIRM_CANCEL,
-        variant: 'info',
-        onConfirm: () => {
-          isDirtyRef.current = false
-          history.back()
-        },
-      })
+      setTimeout(() => {
+        useAlertStore.getState().showConfirm({
+          title: CONFIRM_TITLE,
+          message: CONFIRM_MESSAGE,
+          confirmText: CONFIRM_OK,
+          cancelText: CONFIRM_CANCEL,
+          variant: 'info',
+          onConfirm: () => {
+            isDirtyRef.current = false
+            history.back()
+          },
+        })
+      }, 0)
     }
 
     window.addEventListener('popstate', handler)
     return () => window.removeEventListener('popstate', handler)
+  }, [])
+
+  // --- Click intercept: links that navigate away ---
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (!isDirtyRef.current) return
+
+      const anchor = (e.target as HTMLElement).closest('a')
+      if (!anchor) return
+
+      const href = anchor.getAttribute('href')
+      if (!href) return
+
+      // Skip hash links, external links, same page
+      if (href.startsWith('#')) return
+      if (href.startsWith('http') && !href.startsWith(window.location.origin)) return
+      if (href === window.location.pathname) return
+
+      // Prevent navigation
+      e.preventDefault()
+      e.stopPropagation()
+
+      setTimeout(() => {
+        useAlertStore.getState().showConfirm({
+          title: CONFIRM_TITLE,
+          message: CONFIRM_MESSAGE,
+          confirmText: CONFIRM_OK,
+          cancelText: CONFIRM_CANCEL,
+          variant: 'info',
+          onConfirm: () => {
+            isDirtyRef.current = false
+            window.location.href = anchor.href
+          },
+        })
+      }, 0)
+    }
+
+    // Use capture phase to intercept before Next.js Link handles the click
+    document.addEventListener('click', handler, true)
+    return () => document.removeEventListener('click', handler, true)
   }, [])
 
   const resetDirty = useCallback(() => {

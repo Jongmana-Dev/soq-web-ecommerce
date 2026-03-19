@@ -99,11 +99,18 @@ export function useGeoSelections(
     if (!prov) return []
     const dist = prov.districts.find((d) => d.district === selectedDistrict)
     if (!dist) return []
-    return dist.subdistricts.map((s) => ({
-      value: s.subdistrict,
-      label: s.subdistrict,
-      zipcode: s.zipcode,
-    }))
+    // Check which subdistrict names appear more than once (different zipcodes)
+    const nameCount = new Map<string, number>()
+    dist.subdistricts.forEach((s) => nameCount.set(s.subdistrict, (nameCount.get(s.subdistrict) ?? 0) + 1))
+
+    return dist.subdistricts.map((s) => {
+      const isDuplicate = (nameCount.get(s.subdistrict) ?? 0) > 1
+      return {
+        value: isDuplicate ? `${s.subdistrict}||${s.zipcode}` : s.subdistrict,
+        label: isDuplicate ? `${s.subdistrict} (${s.zipcode})` : s.subdistrict,
+        zipcode: s.zipcode,
+      }
+    })
   }, [data, selectedProvince, selectedDistrict])
 
   return { provinces, districts, subdistricts }

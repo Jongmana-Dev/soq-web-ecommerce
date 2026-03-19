@@ -59,7 +59,7 @@ function ReviewCard({
               alt={review.name}
               fill
               sizes="260px"
-              className="object-cover object-top"
+              className="object-cover object-center"
             />
           </div>
         )}
