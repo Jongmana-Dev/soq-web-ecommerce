@@ -127,8 +127,7 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
 
         // Usage steps (if not provided via props)
         if (!usageSteps || usageSteps.length === 0) {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-          const stepsRes = await fetch(`${apiUrl}/api/cms/usage-steps`)
+          const stepsRes = await fetch('/api/settings-proxy/usage-steps')
           if (!stepsRes.ok) throw new Error(`Usage steps API error: ${stepsRes.status}`)
           const stepsData = await stepsRes.json()
           setFetchedSteps(stepsData.data ?? [])
