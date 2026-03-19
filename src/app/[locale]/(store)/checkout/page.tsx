@@ -53,6 +53,11 @@ export default function CheckoutPage() {
   const [orderExpiredAt, setOrderExpiredAt] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number>(0);
 
+  // Snapshot of cart items + fees at order creation (cart gets cleared after)
+  const [orderItems, setOrderItems] = useState<typeof items>([]);
+  const [orderShippingFee, setOrderShippingFee] = useState<number>(0);
+  const [orderRemoteAreaFee, setOrderRemoteAreaFee] = useState<number>(0);
+
   // Shipping config from API
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [remoteProvinces, setRemoteProvinces] = useState<RemoteProvince[]>([]);
@@ -151,6 +156,26 @@ export default function CheckoutPage() {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
     };
   }, [orderId, items, syncItemsToBackend]);
+
+  // --- Expired: show alert modal then go back to shipping ---
+  // Must be defined before early returns (Rules of Hooks)
+  const handleExpired = useCallback(() => {
+    useAlertStore.getState().showResultAlert({
+      type: 'error',
+      title: locale === 'th' ? 'หมดเวลาชำระเงิน' : 'Payment Expired',
+      message: locale === 'th'
+        ? 'คำสั่งซื้อหมดเวลาชำระเงินแล้ว กรุณาสั่งซื้อใหม่อีกครั้ง'
+        : 'Your order has expired. Please place a new order.',
+      buttonText: locale === 'th' ? 'ตกลง' : 'OK',
+      onClose: () => {
+        setOrderId(null);
+        setOrderNumber(null);
+        setOrderExpiredAt(null);
+        setOrderTotal(0);
+        setStep('shipping');
+      },
+    });
+  }, [locale]);
 
   if (!hydrated) {
     return <FullscreenLoading />;
@@ -293,6 +318,11 @@ export default function CheckoutPage() {
       setOrderTotal(order.total);
       prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
 
+      // Snapshot items + fees before clearing cart for OrderSummary display
+      setOrderItems([...items]);
+      setOrderShippingFee(shippingFee);
+      setOrderRemoteAreaFee(remoteAreaFee);
+
       // Set step BEFORE clearing cart — Zustand clear() triggers re-render independently
       // from React setState, so without this order the empty-cart guard fires briefly
       setStep('payment');
@@ -370,25 +400,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // --- Expired: show alert modal then go back to shipping ---
-  const handleExpired = useCallback(() => {
-    useAlertStore.getState().showResultAlert({
-      type: 'error',
-      title: locale === 'th' ? 'หมดเวลาชำระเงิน' : 'Payment Expired',
-      message: locale === 'th'
-        ? 'คำสั่งซื้อหมดเวลาชำระเงินแล้ว กรุณาสั่งซื้อใหม่อีกครั้ง'
-        : 'Your order has expired. Please place a new order.',
-      buttonText: locale === 'th' ? 'ตกลง' : 'OK',
-      onClose: () => {
-        setOrderId(null);
-        setOrderNumber(null);
-        setOrderExpiredAt(null);
-        setOrderTotal(0);
-        setStep('shipping');
-      },
-    });
-  }, [locale]);
-
   // --- Back button: cancel order → go back to shipping ---
   const handleBack = async () => {
     if (orderId) {
@@ -451,9 +462,9 @@ export default function CheckoutPage() {
           {/* Right: Summary */}
           <div>
             <OrderSummary
-              items={items}
-              shippingFee={shippingFee}
-              remoteAreaFee={remoteAreaFee}
+              items={step === 'payment' ? orderItems : items}
+              shippingFee={step === 'payment' ? orderShippingFee : shippingFee}
+              remoteAreaFee={step === 'payment' ? orderRemoteAreaFee : remoteAreaFee}
               locked={step === 'payment'}
             />
           </div>
