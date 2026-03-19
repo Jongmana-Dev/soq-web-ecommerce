@@ -44,13 +44,20 @@ export default function ProfileForm({ session, onUpdate, locale, onDirtyChange }
   useEffect(() => { onDirtyChange?.(isDirty) }, [isDirty, onDirtyChange])
 
   // Fetch profile from backend (phone + email may differ from JWT session)
-  useEffect(() => {
+  const fetchProfile = () => {
     fetch('/api/auth-proxy/profile')
       .then((res) => res.json())
       .then((res) => {
+        if (res.data?.name) {
+          setName(res.data.name)
+          setOriginalName(res.data.name)
+        }
         if (res.data?.phone) {
           setPhone(res.data.phone)
           setOriginalPhone(res.data.phone)
+        } else {
+          setPhone('')
+          setOriginalPhone('')
         }
         // Use DB email as source of truth for editability
         const dbEmail = res.data?.email ?? ''
@@ -63,7 +70,19 @@ export default function ProfileForm({ session, onUpdate, locale, onDirtyChange }
         }
       })
       .catch(() => {})
-  }, [])
+  }
+
+  // Fetch on mount
+  useEffect(() => { fetchProfile() }, [])
+
+  // Re-fetch when user comes back to this tab (e.g. after admin changes data)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!isEditing) fetchProfile()
+    }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [isEditing])
 
   const t = {
     nameLabel: locale === 'th' ? 'ชื่อ' : 'Name',

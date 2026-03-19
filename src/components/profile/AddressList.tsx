@@ -51,12 +51,13 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<AddressForm>(emptyForm)
+  const [originalForm, setOriginalForm] = useState<AddressForm>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof AddressForm, string>>>({})
 
   const isDirty = useMemo(
-    () => showForm && (form.recipient_name !== '' || form.phone !== '' || form.address_line !== ''),
-    [showForm, form.recipient_name, form.phone, form.address_line],
+    () => showForm && JSON.stringify(form) !== JSON.stringify(originalForm),
+    [showForm, form, originalForm],
   )
   useUnsavedChanges(isDirty)
 
@@ -153,15 +154,16 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
   const isFirstAddress = addresses.length === 0
 
   const openAdd = () => {
+    const initial = isFirstAddress ? { ...emptyForm, is_default: true } : emptyForm
     setEditingId(null)
-    setForm(isFirstAddress ? { ...emptyForm, is_default: true } : emptyForm)
+    setForm(initial)
+    setOriginalForm(initial)
     setErrors({})
     setShowForm(true)
   }
 
   const openEdit = (addr: Address) => {
-    setEditingId(addr.id)
-    setForm({
+    const data: AddressForm = {
       recipient_name: addr.recipient_name,
       phone: addr.phone,
       address_line: addr.address_line,
@@ -170,7 +172,10 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
       subdistrict: addr.subdistrict ?? '',
       postal_code: addr.postal_code,
       is_default: addr.is_default,
-    })
+    }
+    setEditingId(addr.id)
+    setForm(data)
+    setOriginalForm(data)
     setErrors({})
     setShowForm(true)
   }
@@ -351,7 +356,7 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
               >
                 <option value="">{t.selectProvince}</option>
                 {provinces.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
+                  <option key={`prov-${p.value}`} value={p.value}>{p.label}</option>
                 ))}
               </select>
               {errors.province && <p className="text-xs text-red-500 mt-1">{t.required}</p>}
@@ -366,7 +371,7 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
               >
                 <option value="">{t.selectDistrict}</option>
                 {districts.map((d) => (
-                  <option key={d.value} value={d.value}>{d.label}</option>
+                  <option key={`dist-${d.value}`} value={d.value}>{d.label}</option>
                 ))}
               </select>
               {errors.district && <p className="text-xs text-red-500 mt-1">{t.required}</p>}
@@ -380,8 +385,8 @@ export default function AddressList({ locale, onDirtyChange }: Props) {
                 className={selectCls('subdistrict')}
               >
                 <option value="">{t.selectSubdistrict}</option>
-                {subdistricts.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
+                {subdistricts.map((s, i) => (
+                  <option key={`${s.value}-${i}`} value={s.value}>{s.label}</option>
                 ))}
               </select>
               {errors.subdistrict && <p className="text-xs text-red-500 mt-1">{t.required}</p>}
