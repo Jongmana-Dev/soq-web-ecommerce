@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { adminFetch } from '@/lib/admin-api'
 import type { Member } from '@/types/admin'
+import UserAvatar from '@/components/ui/UserAvatar'
 
 function formatThaiDate(iso: string) {
   const d = new Date(iso)
@@ -110,13 +111,7 @@ export default function MembersPage() {
       label: 'ชื่อสมาชิก',
       render: (m) => (
         <div className="flex items-center gap-3">
-          {m.image ? (
-            <img src={m.image} alt="" className="w-8 h-8 rounded-full object-cover" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-[#E8E8ED] flex items-center justify-center">
-              <i className="fa-solid fa-user text-xs text-[#86868B]" />
-            </div>
-          )}
+          <UserAvatar src={m.image} name={m.name} size={32} />
           <div>
             <p className="text-sm text-[#1D1D1F]">{m.name || '-'}</p>
             <p className="text-xs text-[#86868B]">{m.email || '-'}</p>
@@ -190,13 +185,7 @@ export default function MembersPage() {
             <div className="space-y-6 mt-2">
               {/* Profile */}
               <div className="flex items-center gap-4">
-                {selected.image ? (
-                  <img src={selected.image} alt="" className="w-14 h-14 rounded-full object-cover" />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-[#E8E8ED] flex items-center justify-center">
-                    <i className="fa-solid fa-user text-xl text-[#86868B]" />
-                  </div>
-                )}
+                <UserAvatar src={selected.image} name={selected.name} size={56} />
                 <div>
                   <p className="text-base font-medium">{selected.name || '-'}</p>
                   <p className="text-sm text-[#86868B]">{selected.email || '-'}</p>

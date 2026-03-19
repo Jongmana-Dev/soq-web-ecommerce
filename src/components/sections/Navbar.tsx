@@ -7,6 +7,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart as ShoppingCartIcon, User as UserIcon, Menu as Bars3Icon, X as XMarkIcon, ShoppingBag as ShoppingBagIcon } from "lucide-react";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { MiniCart } from "@/components/MiniCart";
 import { useCart } from "@/lib/store";
 import dynamic from "next/dynamic"
@@ -243,18 +244,16 @@ function Navbar() {
             <div className="flex items-center gap-2 ml-8 pl-0">
               {/* User / Auth */}
               <div className="relative group" ref={dropdownRef}>
-                {isAuthenticated && session.user.image ? (
+                {isAuthenticated ? (
                   <button
                     onClick={handleUserClick}
                     className="relative p-1 rounded-full hover:ring-2 hover:ring-neutral-300 transition-all"
                     aria-label={tHeader("account")}
                   >
-                    <Image
+                    <UserAvatar
                       src={session.user.image}
-                      alt={session.user.name ?? "User"}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
+                      name={session.user.name}
+                      size={32}
                     />
                     {pendingCount > 0 && (
                       <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-red-500 text-[10px] font-bold text-white rounded-full">
@@ -566,19 +565,11 @@ function Navbar() {
                   {isAuthenticated ? (
                     <>
                       <div className="flex items-center gap-3 px-4 py-2">
-                        {session.user.image ? (
-                          <Image
-                            src={session.user.image}
-                            alt={session.user.name ?? "User"}
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-200 text-neutral-600 text-xs font-bold flex-shrink-0">
-                            {session.user.name?.charAt(0)?.toUpperCase()}
-                          </div>
-                        )}
+                        <UserAvatar
+                          src={session.user.image}
+                          name={session.user.name}
+                          size={32}
+                        />
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-white truncate">{session.user.name}</p>
                           <p className="text-[11px] text-white/50 truncate">{session.user.email}</p>

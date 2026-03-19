@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useLocale } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
-import Image from 'next/image'
+import UserAvatar from '@/components/ui/UserAvatar'
 import { motion } from 'framer-motion'
 import ProfileForm from '@/components/profile/ProfileForm'
 import FullscreenLoading from '@/components/ui/FullscreenLoading'
@@ -86,15 +86,11 @@ export default function ProfilePage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            {user?.image && (
-              <Image
-                src={user.image}
-                alt={user.name ?? 'User'}
-                width={64}
-                height={64}
-                className="rounded-full"
-              />
-            )}
+            <UserAvatar
+              src={user?.image}
+              name={user?.name}
+              size={64}
+            />
             <div>
               <h1 className="text-2xl font-bold text-neutral-900">{user?.name ?? t.title}</h1>
               {user?.email && (
