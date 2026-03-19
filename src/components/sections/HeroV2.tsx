@@ -57,30 +57,30 @@ export default function HeroV2({ products, usageSteps }: Props) {
         className="relative w-full overflow-hidden"
       >
         {/* ══════════ Mobile ══════════ */}
-        <div className="lg:hidden" style={{ backgroundColor: '#ECEDEA' }}>
+        <div className="lg:hidden relative" style={{ backgroundColor: '#ECEDEA' }}>
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="px-6 pt-20 mt-20 pb-4 text-center"
+            className="relative z-10 px-6 pt-20 mt-20 pb-4 text-center"
           >
             <div className="space-y-2">
-              <h1 className="font-poppins text-3xl font-light leading-tight text-[var(--accent)] tracking-wide">
+              <h1 className="font-poppins text-4xl font-light leading-tight text-[var(--accent)] tracking-wide">
                 SOQ.
               </h1>
-              <h2 className="font-poppins text-3xl font-light leading-tight text-black uppercase tracking-wide">
+              <h2 className="font-poppins text-4xl font-light leading-tight text-black uppercase tracking-wide">
                 SAFE FOR SIP
               </h2>
             </div>
 
-            <p className="mt-4 max-w-xs mx-auto font-poppins text-[17px] leading-relaxed text-black font-normal">
+            <p className="mt-4 max-w-xs mx-auto font-poppins text-sm leading-relaxed text-neutral-500 font-normal">
               {locale === 'th'
                 ? 'ผลิตภัณฑ์สำหรับฆ่าเชื้อแบคทีเรียโดยไม่ต้องล้างน้ำออก ใช้ง่าย ปลอดภัย และมีประสิทธิภาพสูงด้วยมาตราฐานโรงงาน '
                 : 'A no-rinse antibacterial sanitizer. Easy to use, safe, and highly effective, backed by factory-standard quality.'}
             </p>
 
-            <div className="mt-4">
+            <div className="mt-8">
               <motion.button
                 onClick={() => setIsModalOpen(true)}
                 whileHover={{ scale: 1.05 }}
@@ -96,9 +96,9 @@ export default function HeroV2({ products, usageSteps }: Props) {
           </motion.div>
 
           {/* Bottles — single image, scales with screen */}
-          <div className="px-6 mt-30 drop-shadow-2xl">
+          <div className="relative z-10 px-6 mt-30 drop-shadow-2xl">
             <img
-              src={`${R2}/hero-bottles-1x.png`}
+              src={`${R2}/hero-bottles-shadow.webp`}
               alt="SOQ bottles"
               className="w-full h-auto block"
             />
@@ -107,27 +107,38 @@ export default function HeroV2({ products, usageSteps }: Props) {
 
         {/* ══════════ Desktop ══════════ */}
         <div className="hidden lg:block">
-          <div className="relative w-full aspect-[2.2/1]">
-
+          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 aspect-[2/1.15]">
+            {/* Background image — matches container width (same as Testimonials) */}
+            <img
+              src={`${R2}/hero-bg-v11-1x.webp`}
+              srcSet={`${R2}/hero-bg-v11-1x.webp 1x, ${R2}/hero-bg-v11-2x.webp 2x`}
+              alt=""
+              className="absolute inset-0 z-[1] w-full h-full object-cover"
+            />
 
             {/* Bottles — right side, vertically centered in section */}
             <div className="absolute inset-0 z-[5]">
-              <div className="relative h-full mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="absolute top-[20%] bottom-[-5%] left-[38%] right-[3%] drop-shadow-2xl">
+              <div className="relative h-full">
+                <div className="absolute top-[10%] bottom-[-15%] left-[32%] right-[-3%]">
                   <Image
-                    src={`${R2}/hero-bottles-1x.png`}
+                    src={`${R2}/hero-bottles-shadow.webp`}
                     alt="SOQ bottles"
                     fill
                     sizes="(min-width: 1536px) 55vw, (min-width: 1280px) 60vw, 65vw"
-                    className="object-contain object-center"
+                    className="object-contain object-center drop-shadow-2xl"
                     priority
+                  />
+                  {/* Ground shadow under bottles */}
+                  <div
+                    className="absolute bottom-[2%] left-[10%] right-[10%] h-[6%] rounded-[50%] blur-xl opacity-20 bg-neutral-900"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Text overlay */}
-            <div className="absolute inset-0 z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+            {/* Text overlay — aligned with navbar (max-w-[1440px]) */}
+            <div className="absolute inset-0 z-10 flex items-center">
+              <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -173,6 +184,7 @@ export default function HeroV2({ products, usageSteps }: Props) {
                   </motion.button>
                 </motion.div>
               </motion.div>
+              </div>
             </div>
           </div>
         </div>

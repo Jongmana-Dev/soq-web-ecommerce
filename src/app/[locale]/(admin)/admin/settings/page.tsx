@@ -17,7 +17,30 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
   const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set())
+  const [clearing, setClearing] = useState(false)
   const showAlert = useAlertStore((s) => s.showAlert)
+
+  const handleClearCache = async () => {
+    setClearing(true)
+    try {
+      const res = await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tags: ['landing', 'reviews', 'certifications', 'settings', 'faqs', 'usage-steps', 'terms', 'brand-history', 'client-logos', 'history', 'about'],
+        }),
+      })
+      if (res.ok) {
+        showAlert('success', 'ล้าง Cache สำเร็จ', 'ข้อมูลหน้าเว็บจะอัปเดตทันที')
+      } else {
+        throw new Error('Failed')
+      }
+    } catch {
+      showAlert('error', 'ล้าง Cache ไม่สำเร็จ', 'กรุณาลองอีกครั้ง')
+    } finally {
+      setClearing(false)
+    }
+  }
 
   const fetchSettings = useCallback(() => {
     setLoading(true)
@@ -141,7 +164,24 @@ export default function SettingsPage() {
 
   return (
     <>
-      <AdminPageHeader title="ตั้งค่าระบบ" description="จัดการการตั้งค่าทั่วไป" />
+      <AdminPageHeader
+        title="ตั้งค่าระบบ"
+        description="จัดการการตั้งค่าทั่วไป"
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClearCache}
+            disabled={clearing}
+            className="border-[#D2D2D7] text-[#1D1D1F] hover:bg-[#F5F5F7]"
+          >
+            {clearing
+              ? <><i className="fa-solid fa-spinner fa-spin mr-2" />กำลังล้าง...</>
+              : <><i className="fa-solid fa-arrows-rotate mr-2" />ล้าง Cache เว็บ</>
+            }
+          </Button>
+        }
+      />
 
       {groups.length === 0 ? (
         <p className="text-[#86868B]">ไม่พบการตั้งค่า</p>

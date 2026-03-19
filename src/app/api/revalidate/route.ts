@@ -1,10 +1,17 @@
 import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
 
 export async function POST(req: NextRequest) {
+  // Allow access via secret (external webhook) OR admin session (admin UI)
   const secret = req.headers.get('x-revalidate-secret')
-  if (secret !== process.env.REVALIDATE_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const hasSecret = secret && secret === process.env.REVALIDATE_SECRET
+
+  if (!hasSecret) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   const body = await req.json().catch(() => ({}))

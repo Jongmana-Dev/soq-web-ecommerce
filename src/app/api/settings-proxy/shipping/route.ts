@@ -5,7 +5,7 @@ const BACKEND_URL = process.env.API_URL ?? 'http://localhost:3001'
 export async function GET() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/settings/shipping`, {
-      next: { revalidate: 300 }, // cache 5 min
+      next: { revalidate: 1800 }, // cache 30 min
     })
     const data = await res.json()
     return NextResponse.json(data, { status: res.status })

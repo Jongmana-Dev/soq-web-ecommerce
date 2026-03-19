@@ -146,14 +146,14 @@ export default function ProductModal({ product, onClose, locale, usageSteps }: P
 
   const resolvedSteps = (usageSteps && usageSteps.length > 0) ? usageSteps : fetchedSteps
 
-  // Build all images list: main image + additional images
-  const allImages: { url: string; alt: string }[] = [
-    { url: product.image, alt: locale === 'th' ? product.name_th : product.name_en },
-    ...(product.images ?? []).map((img) => ({
-      url: img.url,
-      alt: (locale === 'th' ? img.alt_th : img.alt_en) ?? (locale === 'th' ? product.name_th : product.name_en),
-    })),
-  ]
+  // Build images list from API, fallback to main image if empty
+  const apiImages = (product.images ?? []).map((img) => ({
+    url: img.url,
+    alt: (locale === 'th' ? img.alt_th : img.alt_en) ?? (locale === 'th' ? product.name_th : product.name_en),
+  }))
+  const allImages = apiImages.length > 0
+    ? apiImages
+    : [{ url: product.image, alt: locale === 'th' ? product.name_th : product.name_en }]
 
   const handleQuantityChange = (type: 'increase' | 'decrease') => {
     setQuantity((prev) => {
