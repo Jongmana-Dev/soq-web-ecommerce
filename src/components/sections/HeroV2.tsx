@@ -98,7 +98,7 @@ export default function HeroV2({ products, usageSteps }: Props) {
           {/* Bottles — single image, scales with screen */}
           <div className="relative z-10 px-6 mt-30 drop-shadow-2xl">
             <img
-              src={`${R2}/hero-bottles-shadow.webp`}
+              src={`${R2}/hero-bottles-shadow_v2.png`}
               alt="SOQ bottles"
               className="w-full h-auto block"
             />
@@ -121,7 +121,7 @@ export default function HeroV2({ products, usageSteps }: Props) {
               <div className="relative h-full">
                 <div className="absolute top-[10%] bottom-[-15%] left-[32%] right-[-3%]">
                   <Image
-                    src={`${R2}/hero-bottles-shadow.webp`}
+                    src={`${R2}/hero-bottles-shadow_v2.png`}
                     alt="SOQ bottles"
                     fill
                     sizes="(min-width: 1536px) 55vw, (min-width: 1280px) 60vw, 65vw"
