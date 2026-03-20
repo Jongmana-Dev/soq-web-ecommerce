@@ -154,7 +154,7 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
 
   return (
     <>
-      <footer id="footer" ref={ref} className="relative bg-[#171717] text-white z-10">
+      <footer id="footer" ref={ref} className="relative bg-[#1E1E1E] text-white z-10">
         {/* Main */}
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-10 pb-8">
           <div className="flex flex-col lg:flex-row justify-between gap-12">
@@ -164,9 +164,9 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center lg:items-start"
+              className="flex flex-col items-start"
             >
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-start lg:items-start">
                 <img src="/logo.svg" alt="SOQ" className="h-14 w-auto invert" />
                 <p className="mt-2 text-neutral-500 text-xs tracking-widest uppercase text-center">
                   {t('tagline')}
@@ -175,7 +175,7 @@ export default function Footer({ termsSections = [], contactInfo: contactInfoPro
 
               {/* Nav — stacked with bullets */}
               <nav className="mt-8">
-                <ul className="flex flex-col items-center lg:items-start gap-2.5">
+                <ul className="flex flex-col items-start gap-2.5">
                   {navLinks.map((link) => (
                     <li key={link.href} className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
