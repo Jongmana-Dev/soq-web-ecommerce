@@ -51,6 +51,7 @@ export default function CheckoutPage() {
   // Order state (created before showing QR)
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const orderNumberRef = useRef<string | null>(null);
   const [orderExpiredAt, setOrderExpiredAt] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number>(0);
 
@@ -320,6 +321,7 @@ export default function CheckoutPage() {
 
       setOrderId(order.id);
       setOrderNumber(order.order_number);
+      orderNumberRef.current = order.order_number;
       setOrderExpiredAt(order.expired_at);
       setOrderTotal(order.total);
       prevItemsRef.current = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
@@ -382,8 +384,6 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Failed to verify slip');
       }
 
-      // Capture orderNumber before closure to avoid stale state
-      const confirmedOrderNumber = orderNumber;
       useAlertStore.getState().showResultAlert({
         type: 'success',
         title: locale === 'th' ? 'ตรวจสอบสลิปสำเร็จ' : 'Slip Verified',
@@ -391,7 +391,7 @@ export default function CheckoutPage() {
         buttonText: locale === 'th' ? 'ตกลง' : 'OK',
         onClose: () => {
           clear();
-          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(confirmedOrderNumber ?? '')}`);
+          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(orderNumberRef.current ?? '')}`);
         },
       });
     } catch (err) {

@@ -11,7 +11,7 @@ export default function ConfirmationPage() {
   const orderNumber = searchParams.get('order') ?? '—';
 
   return (
-    <div className="container mx-auto px-4 py-20 text-center max-w-lg">
+    <div className="min-h-screen flex flex-col items-center justify-center container mx-auto px-4 text-center max-w-lg">
       <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
 
       <h1 className="text-3xl font-semibold text-neutral-900 mb-2">{t('confirmation.title')}</h1>
