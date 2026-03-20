@@ -391,7 +391,7 @@ export default function CheckoutPage() {
         buttonText: locale === 'th' ? 'ตกลง' : 'OK',
         onClose: () => {
           clear();
-          nextRouter.push(`/${locale}/checkout/confirmation?order=${encodeURIComponent(orderNumberRef.current ?? '')}`);
+          window.location.href = `/${locale}/checkout/confirmation?order=${encodeURIComponent(orderNumberRef.current ?? '')}`;
         },
       });
     } catch (err) {
