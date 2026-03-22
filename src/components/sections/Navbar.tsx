@@ -110,7 +110,7 @@ function Navbar() {
 
   const changeLocale = (newLocale: "th" | "en") => {
     const pathWithoutLocale = pathname.replace(/^\/(th|en)/, "") || "/";
-    router.replace(pathWithoutLocale, { locale: newLocale });
+    router.replace(pathWithoutLocale as any, { locale: newLocale });
   };
 
   // Check if we're on the landing page (home)
