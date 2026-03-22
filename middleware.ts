@@ -20,10 +20,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/th', req.url))
   }
 
-  // If entering with /en, redirect to /th (always default to Thai)
-  if (pathname === '/en') {
-    return NextResponse.redirect(new URL('/th', req.url))
-  }
+  // Note: removed forced /en → /th redirect to allow language switching to work
 
   // Check if the path (without locale prefix) is protected
   const pathWithoutLocale = pathname.replace(/^\/(th|en)/, '') || '/'
