@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import HeroV3 from '@/components/sections/HeroV3'
+import HeroV2 from '@/components/sections/HeroV2'
 import Testimonials from '@/components/sections/TestimonialsV2'
 import Product from '@/components/sections/Product'
 import Standards from '@/components/sections/IndustrialStandards'
@@ -138,7 +138,7 @@ export default async function IndexPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
-      <HeroV3 products={products} />
+      <HeroV2 products={products} usageSteps={usageSteps} />
       <div style={{ backgroundColor: '#ECEDEA' }} className="py-2 sm:py-3 lg:py-4">
         <ClientLogos logos={clientLogos} />
       </div>
