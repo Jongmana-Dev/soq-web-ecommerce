@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
-import HeroV1 from '@/components/sections/HeroV1'
-import HeroV2 from '@/components/sections/HeroV2'
 import HeroV3 from '@/components/sections/HeroV3'
-import HeroV4 from '@/components/sections/HeroV4'
 import Testimonials from '@/components/sections/TestimonialsV2'
 import Product from '@/components/sections/Product'
 import Standards from '@/components/sections/IndustrialStandards'
@@ -141,14 +138,7 @@ export default async function IndexPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
-      {(() => {
-        switch (process.env.NEXT_PUBLIC_HERO_MODE) {
-          case 'v1': return <HeroV1 products={products} />
-          case 'v2': return <HeroV2 products={products} usageSteps={usageSteps} />
-          case 'v4': return <HeroV4 products={products} />
-          default:   return <HeroV3 products={products} />
-        }
-      })()}
+      <HeroV3 products={products} />
       <div style={{ backgroundColor: '#ECEDEA' }} className="py-2 sm:py-3 lg:py-4">
         <ClientLogos logos={clientLogos} />
       </div>
