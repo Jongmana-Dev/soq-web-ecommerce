@@ -28,3 +28,6 @@
 
 ## ประวัติ Code Review
 - `review_code/soq_web_20260207_035827.md` — Review ครั้งแรก (พบ 117 issues)
+- `review_code/011-performance_tunning/` — Railway RAM audit (2026-04-25)
+  - Top findings: ไม่มี `output: 'standalone'`, `.ignored` 323MB, 4 Hero bundled, verify-slip buffer copies
+  - Priority: P0-1 (standalone), P0-2 (clean .ignored), P1-1 (split hero), P1-2 (stream slip)
