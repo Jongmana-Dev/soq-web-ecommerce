@@ -147,7 +147,8 @@ interface OrderItem {
   product_name?: string
   name?: string
   quantity: number
-  price: number
+  unit_price: number
+  subtotal?: number
 }
 
 export async function sendOrderCreatedEmail(
@@ -163,13 +164,13 @@ export async function sendOrderCreatedEmail(
     timeStyle: 'short',
   })
 
-  const itemRows = items
+  const itemRows = (items ?? [])
     .map(
       (item) => `
     <tr>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;">${item.product_name || item.name || '-'}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-align:center;">${item.quantity}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-align:right;">${formatCurrency(item.price)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-align:center;">${item.quantity ?? 0}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;text-align:right;">${formatCurrency(item.unit_price ?? item.subtotal)}</td>
     </tr>`,
     )
     .join('')
@@ -338,6 +339,7 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-function formatCurrency(amount: number): string {
-  return `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+function formatCurrency(amount: number | null | undefined): string {
+  const safe = typeof amount === 'number' && !Number.isNaN(amount) ? amount : 0
+  return `฿${safe.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
 }

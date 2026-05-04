@@ -57,3 +57,6 @@ storybook-static/
 tmp/
 temp/
 *.local
+
+# Claude Code — local-only config (.claude/ มี settings.local.json + secrets)
+.claude/
