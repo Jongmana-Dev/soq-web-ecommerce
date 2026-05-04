@@ -146,6 +146,27 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
         </div>
       </div>
 
+      {/* Deadline + Countdown — moved to top so it's always visible
+          and never overlapped by mobile sticky CTA bar */}
+      {deadline && (
+        <div className={`flex items-center gap-3 px-4 py-3 border ${isExpired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+          <i className={`fa-solid fa-clock text-lg ${isExpired ? 'text-red-500' : 'text-amber-600'}`} />
+          <div className="flex-1 min-w-0">
+            <p className={`text-xs ${isExpired ? 'text-red-700' : 'text-amber-800'}`}>
+              {isExpired
+                ? (locale === 'th' ? 'หมดเวลาชำระเงินแล้ว' : 'Payment deadline has passed')
+                : (locale === 'th' ? 'กรุณาชำระเงินก่อน' : 'Please pay before')}{' '}
+              {!isExpired && <span className="font-semibold">{deadline}</span>}
+            </p>
+          </div>
+          {countdown && !isExpired && (
+            <div className="text-xl font-bold tabular-nums tracking-wider text-amber-700 shrink-0">
+              {countdown}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Payment Method Section */}
       <div className="border border-emerald-200 bg-emerald-50/30 p-5 space-y-4">
         <div className="flex items-center gap-3">
@@ -223,26 +244,6 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
         <div className="text-center">
           <div className="text-2xl font-bold text-neutral-900">฿{total.toLocaleString()}</div>
         </div>
-
-        {/* Deadline + Countdown */}
-        {deadline && (
-          <div className={`text-center space-y-2 px-4 py-3 border ${isExpired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-            <div className="flex items-center justify-center gap-2">
-              <i className={`fa-solid fa-clock text-sm ${isExpired ? 'text-red-500' : 'text-amber-600'}`} />
-              <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-amber-800'}`}>
-                {isExpired
-                  ? (locale === 'th' ? 'หมดเวลาชำระเงินแล้ว' : 'Payment deadline has passed')
-                  : (locale === 'th' ? 'กรุณาชำระเงินก่อน' : 'Please pay before')}{' '}
-                {!isExpired && <span className="font-semibold">{deadline}</span>}
-              </p>
-            </div>
-            {countdown && !isExpired && (
-              <div className="text-2xl font-bold tabular-nums tracking-wider text-amber-700">
-                {countdown}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Step connector */}
