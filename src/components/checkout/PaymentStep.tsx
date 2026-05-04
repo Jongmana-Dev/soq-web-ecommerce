@@ -29,10 +29,30 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
   const t = useTranslations();
   const locale = useLocale();
   const fileRef = useRef<HTMLInputElement>(null);
+  const slipSectionRef = useRef<HTMLDivElement>(null);
+  const uploadAreaRef = useRef<HTMLDivElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [slipBase64, setSlipBase64] = useState<string>('');
   const [countdown, setCountdown] = useState('');
   const [isExpired, setIsExpired] = useState(false);
+  const [slipInView, setSlipInView] = useState(false);
+
+  // Detect when actual upload control enters viewport (not just section header)
+  // → Sticky CTA bar hides only when user can really see the upload button
+  useEffect(() => {
+    const target = uploadAreaRef.current;
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSlipInView(entry.isIntersecting),
+      { threshold: 0.5 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSlip = () => {
+    slipSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Auto-clear slip when verification fails so user can re-upload
   useEffect(() => {
@@ -112,7 +132,7 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
@@ -127,12 +147,14 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
       </div>
 
       {/* Payment Method Section */}
-      <div className="border border-emerald-200 bg-emerald-50/30 p-6 space-y-5">
-        <div className="flex items-center gap-2 justify-center">
-          <i className="fa-solid fa-building-columns text-emerald-600" />
-          <h4 className="font-semibold text-emerald-900">{t('checkout.promptpayTitle')}</h4>
+      <div className="border border-emerald-200 bg-emerald-50/30 p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
+          <div>
+            <h4 className="font-semibold text-emerald-900">{t('checkout.promptpayTitle')}</h4>
+            <p className="text-xs text-neutral-500">{t('checkout.promptpayDesc')}</p>
+          </div>
         </div>
-        <p className="text-sm text-neutral-500 text-center">{t('checkout.promptpayDesc')}</p>
 
         {/* Tabs */}
         {hasBoth && (
@@ -166,9 +188,9 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
 
         {/* PromptPay Content */}
         {activeTab === 'promptpay' && promptpay && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-center">
-              <PromptPayQR amount={total} promptpayId={promptpay.account_number} />
+              <PromptPayQR amount={total} promptpayId={promptpay.account_number} size={160} />
             </div>
             <p className="text-sm text-neutral-600 text-center font-medium">{promptpay.account_name}</p>
           </div>
@@ -223,13 +245,21 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
         )}
       </div>
 
+      {/* Step connector */}
+      <div className="flex flex-col items-center gap-1 py-1">
+        <div className="w-px h-4 bg-neutral-300" />
+        <i className="fa-solid fa-arrow-down text-neutral-400 text-xs" />
+      </div>
+
       {/* Upload Slip */}
-      <div className="border-2 border-neutral-900 bg-neutral-50 p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <i className="fa-solid fa-receipt text-neutral-700" />
-          <h4 className="font-semibold">{t('checkout.uploadSlip')}</h4>
+      <div ref={slipSectionRef} className="border-2 border-neutral-900 bg-neutral-50 p-5 space-y-4 scroll-mt-4">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
+          <div>
+            <h4 className="font-semibold">{t('checkout.uploadSlip')}</h4>
+            <p className="text-xs text-neutral-500">{t('checkout.uploadSlipDesc')}</p>
+          </div>
         </div>
-        <p className="text-sm text-neutral-500">{t('checkout.uploadSlipDesc')}</p>
 
         {/* Slip verification warning */}
         <div className="flex gap-3 bg-neutral-100 border border-neutral-300 px-4 py-3">
@@ -254,32 +284,34 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
           className="hidden"
         />
 
-        {preview ? (
-          <div className="relative">
-            <img
-              src={preview}
-              alt="Slip preview"
-              className="w-full max-h-72 object-contain border border-neutral-200 bg-white"
-            />
+        <div ref={uploadAreaRef}>
+          {preview ? (
+            <div className="relative">
+              <img
+                src={preview}
+                alt="Slip preview"
+                className="w-full max-h-72 object-contain border border-neutral-200 bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => { setPreview(null); setSlipBase64(''); if (fileRef.current) fileRef.current.value = ''; }}
+                className="absolute top-2 right-2 w-7 h-7 bg-white border border-neutral-200 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 transition-colors shadow-sm"
+              >
+                <i className="fa-solid fa-xmark text-xs" />
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => { setPreview(null); setSlipBase64(''); if (fileRef.current) fileRef.current.value = ''; }}
-              className="absolute top-2 right-2 w-7 h-7 bg-white border border-neutral-200 rounded-full flex items-center justify-center text-neutral-400 hover:text-red-500 transition-colors shadow-sm"
+              onClick={() => fileRef.current?.click()}
+              className="w-full border-2 border-dashed border-neutral-300 py-10 text-center hover:border-neutral-500 hover:bg-white transition-colors cursor-pointer"
             >
-              <i className="fa-solid fa-xmark text-xs" />
+              <i className="fa-solid fa-cloud-arrow-up text-3xl text-neutral-300 mb-3 block" />
+              <p className="text-sm font-medium text-neutral-600">{t('checkout.chooseFile')}</p>
+              <p className="text-xs text-neutral-400 mt-1">JPG, PNG</p>
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="w-full border-2 border-dashed border-neutral-300 py-10 text-center hover:border-neutral-500 hover:bg-white transition-colors cursor-pointer"
-          >
-            <i className="fa-solid fa-cloud-arrow-up text-3xl text-neutral-300 mb-3 block" />
-            <p className="text-sm font-medium text-neutral-600">{t('checkout.chooseFile')}</p>
-            <p className="text-xs text-neutral-400 mt-1">JPG, PNG</p>
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Submit */}
@@ -309,6 +341,29 @@ export default function PaymentStep({ total, orderNumber, expiredAt, onSubmit, o
           </>
         )}
       </button>
+
+      {/* Mobile Sticky CTA — guide user to upload slip section
+          Hidden on desktop (md+); hidden when slip section in view; hidden after slip selected;
+          hidden when expired (no point uploading) */}
+      {!slipInView && !preview && !isExpired && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-[env(safe-area-inset-bottom)]">
+          {/* step label strip */}
+          <div className="bg-neutral-800 text-neutral-400 text-[10px] font-medium tracking-widest uppercase flex items-center justify-center gap-1.5 py-1">
+            <i className="fa-solid fa-circle-check text-emerald-500 text-[10px]" />
+            <span>{locale === 'th' ? 'ชำระเงินแล้ว — ขั้นตอนถัดไป' : 'Paid — next step'}</span>
+          </div>
+          {/* main CTA */}
+          <button
+            type="button"
+            onClick={scrollToSlip}
+            className="w-full bg-[var(--accent)] text-black py-4 font-bold flex items-center justify-center gap-3 text-[15px] shadow-[0_-4px_24px_color-mix(in_srgb,var(--accent)_50%,transparent)]"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/15 text-sm font-bold shrink-0">2</span>
+            <span>{locale === 'th' ? 'แนบสลิปและยืนยันการชำระ' : 'Attach slip & confirm payment'}</span>
+            <i className="fa-solid fa-arrow-down animate-bounce" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

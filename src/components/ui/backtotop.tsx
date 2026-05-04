@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 const ContactModal = dynamic(() => import('@/components/modals/ContactModal'))
 
 export default function BackToTop() {
+  const pathname = usePathname()
   const [isVisible, setIsVisible] = useState(false)
   const [isContactOpen, setIsContactOpen] = useState(false)
+
+  // On /checkout, mobile sticky CTA bar occupies bottom — push floating widgets up to avoid overlap
+  const isCheckout = pathname?.includes('/checkout') && !pathname?.includes('/confirmation')
 
   useEffect(() => {
     let ticking = false
@@ -33,7 +38,11 @@ export default function BackToTop() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
+      <div
+        className={`fixed right-6 z-50 flex flex-col items-end gap-3 pointer-events-none transition-all duration-300 ${
+          isCheckout ? 'bottom-28 md:bottom-6' : 'bottom-6'
+        }`}
+      >
 
         {/* Back to Top Button */}
         <AnimatePresence>
