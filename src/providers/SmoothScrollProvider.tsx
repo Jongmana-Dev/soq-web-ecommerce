@@ -21,14 +21,17 @@ export default function SmoothScrollProvider({ children }: Props) {
     const updateActive = (id: string) => {
       document.body.dataset.activeSection = id
       window.dispatchEvent(new CustomEvent('sectionchange', { detail: id }))
-      if (id) {
+      // Guard: only update hash if it actually changed
+      // (Safari throws SecurityError if replaceState called > 100x / 10s)
+      if (id && window.location.hash !== '#' + id) {
         window.history.replaceState(null, '', '#' + id)
       }
     }
 
     // Clear hash when scrolled to top
+    // Guard: only clear if hash exists — prevents replaceState loop on every scroll frame
     const onScroll = () => {
-      if (lenis.scroll <= 50) {
+      if (lenis.scroll <= 50 && window.location.hash) {
         window.history.replaceState(null, '', window.location.pathname)
         document.body.dataset.activeSection = ''
       }

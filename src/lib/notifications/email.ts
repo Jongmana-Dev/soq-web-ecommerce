@@ -162,6 +162,7 @@ export async function sendOrderCreatedEmail(
   const expiredStr = expiredDate.toLocaleString('th-TH', {
     dateStyle: 'long',
     timeStyle: 'short',
+    timeZone: 'Asia/Bangkok',
   })
 
   const itemRows = (items ?? [])
