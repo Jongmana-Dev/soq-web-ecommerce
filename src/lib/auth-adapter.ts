@@ -22,6 +22,8 @@ async function adapterFetch<T>(
     },
     body: JSON.stringify(body),
     cache: 'no-store',
+    // กัน login ค้างไม่มีกำหนดเมื่อ API ช้า — 15s เผื่อ cold start ของ Railway
+    signal: AbortSignal.timeout(15_000),
   })
 
   if (!res.ok) {
