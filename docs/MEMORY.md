@@ -35,6 +35,7 @@
     (`railway.json`), timeout 15s ใน `adapterFetch` (`src/lib/auth-adapter.ts`)
   - เฝ้าหลัง deploy: RAM ควร peak < 600MB, ดูว่าไม่มี OOM restart ถี่ผิดปกติใน week แรก
   - ค้างไว้ (ฝั่ง infra): เช็ค App Sleeping ของ API + bucket service (เจอ 504 บนไฟล์ 64KB ตอนตี 2)
+  - เอกสารเต็ม → [defects/2026-06-11-ram-spike-avif-encoding.md](./defects/2026-06-11-ram-spike-avif-encoding.md)
 - **2026-06-11 — Google login พัง (error=Configuration) สำหรับ user ที่เข้าผ่าน www**
   - Root cause: ยังไม่ deploy NGINX → ไม่มีตัว redirect `www.soqthailand.com` → apex
     user เริ่ม OAuth บน www → PKCE cookie (host-only) อยู่บน www แต่ Google callback
