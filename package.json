@@ -2,7 +2,7 @@
   "name": "soq-web-ecommerce",
   "private": true,
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=22.23.4 <23"
   },
   "scripts": {
     "build": "next build",
