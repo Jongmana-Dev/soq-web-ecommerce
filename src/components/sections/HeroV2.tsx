@@ -97,10 +97,15 @@ export default function HeroV2({ products, usageSteps }: Props) {
 
           {/* Bottles — single image, scales with screen */}
           <div className="relative z-10 px-6 mt-30 drop-shadow-2xl">
-            <img
-              src={`${R2}/hero-bottles-shadow_v2.png`}
+            {/* sizes 1px ที่ lg+ — กัน desktop โหลดรูปนี้ซ้ำ (div ถูกซ่อนด้วย lg:hidden แต่ browser ยังโหลด) */}
+            <Image
+              src={`${R2}/hero-bottles-shadow_v2.webp`}
               alt="SOQ bottles"
+              width={2400}
+              height={1865}
+              sizes="(min-width: 1024px) 1px, 100vw"
               className="w-full h-auto block"
+              priority
             />
           </div>
         </div>
@@ -121,10 +126,10 @@ export default function HeroV2({ products, usageSteps }: Props) {
               <div className="relative h-full">
                 <div className="absolute top-[10%] bottom-[-15%] left-[32%] right-[-3%]">
                   <Image
-                    src={`${R2}/hero-bottles-shadow_v2.png`}
+                    src={`${R2}/hero-bottles-shadow_v2.webp`}
                     alt="SOQ bottles"
                     fill
-                    sizes="(min-width: 1536px) 55vw, (min-width: 1280px) 60vw, 65vw"
+                    sizes="(min-width: 1536px) 55vw, (min-width: 1280px) 60vw, (min-width: 1024px) 65vw, 1px"
                     className="object-contain object-center drop-shadow-2xl"
                     priority
                   />

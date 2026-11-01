@@ -44,6 +44,14 @@
   - แนะนำเพิ่ม: ตั้ง Cloudflare Redirect Rule www → apex (301) ที่ edge ด้วย
   - เมื่อ NGINX go-live: `20-member.conf` มี www → apex redirect อยู่แล้ว (ซ้ำกันได้ ไม่เป็นไร)
   - เอกสารเต็ม → [defects/2026-06-11-google-oauth-www-pkce.md](./defects/2026-06-11-google-oauth-www-pkce.md)
+- **2026-10-23 — ค่า RAM Railway สูงทั้งที่ traffic น้อย (ecommerce เฉลี่ย ~785MB = 57% ของบิล)**
+  - Root cause: Next image optimizer ตั้ง sharp concurrency = core ที่ container เห็น / 2
+    (`next/dist/server/image-optimizer.js:189`) + hero PNG 4090px 5.4MB → RAM ค้างหลังทุก burst
+  - Fix: `experimental.imgOptConcurrency: 1` (`next.config.ts`), `MALLOC_ARENA_MAX=2` (`railway.json`)
+    → ecommerce ~370MB; hero → `hero-bottles-shadow_v2.webp` 2400px 289KB + mobile ใช้ `<Image>`
+    (`HeroV2.tsx`) → RAM ค้างหลัง burst 301-308MB → 117-144MB (วัด local)
+  - ห้าม: Cloudflare cache `/_next/image` บน plan Free — Next เลือก format ตาม `Accept`
+    (`*/*` ได้ JPEG/PNG) แต่ CF Free น่าจะไม่แยก cache ตาม `Vary: Accept` (ยังไม่ verify) → browser อาจได้ JPEG ไม่มี alpha
 
 ## ประวัติ Code Review
 - `review_code/soq_web_20260207_035827.md` — Review ครั้งแรก (พบ 117 issues)
