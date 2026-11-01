@@ -10,17 +10,6 @@ stages:
   script:
     - railway up --project $PROJECT_ID --service $SERVICE_NAME --environment $ENV_NAME --detach
 
-deploy-uat:
-  extends: .deploy_template
-  variables:
-    RAILWAY_TOKEN: $RAILWAY_TOKEN_UAT
-    PROJECT_ID: $RAILWAY_PROJECT_ID_UAT
-    SERVICE_NAME: "soq-web-ecommerce"
-    ENV_NAME: "production"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "uat"
-      when: always
-
 deploy-prod:
   extends: .deploy_template
   variables:

@@ -9,6 +9,11 @@ const nextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
   compress: true,
+  experimental: {
+    // default = (จำนวน core ที่ container เห็น / 2) — บน Railway เห็น core ของ host ทั้งเครื่อง
+    // → libvips เปิด thread + buffer เยอะเกินจำเป็น เป็นต้นเหตุ RAM ค้างสูง (2026-10-23)
+    imgOptConcurrency: 1,
+  },
   async redirects() {
     return [
       // www → apex: OAuth cookies (PKCE/state) เป็น host-only — ถ้าเริ่ม login บน www
